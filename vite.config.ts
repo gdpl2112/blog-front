@@ -33,7 +33,31 @@ export default defineConfig({
                 target: baseUrl,
                 changeOrigin: false,
                 rewrite: (path) => path.replace(/^\/ba/, '')
+            }, '/2022': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/2023': {
+                target: baseUrl,
+                changeOrigin: false
             }, '/2024': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/tool': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/get-host': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/stamp2time': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/get-music': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/get-url-by-id': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/get-cover-by-id': {
                 target: baseUrl,
                 changeOrigin: false
             }

@@ -58,26 +58,7 @@ audio {
   }
 }
 
-@keyframes a_normal {
-  0% {
-    transform: scale(1.02);
-  }
-
-  100% {
-    transform: scale(0.98);
-  }
-}
-
-@keyframes a_hover {
-  0% {
-    transform: scale(0.98);
-  }
-
-  100% {
-    transform: scale(1.02);
-  }
-}
-
+//控制友联
 .yl-img {
   max-width: 25px;
   transition: all 0.8s ease !important;
@@ -90,11 +71,53 @@ audio {
   max-width: 30px;
 }
 
+//以下控制player
+
+#player {
+  border: 5px solid transparent;
+  background-color: rgba(128, 112, 131, 0.34);
+  border-radius: 7px;
+  animation: normalp .3s linear forwards;
+  position: fixed;
+  top: 12%;
+  right: 1%;
+  width: 350px;
+  z-index: 1031;
+}
+
+#player:hover {
+  animation: hoverp .3s linear forwards;
+  background-color: rgba(255, 255, 255, .9)
+}
+
+@keyframes normalp {
+  0% {
+    transform: scale(1);
+    right: 1%;
+  }
+
+  100% {
+    transform: scale(0.98);
+    right: -12%;
+  }
+}
+
+@keyframes hoverp {
+  0% {
+    transform: scale(0.98);
+    right: -12%;
+  }
+
+  100% {
+    transform: scale(1.00);
+    right: 1%;
+  }
+}
 </style>
 
 <template>
   <div class="app">
-    <nav id="main-nav" class="navbar navbar-expand-lg navbar-light">
+    <nav id="main-nav" class="z-999 navbar navbar-expand-lg navbar-light">
       <RouterLink class="navbar-brand navbar"
                   style="align-items: center;display: flex;color: #b845e7;text-decoration: none;" to="/index">
         <img class="d-inline-block align-text-top" src="/favicon.ico"
@@ -185,14 +208,18 @@ audio {
         </center>
       </div>
     </footer>
+
+    <div id="player"></div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import service from "@/axios";
+import 'APlayer/dist/APlayer.min.css';
+import APlayer from 'APlayer';
 
 let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"}])
 let host0 = ref("")
@@ -214,4 +241,29 @@ function jumpToflink() {
   }, {duration: 100, easing: "swing"});
   return false;
 }
+
+//挂载完成加载player
+onMounted(() => {
+  const ap = new APlayer({
+    container: document.getElementById('player'),
+    autoplay: true,
+    listMaxHeight: 60,
+    audio: []
+  });
+  ap.on('ended', function () {
+
+  });
+  service.get("/get-music").then(function (response) {
+    ap.list.clear()
+    ap.list.add(response)
+    ap.list.show()
+    ap.play()
+  }).catch(function (err) {
+    alert(err);
+  });
+  setTimeout(function () {
+    ap.list.toggle()
+  }, 1000)
+})
+
 </script>

@@ -15,6 +15,26 @@
   color: rgba(0, 0, 0, 0.98);
   animation: a_hover .3s linear forwards;
 }
+
+@keyframes a_normal {
+  0% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(0.98);
+  }
+}
+
+@keyframes a_hover {
+  0% {
+    transform: scale(0.98);
+  }
+
+  100% {
+    transform: scale(1.02);
+  }
+}
 </style>
 <template>
   <div class="container" style="width: 90%;">
@@ -27,7 +47,7 @@
         <div class="col-9">
           <h5 class="card-title" v-text="d.title"></h5>
           <p class="card-text" v-text="d.authorName"></p>
-          <span class="bi-eye" v-text="d.views"> </span>
+          <span class="bi bi-eye" v-text="d.views"> </span>
           <p class="card-text"><small class="text-muted" v-text="getF(d.time)"> </small></p>
         </div>
       </div>
