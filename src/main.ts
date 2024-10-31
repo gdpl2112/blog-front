@@ -13,6 +13,8 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min'
 
+import 'aplayer/dist/APlayer.min.css';
+
 const app = createApp(App)
 
 app.use(ElementPlus)
