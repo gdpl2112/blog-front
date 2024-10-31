@@ -4,7 +4,7 @@ import Cookie from "js-cookie";
 
 const service = axios.create({
     baseURL: '/',
-    timeout: 15000,
+    timeout: 30000,
 });
 
 // 添加请求拦截器
