@@ -51,12 +51,14 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
+import {onMounted, reactive, ref} from 'vue'
 import {Lock, User} from '@element-plus/icons-vue'
 import {login} from '@/api/login'
 import {useRouter} from "vue-router";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie"
+import service from "@/axios";
+import {ElLoading} from "element-plus";
 
 const form = reactive({
   username: '',
@@ -86,13 +88,11 @@ const submitForm = () => {
     if (valid) {
       loading.value = true
       login(form.username, form.password).then(res => {
-        toast("登录成功")
+        toast("登录成功","success")
         Cookie.set("token", res.token)
         router.push("/")
       }).catch(err => {
-        if (err) {
-          toast(err.msg, "error")
-        }
+        toast(err)
       }).finally(() => {
         loading.value = false
       });
@@ -108,7 +108,40 @@ const resetForm = () => {
 }
 
 const gotoGithub = () => {
-
+  service.get("/auth/github/login?now=false").then(res => {
+    document.location = res.url
+  }).catch(err => {
+    toast("获得授权登录链接失败" + err, "danger")
+  });
 }
 
+function loginGithub() {
+  const url = document.location.toString()
+  const n = url.indexOf("?");
+  const pu = url.substring(n)
+  if (n > 0) {
+    loading.value = true
+    const loadingf = ElLoading.service({
+      lock: true,
+      text: 'Loading',
+      background: 'rgba(0, 0, 0, 0.7)',
+    })
+    service.get("/auth/github/callback" + pu).then(res => {
+      loadingf.close()
+      toast("登录成功","success")
+      Cookie.set("token", res.token)
+      router.push("/")
+    }).catch(err => {
+      console.log(err)
+      toast("登录失败:" + err)
+    }).finally(() => {
+      loadingf.close()
+      loading.value = false
+    })
+  }
+}
+
+onMounted(() => {
+  loginGithub()
+})
 </script>

@@ -1,14 +1,16 @@
 import axios from "axios";
 import {toast} from "@/utils/utils";
+import Cookie from "js-cookie";
 
 const service = axios.create({
     baseURL: '/',
-    timeout: 1000,
+    timeout: 15000,
 });
 
 // 添加请求拦截器
 service.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
+    config.headers['Token'] = Cookie.get("token")
     return config;
 }, function (error) {
     // 对请求错误做些什么
@@ -22,9 +24,6 @@ service.interceptors.response.use(function (response) {
     return response.data;
 }, function (err) {
     console.log(err.response)
-    if (!err.response.data) {
-        toast("请求异常", "error")
-    }
     return Promise.reject(err.response.data);
 });
 export default service;

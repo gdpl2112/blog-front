@@ -29,10 +29,18 @@ export default defineConfig({
                 target: baseUrl,
                 changeOrigin: false,
                 rewrite: (path) => path.replace(/^\/api/, '/api')
-            }, '/ba': {
+            },'/user': {
                 target: baseUrl,
                 changeOrigin: false,
-                rewrite: (path) => path.replace(/^\/ba/, '')
+            },'/auth': {
+                target: baseUrl,
+                changeOrigin: false,
+            },'/notice': {
+                target: baseUrl,
+                changeOrigin: false,
+            },'/comments': {
+                target: baseUrl,
+                changeOrigin: false,
             }, '/2022': {
                 target: baseUrl,
                 changeOrigin: false

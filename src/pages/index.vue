@@ -84,7 +84,7 @@
 
 <script lang="ts" setup>
 import service from "@/axios";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {formatMsgTime} from "@/utils/utils";
 import router from "@/router";
 
@@ -95,7 +95,7 @@ let pdown = ref(null)
 let pn = ref(1)
 
 function showPageDatas(p: number) {
-  service.get("/ba/notice/gets?pageNum=" + p).then(function (response) {
+  service.get("/notice/gets?pageNum=" + p).then(function (response) {
     rawdata.value = response
     pn.value = p
     pup.value = rawdata.value.current - 1
@@ -116,11 +116,10 @@ showPageDatas(1)
 
 function routerTo(id: number) {
   router.push({
-    path: '/notice',
+    path: '/article',
     query: {
       id: id
     }
   })
 }
-
 </script>
