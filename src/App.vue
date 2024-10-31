@@ -182,7 +182,7 @@ import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
 import {onMounted, ref} from "vue";
 import service from "@/axios";
-import 'APlayer/dist/APlayer.min.css';
+import 'aplayer/dist/aplayer.min.css';
 import APlayer from 'APlayer';
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
