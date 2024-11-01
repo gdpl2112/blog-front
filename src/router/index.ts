@@ -6,6 +6,7 @@ import index from '@/pages/index.vue'
 import login from '@/pages/login.vue'
 import apis from '@/pages/apis.vue'
 import article from '@/pages/article.vue'
+import upload from '@/pages/upload.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -27,6 +28,12 @@ const routes = [{
     component: apis,
     meta: {
         title: 'API列表'
+    }
+}, {
+    path: '/upload',
+    component: upload,
+    meta: {
+        title: '发布文章'
     }
 }, {
     path: '/v0',

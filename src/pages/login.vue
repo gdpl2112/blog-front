@@ -88,11 +88,13 @@ const submitForm = () => {
     if (valid) {
       loading.value = true
       login(form.username, form.password).then(res => {
-        toast("登录成功","success")
-        Cookie.set("token", res.token)
-        router.push("/")
+        if (res.code === 200) {
+          toast("登录成功", "success")
+          Cookie.set("token", res.token)
+          router.push("/")
+        } else toast(res.msg)
       }).catch(err => {
-        toast(err)
+        toast(err.msg)
       }).finally(() => {
         loading.value = false
       });
@@ -127,10 +129,14 @@ function loginGithub() {
       background: 'rgba(0, 0, 0, 0.7)',
     })
     service.get("/auth/github/callback" + pu).then(res => {
-      loadingf.close()
-      toast("登录成功","success")
-      Cookie.set("token", res.token)
-      router.push("/")
+      if (res.code === 200) {
+        loadingf.close()
+        toast("登录成功", "success")
+        Cookie.set("token", res.token)
+        router.push("/")
+      } else {
+        toast(res.msg)
+      }
     }).catch(err => {
       console.log(err)
       toast("登录失败:" + err)

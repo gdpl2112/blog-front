@@ -6,9 +6,18 @@ td {
 </style>
 <template>
   <el-descriptions title="已登录用户信息" direction="vertical" border style="margin-top: 20px">
-    <el-descriptions-item :rowspan="2" :width="140" label="头像" align="center">
-      <el-image style="width: 100px; height: 100px" :src="user.icon"/>
+
+    <el-descriptions-item :rowspan="2" width="150" label="头像(点击更改)" align="center">
+      <el-upload
+          class="avatar-uploader"
+          action="/user/upload_img"
+          :show-file-list="false"
+          :before-upload="beforeAvatarUpload"
+          :on-success="handleAvatarSuccess">
+        <el-image :src="user.icon" class="avatar"/>
+      </el-upload>
     </el-descriptions-item>
+
     <el-descriptions-item label="昵称(唯一)">{{ user.nickname }}</el-descriptions-item>
     <el-descriptions-item label="邮箱">{{ user.eid }}</el-descriptions-item>
     <el-descriptions-item label="QQ">{{ user.qid }}</el-descriptions-item>
@@ -117,16 +126,27 @@ td {
         提交
       </el-button>
       <el-button @click="resetFormPass(ruleFormRef)">Reset</el-button>
+      <el-button type="warning" @click="dialogVisible = true">忘记密码</el-button>
     </el-form-item>
   </el-form>
-
+  <el-dialog v-model="dialogVisible" title="密码重置" width="400">
+    <span>将通过邮箱重置你的账号为随机密码<br>若邮箱未绑定此操作将失败!</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button :loading="dialogLoading" type="danger" @click="forgetPass()">
+          确定
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
 import service from "@/axios";
 import {toast} from "@/utils/utils";
 import {reactive, ref} from "vue";
-import type {FormInstance, FormRules} from "element-plus";
+import type {FormInstance, FormRules, UploadProps} from "element-plus";
 import {Lock} from '@element-plus/icons-vue'
 
 const user = ref({})
@@ -135,6 +155,28 @@ service.get("/auth/info").then((res) => {
 }).catch((err) => {
   toast("获取登录信息失败,请尝试重新登录")
 })
+
+const handleAvatarSuccess: UploadProps['onSuccess'] = (
+    response
+) => {
+  service.post("/user/upload_head_img", {url: response}).then((res) => {
+    if (res.code == 200) {
+      toast(res.msg, "success");
+      user.value.icon = response
+    } else toast(res.msg)
+  })
+}
+
+const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
+  if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
+    toast('仅支持上传jpg或png格式图片')
+    return false
+  } else if (rawFile.size / 1024 / 1024 > 3) {
+    toast('图片大小超过3MB!')
+    return false
+  }
+  return true
+}
 
 const eidFormRef = ref<FormInstance>()
 
@@ -269,4 +311,20 @@ const resetFormPass = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
 }
+
+const dialogVisible = ref(false)
+const dialogLoading = ref(false)
+
+function forgetPass() {
+  dialogLoading.value = true
+  service.get("/auth/forgetpass").then((res) => {
+    if (res.code == 200) {
+      toast(res.msg, "success")
+    } else toast(res.msg)
+  }).finally(() => {
+    dialogVisible.value = false
+    dialogLoading.value = false
+  })
+}
+
 </script>
