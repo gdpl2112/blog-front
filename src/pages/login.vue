@@ -15,7 +15,7 @@
       </div>
       <el-form ref="formRef" :rules="rules" :model="form" class="w-[250px]">
         <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="请输入用户名">
+          <el-input v-model="form.username" placeholder="请输入用户名/QQ/邮箱">
             <template #prefix>
               <el-icon>
                 <User/>
@@ -38,10 +38,17 @@
           </el-button>
           <el-button round class="w-[78px] bg-cyan-200" @click="resetForm()">重置</el-button>
         </el-form-item>
+
         第三方登录:
         <el-form-item>
           <el-button :loading="loading" round class="w-[240px] bg-zinc-800" type="primary" @click="gotoGithub">
             GITHUB
+          </el-button>
+        </el-form-item>
+        去注册:
+        <el-form-item>
+          <el-button :loading="loading" round class="w-[160px] bg-sky-500" type="primary" @click="gotoReg">
+            邮箱注册
           </el-button>
         </el-form-item>
 
@@ -115,6 +122,9 @@ const gotoGithub = () => {
   }).catch(err => {
     toast("获得授权登录链接失败" + err, "danger")
   });
+}
+const gotoReg = () => {
+  router.push("/reg")
 }
 
 function loginGithub() {

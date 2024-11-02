@@ -4,6 +4,7 @@ import notFound from '@/pages/404.vue'
 
 import index from '@/pages/index.vue'
 import login from '@/pages/login.vue'
+import reg from '@/pages/reg.vue'
 import apis from '@/pages/apis.vue'
 import article from '@/pages/article.vue'
 import upload from '@/pages/upload.vue'
@@ -60,6 +61,12 @@ const routes = [{
     component: login,
     meta: {
         title: 'kloping登录'
+    }
+},{
+    path: '/reg',
+    component: reg,
+    meta: {
+        title: 'kloping`s blog注册'
     }
 }, {
     path: '/:pathMatch(.*)*',

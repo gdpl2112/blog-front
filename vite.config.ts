@@ -26,10 +26,10 @@ export default defineConfig({
         port: 80, // 指定启动端口
         open: false, //启动后是否自动打开浏览器
         proxy: {
-            '/api': {
+            '/api/': {
                 target: baseUrl,
                 changeOrigin: false,
-                rewrite: (path) => path.replace(/^\/api/, '/api')
+                // rewrite: (path) => path.replace(/^\/api/, '/api')
             },'/user': {
                 target: baseUrl,
                 changeOrigin: false,
@@ -42,13 +42,16 @@ export default defineConfig({
             },'/comments': {
                 target: baseUrl,
                 changeOrigin: false,
-            }, '/2022': {
+            }, '/2022/': {
                 target: baseUrl,
                 changeOrigin: false
-            }, '/2023': {
+            }, '/2023/': {
                 target: baseUrl,
                 changeOrigin: false
-            }, '/2024': {
+            }, '/2024/': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/avatar/': {
                 target: baseUrl,
                 changeOrigin: false
             }, '/tool': {

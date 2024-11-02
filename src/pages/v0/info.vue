@@ -10,7 +10,6 @@ td {
     <el-descriptions-item :rowspan="2" width="150" label="头像(点击更改)" align="center">
       <el-upload
           class="avatar-uploader"
-          action="/user/upload_img"
           :show-file-list="false"
           :before-upload="beforeAvatarUpload"
           :on-success="handleAvatarSuccess">
@@ -90,8 +89,7 @@ td {
       status-icon
       :rules="rules"
       label-width="auto"
-      class="demo-ruleForm"
-  >
+      class="demo-ruleForm">
     <hr>
     密码修改
     <el-form-item label="旧密码" prop="opass">
@@ -156,26 +154,24 @@ service.get("/auth/info").then((res) => {
   toast("获取登录信息失败,请尝试重新登录")
 })
 
-const handleAvatarSuccess: UploadProps['onSuccess'] = (
-    response
-) => {
-  service.post("/user/upload_head_img", {url: response}).then((res) => {
-    if (res.code == 200) {
-      toast(res.msg, "success");
-      user.value.icon = response
-    } else toast(res.msg)
-  })
-}
+const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {}
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
     toast('仅支持上传jpg或png格式图片')
-    return false
   } else if (rawFile.size / 1024 / 1024 > 3) {
     toast('图片大小超过3MB!')
-    return false
+  }else{
+    const formData = new FormData();
+    formData.append('file', rawFile);
+    service.post("/user/upload_head_img", formData).then((res) => {
+      if (res.code == 200) {
+        toast(res.msg, "success");
+        user.value.icon = res.url
+      } else toast(res.msg)
+    })
   }
-  return true
+  return false
 }
 
 const eidFormRef = ref<FormInstance>()
