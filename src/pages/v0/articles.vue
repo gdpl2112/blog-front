@@ -8,10 +8,11 @@
     <el-collapse>
       <el-collapse-item name="1">
         <template #title>
-          <el-icon>
+          <p>我发布的
+            <el-icon>
             <Document/>
           </el-icon>
-          <p>我发布的</p>
+          </p>
         </template>
         <el-timeline style="overflow-y: scroll;max-height: 500px">
           <el-timeline-item color="#E8A891E5" v-for="e in datas" :timestamp="e.time" placement="top">
@@ -24,10 +25,11 @@
       </el-collapse-item>
       <el-collapse-item name="2">
         <template #title>
-          <el-icon>
+          <p>我收藏的
+            <el-icon>
             <Star/>
-          </el-icon>
-          <p>我收藏的</p>
+            </el-icon>
+          </p>
         </template>
         <el-timeline style="overflow-y: scroll;max-height: 500px">
           <el-timeline-item color="#E8A891E5" v-for="e in dataw" :timestamp="e.time" placement="top">
@@ -45,7 +47,7 @@
 
 <script lang="ts" setup>
 import service from "@/axios";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {Document, Star} from "@element-plus/icons-vue";
 import router from "@/router";
 
@@ -67,4 +69,8 @@ function toArticle(id: number) {
     }
   })
 }
+import $ from 'jquery'
+onMounted(() => {
+  $("#el-collapse-head-1").click()
+})
 </script>

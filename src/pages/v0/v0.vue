@@ -6,11 +6,8 @@
           选项栏
         </div>
       </h5>
-      <el-menu
-          default-active="1"
-          class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose">
+      <el-menu default-active="1" class="el-menu-vertical-demo"
+               @open="handleOpen" @close="handleClose">
         <RouterLink to="/v0/info" style="text-decoration: none;">
           <el-menu-item index="1">
             <el-icon>
@@ -35,6 +32,14 @@
             <span>杂项</span>
           </el-menu-item>
         </RouterLink>
+        <RouterLink v-if="roles.includes('admin')" to="/v0/admin" style="text-decoration: none;">
+          <el-menu-item index="4">
+            <el-icon>
+              <setting/>
+            </el-icon>
+            <span>管理</span>
+          </el-menu-item>
+        </RouterLink>
       </el-menu>
     </el-col>
     <el-col :lg="1" :md="0">
@@ -49,9 +54,18 @@
 import {RouterLink, RouterView} from 'vue-router'
 
 import {Document, Menu as IconMenu, Setting} from "@element-plus/icons-vue";
+import {onMounted, ref} from "vue";
+import service from "@/axios";
 
 const handleOpen = (key: string, keyPath: string[]) => {
 }
 const handleClose = (key: string, keyPath: string[]) => {
 }
+
+const roles = ref(['user'])
+onMounted(() => {
+  service.get("/auth/role").then((res) => {
+    roles.value = res
+  })
+})
 </script>
