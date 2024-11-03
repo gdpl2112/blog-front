@@ -11,7 +11,7 @@
       <div class="col-2"></div>
       <div class="col-8 mb-3">
         <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="过滤">
+          <input id="search0" class="form-control me-2" type="search" placeholder="过滤">
           <button class="btn btn-outline-success" type="button">filter</button>
         </form>
       </div>
