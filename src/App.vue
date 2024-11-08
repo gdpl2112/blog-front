@@ -83,7 +83,9 @@ audio {
              style="opacity: 0.86; border-radius: 999px;max-width: 50px;margin-right: 15px;margin-left: 20px">
         kloping`s blog
       </RouterLink>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent"
+              aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
@@ -93,6 +95,9 @@ audio {
           </li>
           <li class="nav-item">
             <RouterLink to="/apis" class="nav-link" aria-current="page">API</RouterLink>
+          </li>
+          <li class="nav-item">
+            <RouterLink to="/room" class="nav-link" aria-current="page">音乐厅</RouterLink>
           </li>
           <li class="nav-item dropdown">
             <div id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -143,7 +148,7 @@ audio {
     </nav>
 
     <div class="container" style="margin-top: 10px">
-      <RouterView></RouterView>
+      <RouterView :apl="ap"></RouterView>
     </div>
 
     <footer>
@@ -178,14 +183,15 @@ audio {
 </template>
 
 <script lang="ts" setup>
+
 import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
 import {onMounted, ref} from "vue";
 import service from "@/axios";
-import APlayer from 'aplayer/dist/APlayer.min';
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
 import router from "@/router";
+import APlayer from 'aplayer/dist/APlayer.min';
 
 let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"}])
 let host0 = ref("")
@@ -208,15 +214,20 @@ function jumpToflink() {
   return false;
 }
 
+
+let ap: APlayer;
 //挂载完成加载player
 onMounted(() => {
-  const ap = new APlayer({
+  ap = new APlayer({
     container: document.getElementById('player'),
     autoplay: true,
     listMaxHeight: 60,
     audio: [],
     preload: "none"
   });
+  ap.on('loadeddata', function () {
+
+  })
   service.get("/get-music").then(function (response) {
     ap.list.clear()
     ap.list.add(response)
@@ -227,6 +238,8 @@ onMounted(() => {
   }).catch(function (err) {
     toast("获取音乐失败" + err)
   });
+
+  window.ap = ap
 })
 
 function ttplayer() {

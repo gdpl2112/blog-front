@@ -89,7 +89,7 @@
 <script lang="ts" setup>
 import {useRoute} from "vue-router";
 import {formatMsgTime, toast} from "@/utils/utils";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import service from "@/axios";
 
 import {MdPreview} from 'md-editor-v3';
@@ -111,20 +111,6 @@ let fClassEnd = ref("btn-outline-secondary")
 service.get("/notice/get-notice-id?id=" + id).then(function (response) {
   data.value = response
   document.getElementsByTagName("title")[0].innerText = data.value.title
-}).catch(function (err) {
-  console.log(err);
-})
-
-
-let deletable = ref(false)
-service.get("/notice/deletable?id=" + id).then(function (response) {
-  deletable.value = response
-}).catch(function (err) {
-  console.log(err);
-})
-
-service.get("/notice/favorited?id=" + id).then(function (response) {
-  fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
 }).catch(function (err) {
   console.log(err);
 })
@@ -182,6 +168,25 @@ service.get("/user/login_state").then(response => {
   lstate.value = response
 }).catch(err => {
   toast("获取登录信息失败")
+})
+
+let deletable = ref(false)
+
+onMounted(() => {
+  if (lstate.value == true) {
+
+    service.get("/notice/favorited?id=" + id).then(function (response) {
+      fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
+    }).catch(function (err) {
+      console.log(err);
+    })
+
+    service.get("/notice/deletable?id=" + id).then(function (response) {
+      deletable.value = response
+    }).catch(function (err) {
+      console.log(err);
+    })
+  }
 })
 
 function commentDo() {

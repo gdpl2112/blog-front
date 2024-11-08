@@ -72,6 +72,9 @@ export default defineConfig({
             }, '/get-cover-by-id': {
                 target: baseUrl,
                 changeOrigin: false
+            }, '/get-lrc-by-id': {
+                target: baseUrl,
+                changeOrigin: false
             }
         },
     }
