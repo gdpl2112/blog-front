@@ -17,7 +17,17 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 
 import 'aplayer/dist/APlayer.min.css';
 
+import {useScroll} from "vue3-progress-scroll";
+
 const app = createApp(App)
+
+app.use(useScroll, {
+    progress: "green", // 进度条颜色
+    progressRollback: "#fff", // 进度条回滚颜色
+    progressTop: "3px", // 进度条距离顶部的距离
+    progressLeft: "0px", // 进度条距离左边的距离
+    UIViewBackground: "#fff", // 页面背景色
+})
 
 app.use(ElementPlus)
 

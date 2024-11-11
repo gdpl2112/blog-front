@@ -23,7 +23,8 @@
     "md-editor-v3": "^4.21.2",
     "sass-embedded": "^1.80.5",
     "vue": "^3.4.29",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue3-progress-scroll": "^1.2.7"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",

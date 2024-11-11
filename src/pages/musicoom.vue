@@ -62,7 +62,7 @@ onMounted(() => {
       if (rting % 5 == 0) {
         animateBox()
         nowLyrics.value = getNearst(ap.audio.currentTime * 1000)
-        percentage.value = ((ap.audio.currentTime / ap.audio.duration) * 100).toFixed(2)
+        percentage.value = Number(((ap.audio.currentTime / ap.audio.duration) * 100).toFixed(2))
       }
     }
     if (now_id.value !== ap.list.audios[ap.list.index].id) {
@@ -101,6 +101,10 @@ function getNearst(time: number, nextn: number = 3) {
 }
 
 let percentage = ref(0)
+
+function onPercentChange(per) {
+  console.log(per)
+}
 </script>
 <template>
   <el-row class="min-h-screen" id="froom">
@@ -108,12 +112,12 @@ let percentage = ref(0)
       <h3>{{ info.name }}</h3>
       <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---{{ info.artist }}</h4>
     </div>
-    <el-col :lg="8" :md="12" class="bg-opacity- bg-zinc-500  flex items-center justify-center">
+    <el-col :lg="8" :md="12" class="bg-opacity-95 bg-zinc-500  flex items-center justify-center">
       <div style="margin-top: -180px" class="square" @click="togglePlay()">
         <img id="icon-img" class="rounded-full square" alt="1" src=""/>
       </div>
     </el-col>
-    <el-col :lg="16" :md="12" class="bg-opacity-100 bg-zinc-500 flex items-center justify-content-center">
+    <el-col :lg="16" :md="12" class="bg-opacity-95 bg-zinc-500 flex items-center justify-content-center">
       <div style="margin-top: -180px;left: 10%; width: 80%">
         <div style="background-color: rgba(255,255,255,0.02);color: rgba(213,222,244,0.9);" class="items-center"
              role="alert" v-for="(e,i) in nowLyrics">
@@ -122,8 +126,7 @@ let percentage = ref(0)
       </div>
     </el-col>
 
-    <el-progress style="position: absolute;width: 80%;left: 10%;bottom: 4%"
-                 :text-inside="true" :stroke-width="26" :percentage="percentage"/>
+
   </el-row>
 </template>
 

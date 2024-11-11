@@ -9,6 +9,7 @@ import apis from '@/pages/apis.vue'
 import article from '@/pages/article.vue'
 import upload from '@/pages/upload.vue'
 import musicroom from '@/pages/musicoom.vue'
+import tem from '@/pages/tem.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -42,6 +43,12 @@ const routes = [{
     component: musicroom,
     meta: {
         title: '音乐厅'
+    }
+},, {
+    path: '/tem',
+    component: tem,
+    meta: {
+        title: '测试'
     }
 }, {
     path: '/v0',
