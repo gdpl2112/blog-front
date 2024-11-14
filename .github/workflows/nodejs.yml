@@ -36,6 +36,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: "/home/runner/work/blog-front/dist"
+          source: "dist"
           target: "/root/projects/website0/classes/static"
           strip_components: 2
