@@ -115,20 +115,25 @@ function getFormatToolTip(v: number) {
   return getTimeMs((v / 100 * ap.audio.duration).toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
 }
 
-
 const dialogVisible = ref(false)
 
 const search = ref('')
-
+//搜索中
 const searchLoading = ref(false)
-
+//是否是移除选项
 const rmop = ref(true)
+//私有歌单
+let isPri = false
 
 const handlePoi = (index: number, row) => {
   service.get(`/api/music/point?id=${row.id}&name=${row.name}&arts=${row.artist}`).then((r) => {
     if (r.code == 200) {
       toast("添加成功!", "success")
-      toggleList(true, false)
+      if (isPri) {
+        ap.list.add(r.data)
+      } else {
+        toggleList(true, false)
+      }
     } else {
       toast(r.msg)
     }
@@ -142,6 +147,7 @@ const handleRmp = (index: number, row) => {
     if (r.code == 200) {
       toast("移除成功!", "success")
       tableData.value.splice(index, 1)
+      ap.list.remove(index)
     } else {
       toast(r.msg)
     }
@@ -175,15 +181,26 @@ onMounted(() => {
 })
 
 function onSearch() {
-  rmop.value = false
-  searchLoading.value = true
-  service.get(`/api/music/search?keyword=${search.value}`).then((r) => {
-    tableData.value = r
-  }).catch((e) => {
-    toast("搜索失败:" + e)
-  }).finally(() => {
-    searchLoading.value = false
-  })
+  if (search.value.length == 0) {
+    service.get("/api/music/list").then((r) => {
+      if (r.code == 200) {
+        tableData.value = r.data
+        rmop.value = true
+      }
+    }).catch(function (err) {
+      toast("获取音乐失败" + err)
+    });
+  } else {
+    rmop.value = false
+    searchLoading.value = true
+    service.get(`/api/music/search?keyword=${search.value}`).then((r) => {
+      tableData.value = r
+    }).catch((e) => {
+      toast("搜索失败:" + e)
+    }).finally(() => {
+      searchLoading.value = false
+    })
+  }
 }
 
 function toggleList(pri: Boolean, tips: Boolean = true) {
@@ -192,6 +209,7 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
       if (r.code == 200) {
         ap.list.clear()
         ap.list.add(r.data)
+        isPri = true
         if (tips) toast("切换成功", "success")
       } else {
         toast("切换失败:" + r.msg)
@@ -203,6 +221,7 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
     service.get("/api/music/get-music-list").then(function (response) {
       ap.list.clear()
       ap.list.add(response)
+      isPri = false
       if (tips) toast("切换成功", "success")
     }).catch(function (err) {
       toast("获取音乐失败" + err)
