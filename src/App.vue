@@ -228,7 +228,7 @@ onMounted(() => {
   ap.on('loadeddata', function () {
 
   })
-  service.get("/get-music").then(function (response) {
+  service.get("/api/music/get-music-list").then(function (response) {
     ap.list.clear()
     ap.list.add(response)
     ap.list.show()

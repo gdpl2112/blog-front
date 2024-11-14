@@ -37,3 +37,14 @@ export function formatMsgTime(timespan: number) {
     }
     return timeSpanStr
 }
+
+export function getTimeMs(t: number) {
+    let min = 0;
+    while (true) {
+        if (t >= 60) {
+            t -= 60;
+            min += 1;
+        } else break
+    }
+    return "0" + min + ":" + (t < 10 ? "0" + t : t)
+}
