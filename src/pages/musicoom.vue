@@ -15,6 +15,8 @@ let lyrics = ref([""])
 let nowLyrics = ref([])
 let info = ref({})
 
+let cover0 = ref("")
+
 const ap = reactive(window.ap)
 
 function getNearst(time: number, nextn: number = 3) {
@@ -61,7 +63,7 @@ onMounted(() => {
   function loadRes(et: number = 2000) {
     setTimeout(() => {
       const ad0 = ap.list.audios[ap.list.index];
-      iee.attr("src", ad0.cover)
+      cover0.value = ad0.cover
       if (ad0.songId) {
         now_id.value = ad0.songId
       } else now_id.value = ad0.id
@@ -230,53 +232,57 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
 }
 </script>
 <template>
-  <el-row class="min-h-screen" id="froom">
-
-    <div style="position: absolute;width: 40%;left: 35%;top: 3%;">
-      <h3>{{ info.name }}</h3>
-      <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---{{ info.artist }}</h4>
-    </div>
-
+  <el-row class="min-h-screen bg-opacity-95 bg-zinc-500" id="froom">
     <div style="position: absolute; left: 2%;top: 3%;">
       <el-button type="info" plain @click="dialogVisible = true">
         点击搜索
       </el-button>
       <el-button type="primary" plain @click="toggleList(true)">
-        切换个人歌单
+        切换个人
       </el-button>
       <el-button type="primary" plain @click="toggleList(false)">
-        切换默认歌单
+        切换默认
       </el-button>
     </div>
 
-    <div style="position: absolute;bottom: 8%;left: 10%;width: 80%" class="slider-demo-block">
-      <span class="demonstration">{{
-          getTimeMs(ap.audio.currentTime.toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
-        }}</span>
-      <el-slider @change="onPercentChange" :format-tooltip="getFormatToolTip" v-model="percentage"/>
-    </div>
+    <div class="container row min-h-screen ">
+      <div class="row align-self-start text-center">
 
-    <div style="position: absolute;bottom: 14%;left: 40%;width: 30%" class="mb-4">
-      <div>
-        <el-button @click="ap.skipBack()" type="info" round plain>上一曲</el-button>
-        <el-button @click="ap.toggle()" type="info" round plain>播放/暂停</el-button>
-        <el-button @click="ap.skipForward()" type="info" round plain>下一曲</el-button>
-      </div>
-    </div>
+        <div class="col-lg-4 col-md-12" @click="ap.toggle()" style="margin-top: 100px;">
+          <el-avatar style="width: 85%;height: auto" id="icon-img" :src="cover0"/>
+        </div>
 
-    <el-col :lg="8" :md="12" class="bg-opacity-95 bg-zinc-500  flex items-center justify-center">
-      <div style="margin-top: -180px" class="square" @click="ap.toggle()">
-        <img id="icon-img" class="rounded-full square" alt="1" src=""/>
-      </div>
-    </el-col>
-    <el-col :lg="16" :md="12" class="bg-opacity-95 bg-zinc-500 flex items-center justify-content-center">
-      <div style="margin-top: -180px;left: 10%; width: 80%">
-        <div style="background-color: rgba(255,255,255,0.02);color: rgba(213,222,244,0.9);" class="items-center"
-             role="alert" v-for="(e,i) in nowLyrics">
-          <h4 :class="'l-'+i"> {{ e.content }}</h4>
+        <div class="col-lg-7 col-md-12" style="margin-top: 4%;">
+          <div class="row">
+            <h3>{{ info.name }}</h3>
+            <h5 style="color: rgba(172,174,175,0.95);margin-left: 80px;margin-top: 10px">---{{ info.artist }}</h5>
+          </div>
+          <div class="row" style="margin-top: 40px;">
+            <div style="background-color: rgba(255,255,255,0.02);color: rgba(213,222,244,0.9);" class="items-center"
+                 role="alert" v-for="(e,i) in nowLyrics">
+              <h4 :class="'l-'+i"> {{ e.content }}</h4>
+            </div>
+          </div>
         </div>
       </div>
-    </el-col>
+
+      <div class="row align-self-end mb-5 ">
+        <div style="width: 100%" class="mb-4 col-12 ml-5 text-center">
+          <el-button @click="ap.skipBack()" type="info" round plain>上一曲</el-button>
+          <el-button @click="ap.toggle()" type="info" round plain>播放/暂停</el-button>
+          <el-button @click="ap.skipForward()" type="info" round plain>下一曲</el-button>
+        </div>
+        <div class="slider-demo-block col-12 ml-5 text-center" >
+          <span class="demonstration">{{
+              getTimeMs(ap.audio.currentTime.toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
+            }}</span>
+          <div style="width: 80%;margin-left: 10%" class="text-center">
+            <el-slider  @change="onPercentChange" :format-tooltip="getFormatToolTip" v-model="percentage"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <el-dialog v-model="dialogVisible" title="搜音乐" width="500" draggable align-center>
       <el-form :inline="true" class="demo-form-inline">
         <el-form-item>
@@ -290,24 +296,15 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
         <el-table-column label="曲名" prop="name"/>
         <el-table-column label="歌手名" prop="artist"/>
         <el-table-column align="right">
-
           <template #header>
             <div v-html="rmop?'移除从个人歌单':'添加至个人歌单'"></div>
           </template>
-
           <template #default="scope">
-            <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)">
-              ＋
+            <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)">＋
             </el-button>
-
-            <el-button v-if="rmop" size="small" type="danger" @click="handleRmp(scope.$index, scope.row)">
-              －
-            </el-button>
-
+            <el-button v-if="rmop" size="small" type="danger" @click="handleRmp(scope.$index, scope.row)">－</el-button>
           </template>
-
         </el-table-column>
-
       </el-table>
     </el-dialog>
 
@@ -321,12 +318,5 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
 
 .l-1 {
   color: rgba(247, 250, 253, 0.98);
-}
-
-.square {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  transform: rotate(30deg);
 }
 </style>
