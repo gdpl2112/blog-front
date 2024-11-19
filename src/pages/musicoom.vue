@@ -19,6 +19,11 @@ let cover0 = ref("")
 
 const ap = reactive(window.ap)
 
+/**
+ * 获取最近的歌词
+ * @param time
+ * @param nextn
+ */
 function getNearst(time: number, nextn: number = 3) {
   let outs = []
   let ns = false
@@ -50,7 +55,6 @@ onMounted(() => {
   let iee = $("#icon-img");
   //旋转关键
   let rting = 0;
-  let rn = 0
 
   function animateBox() {
     iee.animate({
@@ -62,12 +66,16 @@ onMounted(() => {
 
   function loadRes(et: number = 2000) {
     setTimeout(() => {
+
       const ad0 = ap.list.audios[ap.list.index];
       cover0.value = ad0.cover
+
       if (ad0.songId) {
         now_id.value = ad0.songId
       } else now_id.value = ad0.id
+
       info.value = ad0
+
       if (!ad0.lyric) {
         if (!getLyricing) {
           getLyricing = true
@@ -87,6 +95,7 @@ onMounted(() => {
         lyrics.value = parseLyrics(r)
         ad0.lyric = r;
       }
+
     }, et)
   }
 
@@ -105,6 +114,7 @@ onMounted(() => {
       loadRes(0)
     }
   }, 102)
+
 })
 
 let percentage = ref(0)
@@ -127,6 +137,11 @@ const rmop = ref(true)
 //私有歌单
 let isPri = false
 
+/**
+ * 添加歌
+ * @param index
+ * @param row
+ */
 const handlePoi = (index: number, row) => {
   service.get(`/api/music/point?id=${row.id}&name=${row.name}&arts=${row.artist}`).then((r) => {
     if (r.code == 200) {
@@ -143,7 +158,11 @@ const handlePoi = (index: number, row) => {
     console.log(e)
   });
 }
-
+/**
+ * 移除歌
+ * @param index
+ * @param row
+ */
 const handleRmp = (index: number, row) => {
   service.get(`/api/music/rmp?id=${row.id}`).then((r) => {
     if (r.code == 200) {
