@@ -1,5 +1,5 @@
 // 定义歌词数据类型
-type Lyric = {
+export type Lyric = {
     timestamp: number
     content: string
 }
@@ -26,3 +26,40 @@ const parseLyrics = (dataStr: string): Lyric[] => {
 
 //导出
 export default parseLyrics
+
+/**
+ * 获取最近的歌词
+ * @param time
+ * @param nextn
+ */
+export function getNearst(time: number, nextn: number = 3, lyrics: Lyric[]) {
+    //最终返回歌词
+    let outs = []
+    //匹配到当前时间应的歌词
+    let ns = false
+    //上一次的歌词
+    let ul = null;
+    //上上一次的歌词
+    let ull = null;
+
+    for (let i = 0; i < lyrics.length; i++) {
+        let ee = lyrics[i]
+        if (ns) {
+            if (outs.length >= (nextn + 2)) {
+                break
+            }
+            outs.push(ee)
+        } else {
+            if (ee.timestamp > time) {
+                ns = true
+                if (ull != null) outs.push(ull)
+                if (ul != null) outs.push(ul)
+                outs.push(ee)
+            }
+            ull = ul;
+            ul = ee;
+        }
+    }
+
+    return outs
+}

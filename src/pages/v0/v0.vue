@@ -32,6 +32,12 @@
             <span>杂项</span>
           </el-menu-item>
         </RouterLink>
+        <RouterLink to="/v0/pnote" style="text-decoration: none;">
+          <el-menu-item index="4">
+            <el-icon><Notebook /></el-icon>
+            <span>密码本</span>
+          </el-menu-item>
+        </RouterLink>
         <RouterLink v-if="roles.includes('admin')" to="/v0/admin" style="text-decoration: none;">
           <el-menu-item index="4">
             <el-icon>
@@ -53,7 +59,7 @@
 <script lang="ts" setup>
 import {RouterLink, RouterView} from 'vue-router'
 
-import {Document, Menu as IconMenu, Setting} from "@element-plus/icons-vue";
+import {Document, Menu as IconMenu, Notebook, Setting} from "@element-plus/icons-vue";
 import {onMounted, ref} from "vue";
 import service from "@/axios";
 

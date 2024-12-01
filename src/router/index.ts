@@ -15,6 +15,7 @@ import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
 import articles from '@/pages/v0/articles.vue'
 import aox from '@/pages/v0/aox.vue'
+import pnote from '@/pages/v0/pnote.vue'
 
 
 const routes = [{
@@ -68,6 +69,9 @@ const routes = [{
     }, {
         path: 'aox',
         component: aox
+    },{
+        path: 'pnote',
+        component: pnote
     },
     ]
 },{

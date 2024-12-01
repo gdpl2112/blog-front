@@ -5,7 +5,7 @@ export function toast(msg: string, type = 'error', duration = 2000) {
         message: msg,
         type: type,
         duration: duration,
-        offset: 80
+        offset: 20
     })
 }
 

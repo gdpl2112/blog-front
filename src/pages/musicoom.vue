@@ -5,12 +5,12 @@ import $ from 'jquery';
 import {onMounted, reactive, ref} from "vue";
 import service from "@/axios";
 import {getTimeMs, toast} from "@/utils/utils";
-import parseLyrics from "@/api/lyric";
+import parseLyrics, {getNearst} from "@/api/lyric";
 
 let now_id = ref("")
 
 let lyric = ref("")
-let lyrics = ref([""])
+let lyrics = ref([])
 
 let nowLyrics = ref([])
 let info = ref({})
@@ -18,36 +18,6 @@ let info = ref({})
 let cover0 = ref("")
 
 const ap = reactive(window.ap)
-
-/**
- * 获取最近的歌词
- * @param time
- * @param nextn
- */
-function getNearst(time: number, nextn: number = 3) {
-  let outs = []
-  let ns = false
-  let ul = null;
-  let ull = null;
-  for (let i = 0; i < lyrics.value.length; i++) {
-    let ee = lyrics.value[i]
-    if (ns) {
-      if (outs.length >= (nextn + 2)) {
-        break
-      }
-      outs.push(ee)
-    }
-    if (ee.timestamp > time) {
-      ns = true
-      if (ull != null) outs.push(ull)
-      if (ul != null) outs.push(ul)
-      outs.push(ee)
-    }
-    ull = ul;
-    ul = ee;
-  }
-  return outs
-}
 
 onMounted(() => {
   document.getElementById("froom").scrollIntoView();
@@ -102,14 +72,19 @@ onMounted(() => {
   loadRes()
 
   setInterval(() => {
+
     if (ap.audio.paused == false) {
+
       rting++;
       if (rting % 5 == 0) {
         animateBox()
-        nowLyrics.value = getNearst(ap.audio.currentTime * 1000)
+        nowLyrics.value = getNearst(ap.audio.currentTime * 1000, 6, lyrics.value)
+
         percentage.value = Number(((ap.audio.currentTime / ap.audio.duration) * 100).toFixed(2))
       }
+
     }
+
     if (now_id.value !== ap.list.audios[ap.list.index].id) {
       loadRes(0)
     }
@@ -276,10 +251,17 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
             <h3>{{ info.name }}</h3>
             <h5 style="color: rgba(172,174,175,0.95);margin-left: 80px;margin-top: 10px">---{{ info.artist }}</h5>
           </div>
-          <div class="row" style="margin-top: 40px;">
+          <div class="row" style="margin-top: 20px;">
             <div style="background-color: rgba(255,255,255,0.02);color: rgba(213,222,244,0.9);" class="items-center"
                  role="alert" v-for="(e,i) in nowLyrics">
-              <h4 :class="'l-'+i"> {{ e.content }}</h4>
+              <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  :content="getTimeMs((e.timestamp/1000).toFixed(0))"
+                  placement="left-start">
+                <h4 :class="'l-'+i" v-on:click="ap.seek(e.timestamp/1000)"> {{ e.content }}</h4>
+              </el-tooltip>
+
             </div>
           </div>
         </div>

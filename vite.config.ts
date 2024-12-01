@@ -11,6 +11,7 @@ import path from 'path'
 let baseUrl = 'http://127.0.0.1:406/'
 // https://vitejs.dev/config/
 export default defineConfig({
+    base: './',
     plugins: [
         vue(),
         WindiCSS(),

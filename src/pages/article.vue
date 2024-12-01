@@ -2,9 +2,15 @@
   <div class="container" style="background-color: rgba(255,255,255,0.78)">
     <br>
     <button type="button" class="btn btn-danger bi bi-x-square" v-show="deletable"
-            data-toggle="modal" data-target="#dtips0" @click="remove"></button>
+            data-toggle="modal" @click="remove"></button>
+
+    <button type="button" :class="'bi bi-file-earmark-lock btn '+pClassEnd"
+            v-show="deletable" data-toggle="modal" @click="_private" style="margin: 5px;">
+    </button>
+
     <button type="button" :class="'bi bi-bookmark-heart btn '+fClassEnd"
             v-show="lstate" v-on:click="favorite()" style="margin-left: 5px"></button>
+
     <h5 v-show="!lstate">tips:登录可收藏/删除评论</h5>
     <hr/>
     <center><h3 v-text="data.title"></h3></center>
@@ -70,9 +76,6 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="dtips0Label">提示</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
         </div>
         <div class="modal-body">
           <h3 style="color:#dc0551;">确认删除吗</h3>
@@ -84,12 +87,31 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="dtips1" tabindex="-1" aria-labelledby="dtips1Label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dtips1Label">提示</h5>
+        </div>
+        <div class="modal-body">
+          <h3 style="color:#dc0551;">{{ dtips1text }}</h3>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="privateNow()">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </template>
 
 <script lang="ts" setup>
 import {useRoute} from "vue-router";
 import {formatMsgTime, toast} from "@/utils/utils";
-import {onMounted, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import service from "@/axios";
 
 import {MdPreview} from 'md-editor-v3';
@@ -107,6 +129,7 @@ const id = route.query.id
 
 let data = ref({})
 let fClassEnd = ref("btn-outline-secondary")
+let pClassEnd = ref("btn-outline-secondary")
 
 service.get("/notice/get-notice-id?id=" + id).then(function (response) {
   data.value = response
@@ -144,10 +167,7 @@ function del(id: number) {
 }
 
 function remove() {
-  const myModal = new bootstrap.Modal('#dtips0', {
-    keyboard: false
-  })
-  myModal.show()
+  new bootstrap.Modal('#dtips0', {keyboard: false}).show()
 }
 
 function deleteNow() {
@@ -162,19 +182,43 @@ function deleteNow() {
   })
 }
 
-let lstate = ref(false)
+let dtips1text = ref("确定设置为仅自己可见吗?")
 
-service.get("/user/login_state").then(response => {
-  lstate.value = response
-}).catch(err => {
-  toast("获取登录信息失败")
-})
+function _private() {
+  if (privated.value) {
+    dtips1text.value = "确定取消仅自己可见吗?"
+  } else {
+    dtips1text.value = "确定设置为仅自己可见吗?"
+  }
+  new bootstrap.Modal('#dtips1', {keyboard: false}).show()
+}
+
+function privateNow() {
+  service.get("/notice/private?id=" + id).then(function (response) {
+    if (response.toString() === "OK") {
+      toast("设置成功", "success")
+    }
+    privated.value = response
+    if (privated.value) {
+      pClassEnd.value = "btn-secondary"
+    } else {
+      pClassEnd.value = "btn-outline-secondary"
+    }
+  }).catch(function (err) {
+    console.log(err)
+    toast("设置异常")
+  })
+}
+
+let lstate = ref(false)
 
 let deletable = ref(false)
 
-onMounted(() => {
-  if (lstate.value == true) {
+let privated = ref(false)
 
+onMounted(() => {
+  service.get("/user/login_state").then(response => {
+    lstate.value = response
     service.get("/notice/favorited?id=" + id).then(function (response) {
       fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
     }).catch(function (err) {
@@ -186,7 +230,21 @@ onMounted(() => {
     }).catch(function (err) {
       console.log(err);
     })
-  }
+
+    service.get("/notice/privated?id=" + id).then(function (response) {
+      privated.value = response
+      if (privated.value) {
+        pClassEnd.value = "btn-secondary"
+      } else {
+        pClassEnd.value = "btn-outline-secondary"
+      }
+    }).catch(function (err) {
+      console.log(err);
+    })
+
+  }).catch(err => {
+    toast("获取登录信息失败")
+  })
 })
 
 function commentDo() {
