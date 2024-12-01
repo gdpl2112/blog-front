@@ -78,12 +78,10 @@ const handleCellEnter = (row: any, column: any, cell: any, event: any) => {
 
 const handleCellLeave = (row: any, column: any, cell: any, event: any) => {
   row.isEdit = false
-  //判断mr是否修改
   if (row.type == '' && row.stype == '' && row.account == '' && row.pwd == '' && row.tips == '') {
     if (row.id != 0) {
       service.delete(`/api/pwdnote/${row.id}`).then(res => {
         if (res.code == 200) {
-          //通过id移除dataList指定元素
           dataList.splice(dataList.findIndex(item => item.id === row.id), 1)
           toast("删除成功", "success", 2000)
         } else {
