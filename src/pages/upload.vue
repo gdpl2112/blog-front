@@ -35,8 +35,13 @@
     <br>
     <hr>
     <el-row justify="center">
+
       <el-button :loading="loading" style="width: 300px;" color="#626aef" :dark="isDark" @click="submit()">提交
       </el-button>
+      <el-button :loading="loading" style="width: 300px;"
+                 color="#626aef" :dark="isDark" @click="submitp()">提交到仅己可见
+      </el-button>
+
     </el-row>
     <hr>
     <br>
@@ -89,6 +94,36 @@ function submit() {
     formData.append("icon", imageUrl.value)
     loading.value = true
     service.post("/notice/upload", formData).then((res) => {
+      if (res.code === 200) {
+        toast("提交成功", "success")
+        router.push("/")
+      } else {
+        toast(res.msg)
+      }
+    }).finally(() => {
+      loading.value = false
+    })
+  }
+}
+
+function submitp() {
+  if (title.value === '') {
+    toast("标题不能为空")
+  } else if (title.value.length < 5 || title.value.length > 20) {
+    toast("标题不能少于5或大于20字")
+  } else if (text.value === '') {
+    toast("内容不能为空")
+  } else if (text.value.length < 30) {
+    toast("内容不能少于30个字")
+  } else if (!k0) {
+    toast("请上传图标")
+  } else {
+    const formData = new FormData()
+    formData.append("title", title.value)
+    formData.append("code", text.value)
+    formData.append("icon", imageUrl.value)
+    loading.value = true
+    service.post("/notice/uploadp", formData).then((res) => {
       if (res.code === 200) {
         toast("提交成功", "success")
         router.push("/")
