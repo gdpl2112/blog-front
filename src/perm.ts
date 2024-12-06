@@ -17,16 +17,22 @@ router.beforeEach((to, from, next) => {
         service.get("/user/login_state").then(res => {
             if (!res) {
                 Cookie.remove("token")
+                Cookie.remove("authorization")
             }
         }).catch(() => {
 
         })
         const token = Cookie.get("token")
-        if (!token) {
-            toast("登录后访问")
-            return next({path: "/login"})
-        } else {
+        if (token) {
             next()
+        } else {
+            const auth = Cookie.get("authorization")
+            if (auth) {
+                next()
+            } else {
+                toast("登录后访问")
+                return next({path: "/login"})
+            }
         }
     }
 });
