@@ -131,7 +131,7 @@ const handlePoi = (index: number, row) => {
     } else {
       toast(r.msg)
     }
-    toSync(true)
+    toSyncAdd("ad", -1, r.data)
   }).catch(e => {
     console.log(e)
   });
@@ -150,7 +150,7 @@ const handleRmp = (index: number, row) => {
     } else {
       toast(r.msg)
     }
-    toSync(true)
+    toSyncAdd("rm", index)
   }).catch(e => {
     console.log(e)
   });
@@ -242,6 +242,7 @@ let lived = ref(false)
 //一起听的房主可操作
 let livemd = ref(false)
 let roomdata = ref({})
+
 let wss: WebSocket = null
 
 function createRoom() {
@@ -271,6 +272,9 @@ function createRoom() {
         let data = JSON.parse(event.data)
         if (data.action == "update") {
           roomdata.value = data.data
+          setTimeout(() => {
+            toSync(false)
+          }, 2000)
         }
       }
       wss.onclose = function () {
@@ -293,7 +297,7 @@ function exitRoom() {
       wss.close()
     lived.value = false
     livemd.value = false
-    toast("退出成功","success")
+    toast("退出成功", "success")
   }
 }
 
@@ -301,10 +305,21 @@ ap.on('listswitch', (index) => {
   toSync(false, index.index)
 });
 
-function toSync(a: Boolean = false, index: number = -1) {
+let syncSeek = -1;
+
+ap.on('loadeddata', function () {
+  if (lived.value) {
+    if (syncSeek > -1) {
+      ap.seek(syncSeek)
+      syncSeek = -1
+    }
+  }
+});
+
+function toSync(all: Boolean = false, index: number = -1) {
   if (lived.value) {
     if (livemd.value) {
-      if (a) {
+      if (all) {
         wss.send(JSON.stringify({
           token: getToken(),
           action: "sync",
@@ -326,6 +341,22 @@ function toSync(a: Boolean = false, index: number = -1) {
           }
         }))
       }
+    }
+  }
+}
+
+function toSyncAdd(op: string, index: number = -1, data: any = null) {
+  if (lived.value) {
+    if (livemd.value) {
+      wss.send(JSON.stringify({
+        token: getToken(),
+        action: "add",
+        data: {
+          "op": op,
+          "index": index,
+          "data": data
+        }
+      }))
     }
   }
 }
@@ -376,16 +407,17 @@ const joinRoom = (index: number, row) => {
                 if (!ap.audio.paused)
                   ap.pause()
               }
-              ap.seek(data.secs)
+              if (ap.audio.played)
+                ap.seek(data.secs)
+              else
+                syncSeek = data.secs;
             } else if (data.action == "sync") {
               if (data.songs) {
                 ap.list.clear()
                 ap.list.add(data.songs)
               }
-
               if (data.index != ap.list.index)
                 ap.list.switch(data.index)
-
               if (data.state == 0) {
                 if (ap.audio.paused)
                   ap.play()
@@ -393,10 +425,18 @@ const joinRoom = (index: number, row) => {
                 if (!ap.audio.paused)
                   ap.pause()
               }
-
-              ap.seek(data.secs)
+              if (ap.audio.played)
+                ap.seek(data.secs)
+              else
+                syncSeek = data.secs;
             } else if (data.action == "update") {
               roomdata.value = data.data
+            } else if (data.action == "add") {
+              if (data.op == "ad") {
+                ap.list.add(data.data)
+              } else if (data.op == "rm") {
+                ap.list.remove(data.index)
+              }
             }
           }
           wss.onclose = function () {
@@ -467,8 +507,8 @@ const joinRoom = (index: number, row) => {
           {{ roomdata.name }}
         </div>
         <div v-if="lived" style="width: 100%" class="mb-4 col-12 ml-5 text-center">
-          <span v-for="e in roomdata.users">
-            <el-avatar style="width:auto;height: 40px" id="icon-img" :src="e.icon"/>
+          <span v-for="e in roomdata.icons">
+            <el-avatar style="width:auto;height: 40px" id="icon-img" :src="e"/>
           </span>
         </div>
         <div style="width: 100%" class="mb-4 col-12 ml-5 text-center">
@@ -512,7 +552,7 @@ const joinRoom = (index: number, row) => {
       </el-table>
     </el-dialog>
 
-    <el-dialog v-model="dialogVisibleRoom" title="一起听" width="500" draggable align-center>
+    <el-dialog v-model="dialogVisibleRoom" title="一起听(加入者操作不会同步到房主)" width="500" draggable align-center>
       <el-table :data="rooms" style="width: 100%;height: 400px">
         <el-table-column label="房名" prop="name"/>
         <el-table-column label="在线人数" prop="count"/>
