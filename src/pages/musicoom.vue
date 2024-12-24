@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 import {onMounted, reactive, ref} from "vue";
-import service from "@/axios";
+import service, {getToken} from "@/axios";
 import {getTimeMs, toast} from "@/utils/utils";
 import parseLyrics, {getNearst} from "@/api/lyric";
 
@@ -96,6 +96,7 @@ let percentage = ref(0)
 
 function onPercentChange(p: number) {
   ap.seek(p / 100 * ap.audio.duration)
+  toSync(false)
 }
 
 function getFormatToolTip(v: number) {
@@ -103,6 +104,7 @@ function getFormatToolTip(v: number) {
 }
 
 const dialogVisible = ref(false)
+const dialogVisibleRoom = ref(false)
 
 const search = ref('')
 //搜索中
@@ -129,6 +131,7 @@ const handlePoi = (index: number, row) => {
     } else {
       toast(r.msg)
     }
+    toSync(true)
   }).catch(e => {
     console.log(e)
   });
@@ -147,6 +150,7 @@ const handleRmp = (index: number, row) => {
     } else {
       toast(r.msg)
     }
+    toSync(true)
   }).catch(e => {
     console.log(e)
   });
@@ -200,12 +204,16 @@ function onSearch() {
 }
 
 function toggleList(pri: Boolean, tips: Boolean = true) {
+  if (lived.value) {
+    if (livemd.value == false) return
+  }
   if (pri) {
     service.get("/api/music/list").then((r) => {
       if (r.code == 200) {
         ap.list.clear()
         ap.list.add(r.data)
         isPri = true
+        toSync(true)
         if (tips) toast("切换成功", "success")
       } else {
         toast("切换失败:" + r.msg)
@@ -218,34 +226,222 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
       ap.list.clear()
       ap.list.add(response)
       isPri = false
+      toSync(true)
       if (tips) toast("切换成功", "success")
     }).catch(function (err) {
       toast("获取音乐失败" + err)
     });
   }
 }
+
+//切换个人与默认的控制
+let ttk = ref(false)
+
+//处于一起听
+let lived = ref(false)
+//一起听的房主可操作
+let livemd = ref(false)
+let roomdata = ref({})
+let wss: WebSocket = null
+
+function createRoom() {
+  service.get("/api/music/live").then((r) => {
+    if (r.code == 200) {
+      toast("创建成功", "success")
+      roomdata.value = r.data
+      wss = new WebSocket(r.ws)
+      wss.onerror = function () {
+        console.log("ws连接发生错误");
+      };
+      wss.onopen = function () {
+        lived.value = true
+        livemd.value = true
+        console.log("ws连接成功");
+        wss.send(JSON.stringify({
+          token: getToken(),
+          action: "init",
+          data: {
+            "index": ap.list.index,
+            "secs": Number(ap.audio.currentTime.toFixed(0)),
+            "songs": ap.list.audios
+          }
+        }))
+      }
+      wss.onmessage = function (event) {
+        let data = JSON.parse(event.data)
+        if (data.action == "update") {
+          roomdata.value = data.data
+        }
+      }
+      wss.onclose = function () {
+        console.log("ws连接关闭");
+        lived.value = false
+        livemd.value = false
+        exitRoom()
+      }
+    } else {
+      toast(r.msg)
+    }
+  }).catch(e => {
+    console.log(e)
+  });
+}
+
+function exitRoom() {
+  if (lived) {
+    if (wss)
+      wss.close()
+    lived.value = false
+    livemd.value = false
+    toast("退出成功","success")
+  }
+}
+
+ap.on('listswitch', (index) => {
+  toSync(false, index.index)
+});
+
+function toSync(a: Boolean = false, index: number = -1) {
+  if (lived.value) {
+    if (livemd.value) {
+      if (a) {
+        wss.send(JSON.stringify({
+          token: getToken(),
+          action: "sync",
+          data: {
+            "state": ap.audio.paused ? 1 : 0,
+            "index": index > -1 ? index : ap.list.index,
+            "secs": Number(ap.audio.currentTime.toFixed(0)),
+            "songs": ap.list.audios
+          }
+        }))
+      } else {
+        wss.send(JSON.stringify({
+          token: getToken(),
+          action: "sync",
+          data: {
+            "state": ap.audio.paused ? 1 : 0,
+            "index": index > -1 ? index : ap.list.index,
+            "secs": Number(ap.audio.currentTime.toFixed(0))
+          }
+        }))
+      }
+    }
+  }
+}
+
+let rooms = ref([])
+
+function loadRooms() {
+  service.get("/api/music/lives").then((r) => {
+    if (r.code == 200) {
+      rooms.value = r.data
+    } else {
+      toast(r.msg)
+    }
+  }).catch(e => {
+
+  });
+}
+
+const joinRoom = (index: number, row) => {
+  service.get(`/api/music/live/join?id=${row.uid}`).then((r) => {
+        if (r.code == 200) {
+          toast("加入成功", "success")
+          dialogVisibleRoom.value = false
+          wss = new WebSocket(r.ws)
+          wss.onerror = function () {
+            console.log("ws连接发生错误");
+          };
+          wss.onopen = function () {
+            console.log("ws连接成功");
+            lived.value = true
+            wss.send(JSON.stringify({
+              token: getToken(),
+              action: "auth",
+              data: ""
+            }))
+          }
+          wss.onmessage = function (event) {
+            let data = JSON.parse(event.data)
+            if (data.action == "set") {
+              ap.list.clear()
+              ap.list.add(data.songs)
+              if (data.index != ap.list.index)
+                ap.list.switch(data.index)
+              if (data.state == 0) {
+                if (ap.audio.paused)
+                  ap.play()
+              } else {
+                if (!ap.audio.paused)
+                  ap.pause()
+              }
+              ap.seek(data.secs)
+            } else if (data.action == "sync") {
+              if (data.songs) {
+                ap.list.clear()
+                ap.list.add(data.songs)
+              }
+
+              if (data.index != ap.list.index)
+                ap.list.switch(data.index)
+
+              if (data.state == 0) {
+                if (ap.audio.paused)
+                  ap.play()
+              } else {
+                if (!ap.audio.paused)
+                  ap.pause()
+              }
+
+              ap.seek(data.secs)
+            } else if (data.action == "update") {
+              roomdata.value = data.data
+            }
+          }
+          wss.onclose = function () {
+            console.log("ws连接关闭");
+            lived.value = false
+            livemd.value = false
+            exitRoom()
+          }
+        } else {
+          toast(r.msg)
+        }
+        toSync(true)
+      }
+  ).catch(e => {
+    console.log(e)
+  });
+}
+
 </script>
 <template>
   <el-row class="min-h-screen bg-opacity-95 bg-zinc-500" id="froom">
     <div style="position: absolute; left: 2%;top: 3%;">
-      <el-button type="info" plain @click="dialogVisible = true">
+
+      <el-button v-if="!lived||livemd" type="info" plain @click="dialogVisible = true">
         点击搜索
       </el-button>
-      <el-button type="primary" plain @click="toggleList(true)">
-        切换个人
+      <el-button v-if="!lived||livemd" type="primary" plain @click="ttk = !ttk;toggleList(ttk)">
+        切换个人/默认
       </el-button>
-      <el-button type="primary" plain @click="toggleList(false)">
-        切换默认
+      <el-button v-if="!lived" type="primary" plain @click="createRoom()">
+        创建一起听
+      </el-button>
+      <el-button v-if="!lived" type="success" plain @click="loadRooms();dialogVisibleRoom = true">
+        加入一起听
+      </el-button>
+      <el-button v-if="lived" type="danger" plain @click="exitRoom()">
+        退出一起听
       </el-button>
     </div>
 
     <div class="container row min-h-screen ">
       <div class="row align-self-start text-center">
-
-        <div class="col-lg-4 col-md-12" @click="ap.toggle()" style="margin-top: 100px;">
+        <div class="col-lg-4 col-md-12" @click="ap.toggle();toSync(false)" style="margin-top: 100px;">
           <el-avatar style="width: 85%;height: auto" id="icon-img" :src="cover0"/>
         </div>
-
         <div class="col-lg-7 col-md-12" style="margin-top: 4%;">
           <div class="row">
             <h3>{{ info.name }}</h3>
@@ -259,26 +455,33 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
                   effect="dark"
                   :content="getTimeMs((e.timestamp/1000).toFixed(0))"
                   placement="left-start">
-                <h4 :class="'l-'+i" v-on:click="ap.seek(e.timestamp/1000)"> {{ e.content }}</h4>
+                <h4 :class="'l-'+i" v-on:click="ap.seek(e.timestamp/1000);toSync(false)"> {{ e.content }}</h4>
               </el-tooltip>
-
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row align-self-end mb-5 ">
-        <div style="width: 100%" class="mb-4 col-12 ml-5 text-center">
-          <el-button @click="ap.skipBack()" type="info" round plain>上一曲</el-button>
-          <el-button @click="ap.toggle()" type="info" round plain>播放/暂停</el-button>
-          <el-button @click="ap.skipForward()" type="info" round plain>下一曲</el-button>
+      <div class="row align-self-end mb-5 mt-4">
+        <div v-if="lived" style="width: 100%;color: black" class="mb-4 col-12 ml-5 text-center">
+          {{ roomdata.name }}
         </div>
-        <div class="slider-demo-block col-12 ml-5 text-center" >
+        <div v-if="lived" style="width: 100%" class="mb-4 col-12 ml-5 text-center">
+          <span v-for="e in roomdata.users">
+            <el-avatar style="width:auto;height: 40px" id="icon-img" :src="e.icon"/>
+          </span>
+        </div>
+        <div style="width: 100%" class="mb-4 col-12 ml-5 text-center">
+          <el-button @click="ap.skipBack();toSync(false)" type="info" round plain>上一曲</el-button>
+          <el-button @click="ap.toggle();toSync(false)" type="info" round plain>播放/暂停</el-button>
+          <el-button @click="ap.skipForward();toSync(false)" type="info" round plain>下一曲</el-button>
+        </div>
+        <div class="slider-demo-block col-12 ml-5 text-center">
           <span class="demonstration">{{
               getTimeMs(ap.audio.currentTime.toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
             }}</span>
           <div style="width: 80%;margin-left: 10%" class="text-center">
-            <el-slider  @change="onPercentChange" :format-tooltip="getFormatToolTip" v-model="percentage"/>
+            <el-slider @change="onPercentChange" :format-tooltip="getFormatToolTip" v-model="percentage"/>
           </div>
         </div>
       </div>
@@ -304,6 +507,21 @@ function toggleList(pri: Boolean, tips: Boolean = true) {
             <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)">＋
             </el-button>
             <el-button v-if="rmop" size="small" type="danger" @click="handleRmp(scope.$index, scope.row)">－</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+
+    <el-dialog v-model="dialogVisibleRoom" title="一起听" width="500" draggable align-center>
+      <el-table :data="rooms" style="width: 100%;height: 400px">
+        <el-table-column label="房名" prop="name"/>
+        <el-table-column label="在线人数" prop="count"/>
+        <el-table-column align="right">
+          <template #header>
+            <div>操作</div>
+          </template>
+          <template #default="scope">
+            <el-button size="small" type="primary" @click="joinRoom(scope.$index, scope.row)">加入</el-button>
           </template>
         </el-table-column>
       </el-table>

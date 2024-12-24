@@ -26,4 +26,13 @@ service.interceptors.response.use(function (response) {
     console.log(err.response)
     return Promise.reject(err.response.data);
 });
+
 export default service;
+
+export function getToken() : string {
+    let token = Cookie.get("token");
+    if (!token) {
+        token = Cookie.get("authorization")
+    }
+    return token;
+}

@@ -31,6 +31,7 @@ export default parseLyrics
  * 获取最近的歌词
  * @param time
  * @param nextn
+ * @param lyrics
  */
 export function getNearst(time: number, nextn: number = 3, lyrics: Lyric[]) {
     //最终返回歌词
