@@ -267,6 +267,9 @@ function createRoom() {
             "songs": ap.list.audios
           }
         }))
+        ap.on("play",function () {
+          toSync(false)
+        })
       }
       wss.onmessage = function (event) {
         let data = JSON.parse(event.data)

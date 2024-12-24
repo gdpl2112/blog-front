@@ -225,9 +225,6 @@ onMounted(() => {
     audio: [],
     preload: "none"
   });
-  ap.on('loadeddata', function () {
-
-  })
   service.get("/api/music/get-music-list").then(function (response) {
     ap.list.clear()
     ap.list.add(response)
