@@ -216,7 +216,7 @@ function jumpToflink() {
 
 
 let ap: APlayer;
-//挂载完成加载player
+//挂载完成加载player.
 onMounted(() => {
   ap = new APlayer({
     container: document.getElementById('player'),
