@@ -41,6 +41,7 @@
     <div v-on:click="routerTo(d.id)" v-for="d in data">
       <div class="row shadow-lg p-3 mb-5 rounded notice-div0" style="margin-top: 10px;">
         <div class="col-3 align-middle" style="display: inline-block;">
+          <span style="position: absolute" class="badge text-bg-success" v-if="d.sort>0">置顶</span>
           <img referrer="no-referrer" class="card-img-top img-responsive center-block"
                :src="d.icon" style="display: inline-block;max-width: 120px; " alt=".">
         </div>
@@ -55,7 +56,8 @@
     <hr>
     <br>
     <div class="row">
-      <div class="col-4"></div>
+      <div class="col-4">
+      </div>
       <div class="col-4">
         <nav aria-label="">
           <ul class="pagination justify-content-center">

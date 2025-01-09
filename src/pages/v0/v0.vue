@@ -38,8 +38,8 @@
             <span>密码本</span>
           </el-menu-item>
         </RouterLink>
-        <RouterLink v-if="roles.includes('admin')" to="/v0/admin" style="text-decoration: none;">
-          <el-menu-item index="4">
+        <RouterLink v-if="roles.includes('admin')" to="/v0/adminv0" style="text-decoration: none;">
+          <el-menu-item index="5">
             <el-icon>
               <setting/>
             </el-icon>

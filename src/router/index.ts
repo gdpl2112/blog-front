@@ -16,6 +16,7 @@ import info from '@/pages/v0/info.vue'
 import articles from '@/pages/v0/articles.vue'
 import aox from '@/pages/v0/aox.vue'
 import pnote from '@/pages/v0/pnote.vue'
+import adminv0 from '@/pages/v0/adminv0.vue'
 
 
 const routes = [{
@@ -72,7 +73,10 @@ const routes = [{
     },{
         path: 'pnote',
         component: pnote
-    },
+    },{
+        path: 'adminv0',
+        component: adminv0
+    }
     ]
 },{
     path: '/login',
