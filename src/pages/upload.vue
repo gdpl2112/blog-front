@@ -60,7 +60,7 @@ import {toast} from "@/utils/utils";
 import service from "@/axios";
 import router from "@/router";
 
-const text = ref('#引入md-editor-v3\n##markdown编辑器\n###请书写你的文章');
+const text = ref('# 引入md-editor-v3\n## markdown编辑器\n### 请书写你的文章');
 
 const title = ref('');
 

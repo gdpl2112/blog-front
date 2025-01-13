@@ -29,17 +29,25 @@
             <el-icon>
               <icon-menu/>
             </el-icon>
-            <span>杂项</span>
+            <span>API管理</span>
           </el-menu-item>
         </RouterLink>
-        <RouterLink to="/v0/pnote" style="text-decoration: none;">
+        <RouterLink to="/v0/bgi" style="text-decoration: none;">
           <el-menu-item index="4">
+            <el-icon><Picture /></el-icon>
+            <span>背景图管理</span>
+          </el-menu-item>
+        </RouterLink>
+
+        <RouterLink to="/v0/pnote" style="text-decoration: none;">
+          <el-menu-item index="5">
             <el-icon><Notebook /></el-icon>
             <span>密码本</span>
           </el-menu-item>
         </RouterLink>
+
         <RouterLink v-if="roles.includes('admin')" to="/v0/adminv0" style="text-decoration: none;">
-          <el-menu-item index="5">
+          <el-menu-item index="6">
             <el-icon>
               <setting/>
             </el-icon>
@@ -59,7 +67,7 @@
 <script lang="ts" setup>
 import {RouterLink, RouterView} from 'vue-router'
 
-import {Document, Menu as IconMenu, Notebook, Setting} from "@element-plus/icons-vue";
+import {Document, Menu as IconMenu, Notebook, Setting, Picture} from "@element-plus/icons-vue";
 import {onMounted, ref} from "vue";
 import service from "@/axios";
 

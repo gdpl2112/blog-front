@@ -52,6 +52,9 @@ export default defineConfig({
             }, '/2024/': {
                 target: baseUrl,
                 changeOrigin: false
+            }, '/2025/': {
+                target: baseUrl,
+                changeOrigin: false
             }, '/avatar/': {
                 target: baseUrl,
                 changeOrigin: false

@@ -18,8 +18,12 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 import 'aplayer/dist/APlayer.min.css';
 
 import {useScroll} from "vue3-progress-scroll";
+// 引入VueCookies
+import VueCookies from 'vue3-cookies'
 
 const app = createApp(App)
+
+app.use(VueCookies)
 
 app.use(useScroll, {
     progress: "green", // 进度条颜色
