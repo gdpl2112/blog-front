@@ -1,14 +1,22 @@
 <template>
   <br>
   <hr>
-  <el-carousel ref="cRef" type="card" height="200px" :autoplay="false">
+
+  <el-carousel
+      height="400px"
+      direction="vertical"
+      type="card"
+      ref="cRef"
+      :autoplay="false"
+  >
     <el-carousel-item v-for="item in bgis">
       <div class="block">
         <span class="demonstration" v-text="(item.type==1?'竖屏':'横屏') + (item.id)"></span>
-        <el-image :src="item.url"/>
+        <el-image :src="item.url" lazy/>
       </div>
     </el-carousel-item>
   </el-carousel>
+
   <br>
   <hr>
   <el-row class="row-bg" justify="center">
