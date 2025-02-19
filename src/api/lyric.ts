@@ -61,6 +61,5 @@ export function getNearst(time: number, nextn: number = 3, lyrics: Lyric[]) {
             ul = ee;
         }
     }
-
     return outs
 }

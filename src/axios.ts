@@ -1,5 +1,4 @@
 import axios from "axios";
-import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
 
 const service = axios.create({
@@ -29,7 +28,7 @@ service.interceptors.response.use(function (response) {
 
 export default service;
 
-export function getToken() : string {
+export function getToken(): string {
     let token = Cookie.get("token");
     if (!token) {
         token = Cookie.get("authorization")

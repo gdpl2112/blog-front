@@ -1,5 +1,5 @@
 <template>
-  <el-row class="min-h-screen">
+  <el-row id="main0" class="min-h-screen">
     <el-col :lg="16" :md="12" class="bg-opacity-30 bg-zinc-500  flex items-center justify-center">
       <div style="margin-left: 20px;margin-right: 20px">
         <div class="font-bold text-5xl text-light-50">kloping's blog</div>
@@ -159,5 +159,9 @@ function loginGithub() {
 
 onMounted(() => {
   loginGithub()
+})
+
+onMounted(() => {
+  document.getElementById("main0").scrollIntoView();
 })
 </script>
