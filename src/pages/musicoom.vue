@@ -40,9 +40,8 @@ onMounted(() => {
       const ad0 = ap.list.audios[ap.list.index];
       cover0.value = ad0.cover
 
-      if (ad0.songId) {
-        now_id.value = ad0.songId
-      } else now_id.value = ad0.id
+      if (ad0.songId) now_id.value = ad0.songId
+      else now_id.value = ad0.id
 
       info.value = ad0
 
@@ -65,7 +64,6 @@ onMounted(() => {
         lyrics.value = parseLyrics(r)
         ad0.lyric = r;
       }
-
     }, et)
   }
 
@@ -103,8 +101,9 @@ function getFormatToolTip(v: number) {
   return getTimeMs((v / 100 * ap.audio.duration).toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
 }
 
-const dialogVisible = ref(false)
+const dialogVisible0 = ref(false)
 const dialogVisibleRoom = ref(false)
+const dialogVisibleList = ref(false)
 
 const search = ref('')
 //搜索中
@@ -125,8 +124,6 @@ const handlePoi = (index: number, row) => {
       toast("添加成功!", "success")
       if (isPri) {
         ap.list.add(r.data)
-      } else {
-        toggleList(true, false)
       }
     } else {
       toast(r.msg)
@@ -203,36 +200,57 @@ function onSearch() {
   }
 }
 
-function toggleList(pri: Boolean, tips: Boolean = true) {
-  if (lived.value) {
-    if (livemd.value == false) return
+let toggleListLoading = ref(false)
+let listType: String = "163"
+
+function toggleList(type: String = "pri", tips: Boolean = true) {
+  if (lived.value && !livemd.value) return;
+  if (lived.value && livemd) {
+    if (type !== "pri") {
+      toast("当前处于一起听状态，无法切换到非个人歌单")
+      return
+    }
   }
-  if (pri) {
+  if (listType == type) {
+    toggleListLoading.value = false;
+    dialogVisibleList.value = false;
+    return;
+  }
+  toggleListLoading.value = true;
+
+  const handleSuccess = (data) => {
+    ap.list.clear();
+    ap.list.add(data);
+    listType = type;
+    isPri = type === "pri";
+    toSync(true);
+    if (tips) toast("切换成功", "success");
+  };
+
+  const handleError = (error: String) => {
+    toast(`切换失败: ${error}`, "error");
+  };
+
+  const handleFinally = () => {
+    toggleListLoading.value = false;
+    dialogVisibleList.value = false;
+  };
+
+  if (type === "pri") {
     service.get("/api/music/list").then((r) => {
-      if (r.code == 200) {
-        ap.list.clear()
-        ap.list.add(r.data)
-        isPri = true
-        toSync(true)
-        if (tips) toast("切换成功", "success")
+      if (r.code === 200) {
+        handleSuccess(r.data);
       } else {
-        toast("切换失败:" + r.msg)
+        handleError(r.msg);
       }
-    }).catch((e) => {
-      toast("切换失败:" + e)
-    })
+    }).catch(handleError).finally(handleFinally);
   } else {
-    service.get("/api/music/get-music-list").then(function (response) {
-      ap.list.clear()
-      ap.list.add(response)
-      isPri = false
-      toSync(true)
-      if (tips) toast("切换成功", "success")
-    }).catch(function (err) {
-      toast("获取音乐失败" + err)
-    });
+    service.get(`/api/music/get-music-list?type=${type}`).then((response) => {
+      handleSuccess(response);
+    }).catch(handleError).finally(handleFinally);
   }
 }
+
 
 //切换个人与默认的控制
 let ttk = ref(false)
@@ -246,52 +264,57 @@ let roomdata = ref({})
 let wss: WebSocket = null
 
 function createRoom() {
-  service.get("/api/music/live").then((r) => {
-    if (r.code == 200) {
-      toast("创建成功", "success")
-      roomdata.value = r.data
-      wss = new WebSocket(r.ws)
-      wss.onerror = function () {
-        console.log("ws连接发生错误");
-      };
-      wss.onopen = function () {
-        lived.value = true
-        livemd.value = true
-        console.log("ws连接成功");
-        wss.send(JSON.stringify({
-          token: getToken(),
-          action: "init",
-          data: {
-            "index": ap.list.index,
-            "secs": Number(ap.audio.currentTime.toFixed(0)),
-            "songs": ap.list.audios
-          }
-        }))
-        ap.on("play",function () {
-          toSync(false)
-        })
-      }
-      wss.onmessage = function (event) {
-        let data = JSON.parse(event.data)
-        if (data.action == "update") {
-          roomdata.value = data.data
-          setTimeout(() => {
+  if (!isPri) {
+    toast("请先切换到个人歌单")
+    return
+  } else {
+    service.get("/api/music/live").then((r) => {
+      if (r.code == 200) {
+        toast("创建成功", "success")
+        roomdata.value = r.data
+        wss = new WebSocket(r.ws)
+        wss.onerror = function () {
+          console.log("ws连接发生错误");
+        };
+        wss.onopen = function () {
+          lived.value = true
+          livemd.value = true
+          console.log("ws连接成功");
+          wss.send(JSON.stringify({
+            token: getToken(),
+            action: "init",
+            data: {
+              "index": ap.list.index,
+              "secs": Number(ap.audio.currentTime.toFixed(0)),
+              "songs": ap.list.audios
+            }
+          }))
+          ap.on("play", function () {
             toSync(false)
-          }, 2000)
+          })
         }
+        wss.onmessage = function (event) {
+          let data = JSON.parse(event.data)
+          if (data.action == "update") {
+            roomdata.value = data.data
+            setTimeout(() => {
+              toSync(false)
+            }, 2000)
+          }
+        }
+        wss.onclose = function () {
+          console.log("ws连接关闭");
+          lived.value = false
+          livemd.value = false
+          exitRoom()
+        }
+      } else {
+        toast(r.msg)
       }
-      wss.onclose = function () {
-        console.log("ws连接关闭");
-        lived.value = false
-        livemd.value = false
-        exitRoom()
-      }
-    } else {
-      toast(r.msg)
-    }
-  }).catch(e => {
-    console.log(e)
-  });
+    }).catch(e => {
+      console.log(e)
+    });
+  }
 }
 
 function exitRoom() {
@@ -463,11 +486,11 @@ const joinRoom = (index: number, row) => {
   <el-row class="min-h-screen bg-opacity-95 bg-zinc-500" id="froom">
     <div style="position: absolute; left: 2%;top: 3%;">
 
-      <el-button v-if="!lived||livemd" type="info" plain @click="dialogVisible = true">
+      <el-button v-if="!lived||livemd" type="info" plain @click="dialogVisible0 = true">
         点击搜索
       </el-button>
-      <el-button v-if="!lived||livemd" type="primary" plain @click="ttk = !ttk;toggleList(ttk)">
-        切换个人/默认
+      <el-button v-if="!lived||livemd" type="primary" plain @click="dialogVisibleList = true">
+        切换歌单
       </el-button>
       <el-button v-if="!lived" type="primary" plain @click="createRoom()">
         创建一起听
@@ -530,7 +553,7 @@ const joinRoom = (index: number, row) => {
       </div>
     </div>
 
-    <el-dialog v-model="dialogVisible" title="搜音乐" width="500" draggable align-center>
+    <el-dialog v-model="dialogVisible0" title="搜音乐" width="500" draggable align-center>
       <el-form :inline="true" class="demo-form-inline">
         <el-form-item>
           <el-input v-model="search" placeholder="搜索歌单"/>
@@ -568,6 +591,22 @@ const joinRoom = (index: number, row) => {
           </template>
         </el-table-column>
       </el-table>
+    </el-dialog>
+
+    <el-dialog :body-class="'text-center'" v-model="dialogVisibleList" title="切换平台热歌榜" width="500" draggable
+               align-center>
+      <el-row justify="center" class="mb-1">
+        <el-button :loading="toggleListLoading" type="danger" @click="toggleList('163')">网易云音乐热歌榜</el-button>
+      </el-row>
+      <el-row justify="center" class="mb-1">
+        <el-button :loading="toggleListLoading" type="success" @click="toggleList('qq')">QQ音乐热歌榜</el-button>
+      </el-row>
+      <el-row justify="center" class="mb-1">
+        <el-button :loading="toggleListLoading" type="primary" @click="toggleList('kg')">酷狗音乐热歌榜</el-button>
+      </el-row>
+      <el-row justify="center" class="mb-1">
+        <el-button :loading="toggleListLoading" type="info" @click="toggleList()">个人歌单</el-button>
+      </el-row>
     </el-dialog>
 
   </el-row>

@@ -134,11 +134,11 @@ audio {
             <a @click="jumpToflink" class="nav-link">友链</a>
           </li>
         </ul>
-        <div v-show="user.state" class="d-flex flex-column"> {{ user.nickname }}</div>
-        <img v-show="user.state" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
+        <div v-show="us" class="d-flex flex-column"> {{ user.nickname }}</div>
+        <img v-show="us" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
              :src="user.icon" alt="icon">
         <div class="form-inline mr-sm-2 my-2">
-          <button v-show="user.state" class="mr-2 btn btn-outline-danger font-weight-light" @click="logout">点击登出
+          <button v-show="us" class="mr-2 btn btn-outline-danger font-weight-light" @click="logout">点击登出
           </button>
           <button class="mr-2 btn btn-outline-warning" type="button" @click="ttplayer">显示/隐藏歌单</button>
           <RouterLink to="/v0" class="mr-2 btn btn-outline-success" type="button">个人中心</RouterLink>
@@ -186,7 +186,7 @@ audio {
 
 import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
-import {onMounted, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import service from "@/axios";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
@@ -244,21 +244,25 @@ function ttplayer() {
 }
 
 const user = ref({})
+const us = ref(false)
 
 function loadUser() {
   service.get("/user/login_state").then(response => {
     if (response == true) {
+      us.value = true
       service.get("/auth/info").then((res) => {
         user.value = res
       }).catch((err) => {
         toast("获取登录信息失败,请尝试重新登录")
       })
     } else if (response == false) {
+      us.value = false
       Cookie.remove("token")
       user.value = {}
     }
   }).catch(err => {
     toast("获取登录信息失败")
+    console.log(err)
   })
 }
 
