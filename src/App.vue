@@ -167,7 +167,7 @@ audio {
     <div id="player"></div>
 
 
-    <video controls autoplay muted loop id="bgVideo">
+    <video autoplay muted loop id="bgVideo">
       <source src="/sources/pc.mp4" type="video/mp4" media="(min-width: 768px)">
       <source src="/sources/pe.mp4" type="video/mp4" media="(max-width: 767px)">
     </video>
