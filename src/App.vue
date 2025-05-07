@@ -177,8 +177,8 @@ audio {
 
 
     <video controls autoplay muted loop id="bgVideo">
-      <source src="/sources/pe.mp4" type="video/mp4" media="(max-width: 767px)"> <!-- 手机端 -->
       <source src="/sources/pc.mp4" type="video/mp4" media="(min-width: 768px)">
+      <source src="/sources/pe.mp4" type="video/mp4" media="(max-width: 767px)">
     </video>
   </div>
 </template>
