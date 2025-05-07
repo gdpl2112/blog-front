@@ -37,15 +37,6 @@ audio {
   display: none;
 }
 
-@media (max-width: 1080px) {
-  body {
-    background-image: url("/api/image/rand0?p=1");
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    background-attachment: fixed;
-  }
-}
-
 .yl-img {
   max-width: 25px;
   transition: all 0.8s ease !important;
