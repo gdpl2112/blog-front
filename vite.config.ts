@@ -31,16 +31,16 @@ export default defineConfig({
                 target: baseUrl,
                 changeOrigin: false,
                 // rewrite: (path) => path.replace(/^\/api/, '/api')
-            },'/user': {
+            }, '/user': {
                 target: baseUrl,
                 changeOrigin: false,
-            },'/auth': {
+            }, '/auth': {
                 target: baseUrl,
                 changeOrigin: false,
-            },'/notice': {
+            }, '/notice': {
                 target: baseUrl,
                 changeOrigin: false,
-            },'/comments': {
+            }, '/comments': {
                 target: baseUrl,
                 changeOrigin: false,
             }, '/2022/': {
@@ -65,6 +65,9 @@ export default defineConfig({
                 target: baseUrl,
                 changeOrigin: false
             }, '/stamp2time': {
+                target: baseUrl,
+                changeOrigin: false
+            }, '/sources/*': {
                 target: baseUrl,
                 changeOrigin: false
             }

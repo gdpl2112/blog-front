@@ -46,19 +46,6 @@ audio {
   }
 }
 
-
-@media (min-width: 1080px) {
-  body {
-    width: 100%;
-    height: 100%;
-    background: url("/api/image/rand0?p=0") no-repeat center center fixed;
-    background-size: 100%;
-    -webkit-background-size: cover;
-    -o-background-size: cover;
-  }
-}
-
-//控制友联
 .yl-img {
   max-width: 25px;
   transition: all 0.8s ease !important;
@@ -70,7 +57,15 @@ audio {
   rotate: 1turn;
   max-width: 30px;
 }
-
+#bgVideo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -1; /* 置于内容层下方 */
+  object-fit: cover; /* 保持视频比例填充屏幕 */
+}
 </style>
 
 <template>
@@ -179,6 +174,12 @@ audio {
     </footer>
 
     <div id="player"></div>
+
+
+    <video controls autoplay muted loop id="bgVideo">
+      <source src="/sources/pe.mp4" type="video/mp4" media="(max-width: 767px)"> <!-- 手机端 -->
+      <source src="/sources/pc.mp4" type="video/mp4" media="(min-width: 768px)">
+    </video>
   </div>
 </template>
 
