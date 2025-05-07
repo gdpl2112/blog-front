@@ -2,17 +2,17 @@
 .notice-div0 {
   transition: all 1s ease !important;
   border: 1.5px solid transparent;
-  background-color: rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.5);
+  opacity: 96%;
   border-radius: 12px;
-  opacity: 82%;
-  color: rgba(0, 0, 0, 0.85);
+  color: rgba(0, 0, 0, 0.9);
   animation: a_normal .3s linear forwards;
 }
 
 .notice-div0:hover {
-  background-color: rgba(255, 255, 255, 0.96);
-  opacity: 98%;
-  color: rgba(0, 0, 0, 0.98);
+  background-color: rgba(255, 255, 255, 0.9);
+  opacity: 96%;
+  color: rgb(0, 0, 0);
   animation: a_hover .3s linear forwards;
 }
 
