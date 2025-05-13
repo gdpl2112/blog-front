@@ -54,8 +54,8 @@ audio {
   left: 0;
   min-width: 100%;
   min-height: 100%;
-  z-index: -1; /* 置于内容层下方 */
-  object-fit: cover; /* 保持视频比例填充屏幕 */
+  z-index: -1; /* 修改为更低的层级以确保内容在上 */
+  object-fit: cover;
 }
 </style>
 
@@ -328,5 +328,10 @@ function logout() {
     transform: scale(1.00);
     right: 1%;
   }
+}
+
+.app {
+  position: relative;
+  z-index: 1; /* 确保应用容器在视频之上 */
 }
 </style>
