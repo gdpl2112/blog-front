@@ -143,9 +143,12 @@ audio {
         <center style="opacity: 100%;color: white">
           欢迎您的访问 <br>
           {{ host0 }} 版权所有 Power by <br>
-          <a style="color: #93c3da" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
-             class="alert-link">若生</a>
-          <a style="color: #93c3da" href="//github.com/kloping" class="alert-link">kloping</a>
+          <a style="color: #74e3c6" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
+             class="alert-link">若生</a>&nbsp;
+          <a style="color: #89eac1" href="//github.com/kloping" class="alert-link">kloping</a>
+          <br>
+          <!--公安备案信息-->
+          <a style="color: #ead7d7;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>
         </center>
         <br>
         <center>
