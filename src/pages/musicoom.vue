@@ -48,7 +48,7 @@ onMounted(() => {
       if (!ad0.lyric) {
         if (!getLyricing) {
           getLyricing = true
-          service.get(`/api/music/get-lrc-by-id?id=${now_id.value}`).then((r) => {
+          service.get(`/api/music/get-lrc-by-id?id=${now_id.value}&type=${listType}`).then((r) => {
             lyric.value = r;
             lyrics.value = parseLyrics(r)
             ad0.lyric = r;
@@ -218,7 +218,10 @@ function toggleList(type: String = "pri", tips: Boolean = true) {
   }
   toggleListLoading.value = true;
 
-  const handleSuccess = (data) => {
+  const handleSuccess = (data: Array) => {
+    data.filter((item) => {
+      item.url = item.url + "&type=" + type;
+    });
     ap.list.clear();
     ap.list.add(data);
     listType = type;

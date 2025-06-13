@@ -1,5 +1,16 @@
 <style>
-
+body {
+  margin: 0;
+  background: #333 url("pc.jpg") no-repeat fixed center/cover;
+  min-height: 100vh; /* 确保高度撑满屏幕 */
+}
+/* 移动端适配 */
+@media (max-width: 768px) {
+  body {
+    background-image: url("pe.jpg");
+    background-size: 100% auto;
+  }
+}
 #main-nav {
   transition: all 1s ease !important;
   border: 3px solid transparent;
@@ -54,7 +65,7 @@ audio {
   left: 0;
   min-width: 100%;
   min-height: 100%;
-  z-index: -1; /* 修改为更低的层级以确保内容在上 */
+  z-index: -1;
   object-fit: cover;
 }
 </style>
@@ -168,12 +179,6 @@ audio {
     </footer>
 
     <div id="player"></div>
-
-
-    <video autoplay muted loop id="bgVideo">
-      <source src="/sources/pc.mp4" type="video/mp4" media="(min-width: 768px)">
-      <source src="/sources/pe.mp4" type="video/mp4" media="(max-width: 767px)">
-    </video>
   </div>
 </template>
 
