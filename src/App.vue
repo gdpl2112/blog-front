@@ -1,13 +1,13 @@
 <style>
 body {
   margin: 0;
-  background: #333 url("pc.jpg") no-repeat fixed center/cover;
+  background: #333 url("/pc.jpg") no-repeat fixed center/cover;
   min-height: 100vh; /* 确保高度撑满屏幕 */
 }
 /* 移动端适配 */
 @media (max-width: 768px) {
   body {
-    background-image: url("pe.jpg");
+    background-image: url("/pe.jpg");
     background-size: 100% auto;
   }
 }
