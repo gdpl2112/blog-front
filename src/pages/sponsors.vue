@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
+import service from "@/axios";
 
 // 赞助列表数据
 const sponsors = ref([
-  // {id: 1, name: '示例数据', amount: 1.01, date: '2025-06-21', message: '支持!'},
+  {id: 1, name: '示例数据', amount: 1.01, date: '2025-06-21', msg: '支持!'},
 ]);
+
+onMounted(() => {
+  service.get('/api/get/sponsors').then((r) => {
+    sponsors.value = r
+  }).catch(e => {
+    console.log(e)
+  });
+})
 </script>
 
 <template>
@@ -53,7 +62,7 @@ const sponsors = ref([
           </template>
         </el-table-column>
         <el-table-column prop="date" label="日期" width="180"></el-table-column>
-        <el-table-column prop="message" label="留言"></el-table-column>
+        <el-table-column prop="msg" label="留言"></el-table-column>
       </el-table>
     </div>
     <hr>
