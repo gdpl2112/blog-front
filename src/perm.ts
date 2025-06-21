@@ -3,7 +3,7 @@ import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
 import service from "@/axios";
 
-const urls = ["/index.html", "/login", "/index", "/", "/apis", "/article", "/reg", "/room", "/tem"]
+const urls = ["/index.html", "/login", "/index", "/", "/apis", "/article", "/reg", "/room", "/tem","/sponsors"]
 
 router.beforeEach((to, from, next) => {
     if (to.meta.title) {

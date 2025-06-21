@@ -10,6 +10,7 @@ import article from '@/pages/article.vue'
 import upload from '@/pages/upload.vue'
 import musicroom from '@/pages/musicoom.vue'
 import tem from '@/pages/tem.vue'
+import sponsors from '@/pages/sponsors.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -47,11 +48,17 @@ const routes = [{
     meta: {
         title: '音乐厅'
     }
-},, {
+}, {
     path: '/tem',
     component: tem,
     meta: {
         title: '测试'
+    }
+}, {
+    path: '/sponsors',
+    component: sponsors,
+    meta: {
+        title: '友友们的赞助'
     }
 }, {
     path: '/v0',

@@ -130,6 +130,9 @@ audio {
           <li class="nav-item mr-sm-2" style="margin-right: 8px">
             <a @click="jumpToflink" class="nav-link">友链</a>
           </li>
+          <li class="nav-item">
+            <RouterLink to="/sponsors" class="nav-link" aria-current="page">赞助</RouterLink>
+          </li>
         </ul>
         <div v-show="us" class="d-flex flex-column"> {{ user.nickname }}</div>
         <img v-show="us" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
