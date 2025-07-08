@@ -32,12 +32,13 @@
             <span>API管理</span>
           </el-menu-item>
         </RouterLink>
-        <RouterLink to="/v0/bgi" style="text-decoration: none;">
-          <el-menu-item index="4">
-            <el-icon><Picture /></el-icon>
-            <span>背景图管理</span>
-          </el-menu-item>
-        </RouterLink>
+
+<!--        <RouterLink to="/v0/bgi" style="text-decoration: none;">-->
+<!--          <el-menu-item index="4">-->
+<!--            <el-icon><Picture /></el-icon>-->
+<!--            <span>背景图管理</span>-->
+<!--          </el-menu-item>-->
+<!--        </RouterLink>-->
 
         <RouterLink to="/v0/pnote" style="text-decoration: none;">
           <el-menu-item index="5">

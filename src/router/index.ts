@@ -16,7 +16,6 @@ import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
 import articles from '@/pages/v0/articles.vue'
 import aox from '@/pages/v0/aox.vue'
-import bgi from '@/pages/v0/bgi.vue'
 import pnote from '@/pages/v0/pnote.vue'
 import adminv0 from '@/pages/v0/adminv0.vue'
 
@@ -78,9 +77,6 @@ const routes = [{
     }, {
         path: 'aox',
         component: aox
-    }, {
-        path: 'bgi',
-        component: bgi
     },{
         path: 'pnote',
         component: pnote
