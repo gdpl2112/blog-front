@@ -22,14 +22,22 @@ const ap = reactive(window.ap)
 onMounted(() => {
   document.getElementById("froom").scrollIntoView();
 
+  let im0 = $('.avatar-img img')[0];
+  console.log(im0)
   let iee = $("#icon-img");
   //旋转关键
   let rting = 0;
 
   function animateBox() {
+    if (im0 == null) {
+      im0 = $('.avatar-img img')[0];
+      const $img = $(im0);
+      const width = $img.width() || 0;
+      $img.height(width);
+    }
     iee.animate({
       rotate: '+=7deg'
-    }, 500, "linear",);
+    }, 800, "linear",);
   }
 
   let getLyricing = false
@@ -72,22 +80,18 @@ onMounted(() => {
   setInterval(() => {
 
     if (ap.audio.paused == false) {
-
       rting++;
-      if (rting % 5 == 0) {
+      if (rting % 8 == 0) {
         animateBox()
         nowLyrics.value = getNearst(ap.audio.currentTime * 1000, 6, lyrics.value)
 
         percentage.value = Number(((ap.audio.currentTime / ap.audio.duration) * 100).toFixed(2))
       }
-
     }
-
     if (now_id.value !== ap.list.audios[ap.list.index].id) {
       loadRes(0)
     }
-  }, 102)
-
+  }, 101)
 })
 
 let percentage = ref(0)
@@ -485,6 +489,7 @@ const joinRoom = (index: number, row) => {
 }
 
 </script>
+
 <template>
   <el-row class="min-h-screen bg-opacity-85 bg-zinc-500" id="froom">
     <div style="position: absolute; left: 2%;top: 3%;">
@@ -509,7 +514,7 @@ const joinRoom = (index: number, row) => {
     <div class="container row min-h-screen ">
       <div class="row align-self-start text-center">
         <div class="col-lg-4 col-md-12" @click="ap.toggle();toSync(false)" style="margin-top: 100px;">
-          <el-avatar style="width: 85%;height: auto" id="icon-img" :src="cover0"/>
+          <el-avatar class="avatar-img" style="width: 85%;height: auto" id="icon-img" :src="cover0"/>
         </div>
         <div class="col-lg-7 col-md-12" style="margin-top: 4%;">
           <div class="row">
