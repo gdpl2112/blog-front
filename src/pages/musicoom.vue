@@ -20,16 +20,17 @@ let cover0 = ref("")
 const ap = reactive(window.ap)
 
 onMounted(() => {
+  //调整界面到整个屏幕都是音乐组件
   document.getElementById("froom").scrollIntoView();
 
   let im0 = $('.avatar-img img')[0];
-  console.log(im0)
   let iee = $("#icon-img");
   //旋转关键
   let rting = 0;
 
   function animateBox() {
     if (im0 == null) {
+      //是其保持方形
       im0 = $('.avatar-img img')[0];
       const $img = $(im0);
       const width = $img.width() || 0;
@@ -44,15 +45,11 @@ onMounted(() => {
 
   function loadRes(et: number = 2000) {
     setTimeout(() => {
-
       const ad0 = ap.list.audios[ap.list.index];
       cover0.value = ad0.cover
-
       if (ad0.songId) now_id.value = ad0.songId
       else now_id.value = ad0.id
-
       info.value = ad0
-
       if (!ad0.lyric) {
         if (!getLyricing) {
           getLyricing = true
@@ -78,7 +75,6 @@ onMounted(() => {
   loadRes()
 
   setInterval(() => {
-
     if (ap.audio.paused == false) {
       rting++;
       if (rting % 8 == 0) {
@@ -92,13 +88,27 @@ onMounted(() => {
       loadRes(0)
     }
   }, 101)
+
+  service.get("/user/login_state").then(response => {
+    if (response == true) {
+      service.get("/api/music/list").then((r) => {
+        if (r.code == 200) {
+          tableData.value = r.data
+        }
+      }).catch(function (err) {
+        toast("获取音乐失败" + err)
+      });
+    }
+  }).catch(err => {
+    toast("获取登录信息失败")
+  })
+
 })
 
 let percentage = ref(0)
 
 function onPercentChange(p: number) {
   ap.seek(p / 100 * ap.audio.duration)
-  toSync(false)
 }
 
 function getFormatToolTip(v: number) {
@@ -132,7 +142,6 @@ const handlePoi = (index: number, row) => {
     } else {
       toast(r.msg)
     }
-    toSyncAdd("ad", -1, r.data)
   }).catch(e => {
     console.log(e)
   });
@@ -151,7 +160,6 @@ const handleRmp = (index: number, row) => {
     } else {
       toast(r.msg)
     }
-    toSyncAdd("rm", index)
   }).catch(e => {
     console.log(e)
   });
@@ -164,22 +172,6 @@ const tableData = ref([
     artists: '歌手示例名'
   }
 ])
-
-onMounted(() => {
-  service.get("/user/login_state").then(response => {
-    if (response == true) {
-      service.get("/api/music/list").then((r) => {
-        if (r.code == 200) {
-          tableData.value = r.data
-        }
-      }).catch(function (err) {
-        toast("获取音乐失败" + err)
-      });
-    }
-  }).catch(err => {
-    toast("获取登录信息失败")
-  })
-})
 
 function onSearch() {
   if (search.value.length == 0) {
@@ -204,8 +196,29 @@ function onSearch() {
   }
 }
 
+//切换歌单
 let toggleListLoading = ref(false)
 let listType: String = "163"
+
+const handleSuccess = (data: Array) => {
+  data.filter((item) => {
+    item.url = item.url + "&type=" + type;
+  });
+  ap.list.clear();
+  ap.list.add(data);
+  listType = type;
+  isPri = type === "pri";
+  if (tips) toast("切换成功", "success");
+};
+
+const handleError = (error: String) => {
+  toast(`切换失败: ${error}`, "error");
+};
+
+const handleFinally = () => {
+  toggleListLoading.value = false;
+  dialogVisibleList.value = false;
+};
 
 function toggleList(type: String = "pri", tips: Boolean = true) {
   if (lived.value && !livemd.value) return;
@@ -221,27 +234,6 @@ function toggleList(type: String = "pri", tips: Boolean = true) {
     return;
   }
   toggleListLoading.value = true;
-
-  const handleSuccess = (data: Array) => {
-    data.filter((item) => {
-      item.url = item.url + "&type=" + type;
-    });
-    ap.list.clear();
-    ap.list.add(data);
-    listType = type;
-    isPri = type === "pri";
-    toSync(true);
-    if (tips) toast("切换成功", "success");
-  };
-
-  const handleError = (error: String) => {
-    toast(`切换失败: ${error}`, "error");
-  };
-
-  const handleFinally = () => {
-    toggleListLoading.value = false;
-    dialogVisibleList.value = false;
-  };
 
   if (type === "pri") {
     service.get("/api/music/list").then((r) => {
@@ -259,8 +251,6 @@ function toggleList(type: String = "pri", tips: Boolean = true) {
 }
 
 
-//切换个人与默认的控制
-let ttk = ref(false)
 
 //处于一起听
 let lived = ref(false)
@@ -268,130 +258,12 @@ let lived = ref(false)
 let livemd = ref(false)
 let roomdata = ref({})
 
-let wss: WebSocket = null
-
 function createRoom() {
-  if (!isPri) {
-    toast("请先切换到个人歌单")
-    return
-  } else {
-    service.get("/api/music/live").then((r) => {
-      if (r.code == 200) {
-        toast("创建成功", "success")
-        roomdata.value = r.data
-        wss = new WebSocket(r.ws)
-        wss.onerror = function () {
-          console.log("ws连接发生错误");
-        };
-        wss.onopen = function () {
-          lived.value = true
-          livemd.value = true
-          console.log("ws连接成功");
-          wss.send(JSON.stringify({
-            token: getToken(),
-            action: "init",
-            data: {
-              "index": ap.list.index,
-              "secs": Number(ap.audio.currentTime.toFixed(0)),
-              "songs": ap.list.audios
-            }
-          }))
-          ap.on("play", function () {
-            toSync(false)
-          })
-        }
-        wss.onmessage = function (event) {
-          let data = JSON.parse(event.data)
-          if (data.action == "update") {
-            roomdata.value = data.data
-            setTimeout(() => {
-              toSync(false)
-            }, 2000)
-          }
-        }
-        wss.onclose = function () {
-          console.log("ws连接关闭");
-          lived.value = false
-          livemd.value = false
-          exitRoom()
-        }
-      } else {
-        toast(r.msg)
-      }
-    }).catch(e => {
-      console.log(e)
-    });
-  }
+  toast("稍后更新,敬请期待;")
 }
 
 function exitRoom() {
-  if (lived) {
-    if (wss)
-      wss.close()
-    lived.value = false
-    livemd.value = false
-    toast("退出成功", "success")
-  }
-}
-
-ap.on('listswitch', (index) => {
-  toSync(false, index.index)
-});
-
-let syncSeek = -1;
-
-ap.on('loadeddata', function () {
-  if (lived.value) {
-    if (syncSeek > -1) {
-      ap.seek(syncSeek)
-      syncSeek = -1
-    }
-  }
-});
-
-function toSync(all: Boolean = false, index: number = -1) {
-  if (lived.value) {
-    if (livemd.value) {
-      if (all) {
-        wss.send(JSON.stringify({
-          token: getToken(),
-          action: "sync",
-          data: {
-            "state": ap.audio.paused ? 1 : 0,
-            "index": index > -1 ? index : ap.list.index,
-            "secs": Number(ap.audio.currentTime.toFixed(0)),
-            "songs": ap.list.audios
-          }
-        }))
-      } else {
-        wss.send(JSON.stringify({
-          token: getToken(),
-          action: "sync",
-          data: {
-            "state": ap.audio.paused ? 1 : 0,
-            "index": index > -1 ? index : ap.list.index,
-            "secs": Number(ap.audio.currentTime.toFixed(0))
-          }
-        }))
-      }
-    }
-  }
-}
-
-function toSyncAdd(op: string, index: number = -1, data: any = null) {
-  if (lived.value) {
-    if (livemd.value) {
-      wss.send(JSON.stringify({
-        token: getToken(),
-        action: "add",
-        data: {
-          "op": op,
-          "index": index,
-          "data": data
-        }
-      }))
-    }
-  }
+  
 }
 
 let rooms = ref([])
@@ -408,86 +280,9 @@ function loadRooms() {
   });
 }
 
-const joinRoom = (index: number, row) => {
-  service.get(`/api/music/live/join?id=${row.uid}`).then((r) => {
-        if (r.code == 200) {
-          toast("加入成功", "success")
-          dialogVisibleRoom.value = false
-          wss = new WebSocket(r.ws)
-          wss.onerror = function () {
-            console.log("ws连接发生错误");
-          };
-          wss.onopen = function () {
-            console.log("ws连接成功");
-            lived.value = true
-            wss.send(JSON.stringify({
-              token: getToken(),
-              action: "auth",
-              data: ""
-            }))
-          }
-          wss.onmessage = function (event) {
-            let data = JSON.parse(event.data)
-            if (data.action == "set") {
-              ap.list.clear()
-              ap.list.add(data.songs)
-              if (data.index != ap.list.index)
-                ap.list.switch(data.index)
-              if (data.state == 0) {
-                if (ap.audio.paused)
-                  ap.play()
-              } else {
-                if (!ap.audio.paused)
-                  ap.pause()
-              }
-              if (ap.audio.played)
-                ap.seek(data.secs)
-              else
-                syncSeek = data.secs;
-            } else if (data.action == "sync") {
-              if (data.songs) {
-                ap.list.clear()
-                ap.list.add(data.songs)
-              }
-              if (data.index != ap.list.index)
-                ap.list.switch(data.index)
-              if (data.state == 0) {
-                if (ap.audio.paused)
-                  ap.play()
-              } else {
-                if (!ap.audio.paused)
-                  ap.pause()
-              }
-              if (ap.audio.played)
-                ap.seek(data.secs)
-              else
-                syncSeek = data.secs;
-            } else if (data.action == "update") {
-              roomdata.value = data.data
-            } else if (data.action == "add") {
-              if (data.op == "ad") {
-                ap.list.add(data.data)
-              } else if (data.op == "rm") {
-                ap.list.remove(data.index)
-              }
-            }
-          }
-          wss.onclose = function () {
-            console.log("ws连接关闭");
-            lived.value = false
-            livemd.value = false
-            exitRoom()
-          }
-        } else {
-          toast(r.msg)
-        }
-        toSync(true)
-      }
-  ).catch(e => {
-    console.log(e)
-  });
+const joinRoom = () => {
+   toast("嗯?你是怎么做到的?")
 }
-
 </script>
 
 <template>
@@ -513,7 +308,7 @@ const joinRoom = (index: number, row) => {
 
     <div class="container row min-h-screen ">
       <div class="row align-self-start text-center">
-        <div class="col-lg-4 col-md-12" @click="ap.toggle();toSync(false)" style="margin-top: 100px;">
+        <div class="col-lg-4 col-md-12" @click="ap.toggle();" style="margin-top: 100px;">
           <el-avatar class="avatar-img" style="width: 85%;height: auto" id="icon-img" :src="cover0"/>
         </div>
         <div class="col-lg-7 col-md-12" style="margin-top: 4%;">
@@ -529,7 +324,7 @@ const joinRoom = (index: number, row) => {
                   effect="dark"
                   :content="getTimeMs((e.timestamp/1000).toFixed(0))"
                   placement="left-start">
-                <h4 :class="'l-'+i" v-on:click="ap.seek(e.timestamp/1000);toSync(false)"> {{ e.content }}</h4>
+                <h4 :class="'l-'+i" v-on:click="ap.seek(e.timestamp/1000);"> {{ e.content }}</h4>
               </el-tooltip>
             </div>
           </div>
@@ -546,9 +341,9 @@ const joinRoom = (index: number, row) => {
           </span>
         </div>
         <div style="width: 100%" class="mb-4 col-12 ml-5 text-center">
-          <el-button @click="ap.skipBack();toSync(false)" type="info" round plain>上一曲</el-button>
-          <el-button @click="ap.toggle();toSync(false)" type="info" round plain>播放/暂停</el-button>
-          <el-button @click="ap.skipForward();toSync(false)" type="info" round plain>下一曲</el-button>
+          <el-button @click="ap.skipBack();" type="info" round plain>上一曲</el-button>
+          <el-button @click="ap.toggle();" type="info" round plain>播放/暂停</el-button>
+          <el-button @click="ap.skipForward();" type="info" round plain>下一曲</el-button>
         </div>
         <div class="slider-demo-block col-12 ml-5 text-center">
           <span class="demonstration">{{
@@ -595,7 +390,7 @@ const joinRoom = (index: number, row) => {
             <div>操作</div>
           </template>
           <template #default="scope">
-            <el-button size="small" type="primary" @click="joinRoom(scope.$index, scope.row)">加入</el-button>
+            <el-button size="small" type="primary" @click="joinRoom()">加入</el-button>
           </template>
         </el-table-column>
       </el-table>
