@@ -48,3 +48,15 @@ export function getTimeMs(t: number) {
     }
     return "0" + min + ":" + (t < 10 ? "0" + t : t)
 }
+
+export function copyTextElement(eid: string) {
+    const range = document.createRange();
+    range.selectNode(document.querySelector(eid));
+    const selection: Selection | null = window.getSelection();
+    if (selection != null) {
+        if (selection.rangeCount > 0) selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand('Copy');
+        alert('文本已成功复制到剪贴板');
+    }
+}

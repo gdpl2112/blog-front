@@ -2,6 +2,7 @@
 import {onMounted, ref} from "vue";
 import service from "@/axios";
 import $ from 'jquery'
+import {copyTextElement} from '@/utils/utils'
 
 let list = ref([])
 
@@ -15,13 +16,8 @@ service.get("/api/list").then(function (response) {
 })
 
 function copyTextToClipboard(id: number) {
-  const range = document.createRange();
-  range.selectNode(document.querySelector("#input-" + id));
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) selection.removeAllRanges();
-  selection.addRange(range);
-  document.execCommand('Copy');
-  alert('文本已成功复制到剪贴板');
+  const eid = "#input-" + id
+  copyTextElement(eid)
 }
 
 function inputChange(e: Event, s: string) {
@@ -111,6 +107,7 @@ onMounted(() => {
 .api-author-tag {
   transition: background-color 0.3s ease;
 }
+
 /* 添加卡片悬停效果 */
 .api-card-container {
   transition: transform 0.3s ease, box-shadow 0.3s ease;

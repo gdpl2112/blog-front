@@ -38,6 +38,19 @@
 </style>
 <template>
   <div class="container" style="width: 90%;">
+    <hr>
+    <div class="text-center">
+      <div style="font-size: 14px;margin-top: -12px">每日一言</div>
+      <div id="dayyan_div" style="color: rgba(46,46,46,0.95);font-weight: bold;margin-top: 3px">
+        “ {{ dayyan.line }} ”
+        &nbsp;&nbsp;&nbsp;
+        <el-icon v-on:click="copyTextElement('#dayyan_div')">
+          <CopyDocument/>
+        </el-icon>
+      </div>
+      <div style="color: rgba(50,12,12,0.95);font-size: 15px;margin-top: 3px">-- {{dayyan.from}} --</div>
+    </div>
+    <hr>
     <div v-on:click="routerTo(d.id)" v-for="d in data">
       <div class="row shadow-lg p-3 mb-5 rounded notice-div0" style="margin-top: 10px;">
         <div class="col-3 align-middle" style="display: inline-block;">
@@ -87,8 +100,9 @@
 <script lang="ts" setup>
 import service from "@/axios";
 import {onMounted, ref} from "vue";
-import {formatMsgTime} from "@/utils/utils";
+import {copyTextElement, formatMsgTime} from "@/utils/utils";
 import router from "@/router";
+import {CopyDocument} from "@element-plus/icons-vue";
 
 let rawdata = ref({current: 1, pages: 1, records: []})
 let data = ref([])
@@ -107,8 +121,17 @@ function showPageDatas(p: number) {
   }).catch(function (err) {
     alert(err)
   })
-
 }
+
+let dayyan = ref({line: "每日一言内容",from: "来源"})
+
+onMounted(()=>{
+  service.get("/api/get/dayYan").then(function (response) {
+    dayyan.value = response
+  }).catch(function (err) {
+    alert(err)
+  })
+})
 
 function getF(t: number) {
   return formatMsgTime(t)
