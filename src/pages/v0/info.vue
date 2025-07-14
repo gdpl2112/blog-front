@@ -65,7 +65,7 @@ td {
            :model="qqValidateForm"
            label-width="auto"
            class="demo-ruleForm">
-    tips: 仅当github登录后 qid为空时才可绑定
+    tips: 绑定QQ号仅为了方便登录账号 无其他作用
     <el-form-item
         label="QQ"
         :rules="[

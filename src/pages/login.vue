@@ -44,7 +44,8 @@
           <el-row class="w-[150px] mb-2">
             <el-text truncated>第三方登录</el-text>
           </el-row>
-          <el-button :loading="loading" round class="w-[150px] bg-zinc-800" type="primary" @click="gotoGithub" style="margin: 5px;">
+          <el-button :loading="loading" round class="w-[150px] bg-zinc-800" type="primary" @click="gotoGithub"
+                     style="margin: 5px;">
             <img alt="github" loading="lazy" src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/github.png"
                  style="opacity: 0.86; max-width: 22px;">
             GITHUB
@@ -80,7 +81,6 @@ import {toast} from "@/utils/utils";
 import Cookie from "js-cookie"
 import service from "@/axios";
 import {ElLoading} from "element-plus";
-import QC from "@/utils/qc_jssdk"
 
 const form = reactive({
   username: '',
@@ -142,7 +142,7 @@ const gotoGithub = () => {
 const gotoQq = () => {
   window.qc.Login.showPopup({
     appId: "102801348",
-    redirectURI: "https://kloping.top/login"
+    redirectURI: "https://kloping.top/login?t=qq"
   });
 }
 
@@ -151,10 +151,15 @@ const gotoReg = () => {
   router.push("/reg")
 }
 
-function loginGithub() {
+function loginAuth() {
   const url = document.location.toString()
   const n = url.indexOf("?");
   const pu = url.substring(n)
+  const armap = new Map()
+  pu.split("&").forEach(function (kv) {
+    const kvn = kv.split("=")
+    armap.set(kvn[0], kvn[1])
+  })
   if (n > 0) {
     loading.value = true
     const loadingf = ElLoading.service({
@@ -162,27 +167,49 @@ function loginGithub() {
       text: 'Loading',
       background: 'rgba(0, 0, 0, 0.7)',
     })
-    service.get("/auth/github/callback" + pu).then(res => {
-      if (res.code === 200) {
+    const t = armap.get("t")
+    if (t === "qq") {
+      service.get("/auth/qq/login?access_token=" + armap.get("access_token")).then(res => {
+        if (res.code === 200) {
+          loadingf.close()
+          toast("登录成功", "success")
+          Cookie.set("token", res.token)
+          router.push("/")
+        } else {
+          toast(res.msg)
+        }
+      }).catch(err => {
+        console.log(err)
+        toast("登录失败:" + err)
+      }).finally(() => {
         loadingf.close()
-        toast("登录成功", "success")
-        Cookie.set("token", res.token)
-        router.push("/")
-      } else {
-        toast(res.msg)
-      }
-    }).catch(err => {
-      console.log(err)
-      toast("登录失败:" + err)
-    }).finally(() => {
-      loadingf.close()
-      loading.value = false
-    })
+        loading.value = false
+      })
+    } else {
+      // 无p值 github
+      service.get("/auth/github/callback" + pu).then(res => {
+        if (res.code === 200) {
+          loadingf.close()
+          toast("登录成功", "success")
+          Cookie.set("token", res.token)
+          router.push("/")
+        } else {
+          toast(res.msg)
+        }
+      }).catch(err => {
+        console.log(err)
+        toast("登录失败:" + err)
+      }).finally(() => {
+        loadingf.close()
+        loading.value = false
+      })
+    }
   }
+
 }
 
 onMounted(() => {
-  loginGithub()
+  loginAuth()
 })
 
 onMounted(() => {
