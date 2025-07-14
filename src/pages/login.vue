@@ -39,19 +39,33 @@
           <el-button round class="w-[78px] bg-cyan-200" @click="resetForm()">重置</el-button>
         </el-form-item>
 
-        第三方登录:
+
         <el-form-item>
-          <el-button :loading="loading" round class="w-[240px] bg-zinc-800" type="primary" @click="gotoGithub">
+          <el-row class="w-[150px] mb-2">
+            <el-text truncated>第三方登录</el-text>
+          </el-row>
+          <el-button :loading="loading" round class="w-[150px] bg-zinc-800" type="primary" @click="gotoGithub" style="margin: 5px;">
+            <img alt="github" loading="lazy" src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/github.png"
+                 style="opacity: 0.86; max-width: 22px;">
             GITHUB
           </el-button>
+          <el-button :loading="loading" round class="w-[150px] bg-zinc-50" type="primary" @click="gotoQq"
+                     style="color: #3e2929;margin-left: 6px;margin-top: 5px">
+            <img alt="qq" loading="lazy" src="/tencentqq-icon.png"
+                 style="opacity: 0.86; max-width: 22px;max-height: 22px">
+            QQ账号登录
+          </el-button>
+
         </el-form-item>
-        去注册:
+
         <el-form-item>
+          <el-row class="w-[150px] mb-2">
+            <el-text truncated>注册</el-text>
+          </el-row>
           <el-button :loading="loading" round class="w-[160px] bg-sky-500" type="primary" @click="gotoReg">
             邮箱注册
           </el-button>
         </el-form-item>
-
       </el-form>
     </el-col>
   </el-row>
@@ -123,6 +137,16 @@ const gotoGithub = () => {
     toast("获得授权登录链接失败" + err, "danger")
   });
 }
+
+const gotoQq = () => {
+  service.get("/auth/github/login?now=false").then(res => {
+    document.location = res.url
+  }).catch(err => {
+    toast("获得授权登录链接失败" + err, "danger")
+  });
+}
+
+
 const gotoReg = () => {
   router.push("/reg")
 }
