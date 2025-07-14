@@ -141,7 +141,7 @@ const gotoGithub = () => {
 
 const gotoQq = () => {
   window.qc.Login.showPopup({
-    appId: "102801254",
+    appId: "102801348",
     redirectURI: "https://kloping.top/login"
   });
 }
