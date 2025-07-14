@@ -80,6 +80,7 @@ import {toast} from "@/utils/utils";
 import Cookie from "js-cookie"
 import service from "@/axios";
 import {ElLoading} from "element-plus";
+import QC from "@/utils/qc_jssdk"
 
 const form = reactive({
   username: '',
@@ -139,10 +140,9 @@ const gotoGithub = () => {
 }
 
 const gotoQq = () => {
-  service.get("/auth/github/login?now=false").then(res => {
-    document.location = res.url
-  }).catch(err => {
-    toast("获得授权登录链接失败" + err, "danger")
+  window.qc.Login.showPopup({
+    appId: "102801254",
+    redirectURI: "https://kloping.top/login"
   });
 }
 
