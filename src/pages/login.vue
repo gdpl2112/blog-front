@@ -154,11 +154,13 @@ const gotoReg = () => {
 function loginAuth() {
   const url = document.location.toString()
   const n = url.indexOf("?");
-  const pu = url.substring(n)
+  const pu = url.substring(n + 1)
   const armap = new Map()
   pu.split("&").forEach(function (kv) {
     const kvn = kv.split("=")
-    armap.set(kvn[0], kvn[1])
+    let key0 = kvn[0];
+    if (key0.startsWith("#")) key0 = key0.substring(1)
+    armap.set(key0, kvn[1])
   })
   if (n > 0) {
     loading.value = true
@@ -185,9 +187,26 @@ function loginAuth() {
         loadingf.close()
         loading.value = false
       })
+    } else if (t === "qqb") {
+      service.get("/auth/qq/bind?access_token=" + armap.get("access_token")).then(res => {
+        if (res.code === 200) {
+          loadingf.close()
+          toast("绑定成功", "success")
+          Cookie.set("token", res.token)
+          router.push("/v0")
+        } else {
+          toast(res.msg)
+        }
+      }).catch(err => {
+        console.log(err)
+        toast("绑定失败:" + err)
+      }).finally(() => {
+        loadingf.close()
+        loading.value = false
+      })
     } else {
       // 无p值 github
-      service.get("/auth/github/callback" + pu).then(res => {
+      service.get("/auth/github/callback?" + pu).then(res => {
         if (res.code === 200) {
           loadingf.close()
           toast("登录成功", "success")

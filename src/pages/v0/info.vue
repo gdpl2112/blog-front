@@ -17,7 +17,8 @@ td {
       </el-upload>
     </el-descriptions-item>
 
-    <el-descriptions-item label="昵称(唯一)">{{ user.nickname }}</el-descriptions-item>
+    <el-descriptions-item label="昵称(唯一)">{{ user.userId }}</el-descriptions-item>
+    <el-descriptions-item label="用户昵称">{{ user.nickname }}</el-descriptions-item>
     <el-descriptions-item label="邮箱">{{ user.eid }}</el-descriptions-item>
     <el-descriptions-item label="QQ">{{ user.qid }}</el-descriptions-item>
     <el-descriptions-item label="注册方式">
@@ -30,7 +31,7 @@ td {
   <el-form v-show="user.eid===''" ref="eidFormRef" style="max-width: 400px"
            :model="edvfm"
            label-width="auto" class="demo-dynamic mt-2">
-    tips: 仅当github登录后 邮箱空时才可绑定
+    tips: 邮箱空时可绑定
     <el-form-item prop="email" label="绑定邮箱"
                   :rules="[
         {
@@ -59,7 +60,18 @@ td {
     </el-form-item>
   </el-form>
 
-  <el-form v-show="user.qid==0"
+  <el-form v-show="user.qoId===''" style="max-width: 400px"
+           label-width="auto" class="demo-dynamic mt-2">
+    tips: 若账号已经注册则将覆盖!!!
+    <el-button round class="w-[150px] bg-zinc-50" type="primary" @click="gotoQqb"
+               style="color: #3e2929;margin-left: 6px;margin-top: 5px">
+      <img alt="qq" loading="lazy" src="/tencentqq-icon.png"
+           style="opacity: 0.86; max-width: 22px;max-height: 22px">
+      QQ账号登录
+    </el-button>
+  </el-form>
+
+  <el-form v-show="user.qid<=0"
            ref="qqFormRef"
            style="max-width: 600px"
            :model="qqValidateForm"
@@ -147,6 +159,13 @@ import {reactive, ref} from "vue";
 import type {FormInstance, FormRules, UploadProps} from "element-plus";
 import {Lock} from '@element-plus/icons-vue'
 
+const gotoQqb = () => {
+  window.qc.Login.showPopup({
+    appId: "102801348",
+    redirectURI: "https://kloping.top/login?t=qqb"
+  });
+}
+
 const user = ref({})
 service.get("/auth/info").then((res) => {
   user.value = res
@@ -154,14 +173,15 @@ service.get("/auth/info").then((res) => {
   toast("获取登录信息失败,请尝试重新登录")
 })
 
-const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {}
+const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {
+}
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
     toast('仅支持上传jpg或png格式图片')
   } else if (rawFile.size / 1024 / 1024 > 3) {
     toast('图片大小超过3MB!')
-  }else{
+  } else {
     const formData = new FormData();
     formData.append('file', rawFile);
     service.post("/user/upload_head_img", formData).then((res) => {
@@ -295,7 +315,7 @@ const submitFormPass = (formEl: FormInstance | undefined) => {
           resetFormPass(formEl)
         } else toast(res.msg)
       }).catch((err) => {
-            toast(err, "warning")
+        toast(err, "warning")
       });
     } else {
       toast("请确保所有信息填写正确")
