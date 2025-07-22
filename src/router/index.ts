@@ -45,7 +45,7 @@ const routes = [{
     path: '/room',
     component: musicroom,
     meta: {
-        title: '音乐厅'
+        title: '听音乐'
     }
 }, {
     path: '/tem',
