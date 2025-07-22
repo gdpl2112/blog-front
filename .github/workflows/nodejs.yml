@@ -37,4 +37,4 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           source: "./dist"
-          target: "/root/projects/website0/target/classes"
+          target: "/root/projects/blog-front"
