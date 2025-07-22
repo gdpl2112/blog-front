@@ -285,7 +285,7 @@ const joinRoom = () => {
 </script>
 
 <template>
-  <el-row class="min-h-screen bg-opacity-85 bg-zinc-500" id="froom">
+  <el-row class="min-h-screen bg-opacity-75 bg-zinc-500" id="froom">
     <div style="position: absolute; left: 2%;top: 3%;">
 
       <el-button v-if="!lived||livemd" type="info" plain @click="dialogVisible0 = true">
