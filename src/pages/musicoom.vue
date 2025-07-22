@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 import {onMounted, reactive, ref} from "vue";
-import service, {getToken} from "@/axios";
+import service from "@/axios";
 import {getTimeMs, toast} from "@/utils/utils";
 import parseLyrics, {getNearst} from "@/api/lyric";
 
@@ -200,7 +200,7 @@ function onSearch() {
 let toggleListLoading = ref(false)
 let listType: String = "163"
 
-const handleSuccess = (data: Array) => {
+const handleSuccess = (data: Array, type: String) => {
   data.filter((item) => {
     item.url = item.url + "&type=" + type;
   });
@@ -208,7 +208,7 @@ const handleSuccess = (data: Array) => {
   ap.list.add(data);
   listType = type;
   isPri = type === "pri";
-  if (tips) toast("切换成功", "success");
+  toast("切换成功", "success");
 };
 
 const handleError = (error: String) => {
@@ -238,18 +238,17 @@ function toggleList(type: String = "pri", tips: Boolean = true) {
   if (type === "pri") {
     service.get("/api/music/list").then((r) => {
       if (r.code === 200) {
-        handleSuccess(r.data);
+        handleSuccess(r.data, type);
       } else {
         handleError(r.msg);
       }
     }).catch(handleError).finally(handleFinally);
   } else {
     service.get(`/api/music/get-music-list?type=${type}`).then((response) => {
-      handleSuccess(response);
+      handleSuccess(response, type);
     }).catch(handleError).finally(handleFinally);
   }
 }
-
 
 
 //处于一起听
@@ -263,7 +262,7 @@ function createRoom() {
 }
 
 function exitRoom() {
-  
+
 }
 
 let rooms = ref([])
@@ -281,7 +280,7 @@ function loadRooms() {
 }
 
 const joinRoom = () => {
-   toast("嗯?你是怎么做到的?")
+  toast("嗯?你是怎么做到的?")
 }
 </script>
 
