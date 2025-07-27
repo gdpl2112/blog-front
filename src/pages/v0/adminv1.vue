@@ -27,11 +27,14 @@
   </div>
   <hr>
   <div>
-    <span>添加一个: </span>
+    <span style="margin-top: 1px">添加一个: </span>
     <el-input v-model="vdate" style="width: 97px" placeholder="日期"/>
-    <el-input v-model="vline" style="width: 320px" placeholder="内容"/>
-    <el-input v-model="vfrom" style="width: 88px" placeholder="来源"/>
-      <el-button v-on:click="add" type="primary" plain>添加</el-button>
+    <el-input v-model="vline" style="width: 320px"
+        :autosize="{ minRows: 1, maxRows: 4 }" type="textarea" placeholder="内容"/>
+    <el-input v-model="vfrom" style="width: 100px"
+        :autosize="{ minRows: 1, maxRows: 4 }" type="textarea" placeholder="来源"/>
+    <el-button v-on:click="add" type="primary" plain>添加</el-button>
+    <el-button v-on:click="gen" type="success" plain>生成一个</el-button>
   </div>
   <hr>
 </template>
@@ -88,6 +91,14 @@ function removed(e: any) {
 let vdate = ref("")
 let vline = ref("")
 let vfrom = ref("")
+
+function gen() {
+  service.get("/adm/yiyan/gen").then((r) => {
+    vdate.value = r.date
+    vline.value = r.line
+    vfrom.value = r.from
+  });
+}
 
 function add() {
   service.post("/adm/yiyan/add", {
