@@ -34,6 +34,9 @@ export default defineConfig({
             }, '/user': {
                 target: baseUrl,
                 changeOrigin: false,
+            }, '/adm': {
+                target: baseUrl,
+                changeOrigin: false,
             }, '/auth': {
                 target: baseUrl,
                 changeOrigin: false,

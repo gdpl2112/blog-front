@@ -1,10 +1,14 @@
 <template>
   <div>
+    <hr>
+    <center><h2>帖子管理</h2></center>
+
     <div>
-      <el-divider content-position="left"> 可见/置顶指数/信息</el-divider>
-      <el-divider content-position="left">可见 0可见 1不可见 2私有</el-divider>
-      <el-divider content-position="left">置顶指数 越高越置顶</el-divider>
-      <el-divider content-position="left">标题-作者名-日期-内容类型</el-divider>
+      <el-divider content-position="left">
+        可见/置顶指数/信息 <br>
+        标题-作者名-日期-内容类型
+      </el-divider>
+      <el-divider content-position="right">可见 0可见 1不可见 2私有 <br> 置顶指数 越高越置顶</el-divider>
     </div>
 
     <ul class="list-group bg-opacity-50">
@@ -23,7 +27,7 @@
     </ul>
 
     <el-pagination
-        size="small"
+        size="default"
         background
         layout="prev, pager, next"
         :total="nr.total"
@@ -32,6 +36,7 @@
         @update:current-page="loadData"
         class="mt-4"/>
   </div>
+  <hr>
 </template>
 
 <script setup lang="ts">
@@ -46,7 +51,7 @@ const nr = ref({})
 let notices = ref([])
 
 function loadData(n: number) {
-  service.get("/notice/adm/list?ps=7&p=" + n).then((r) => {
+  service.get("/adm/notice/list?ps=7&p=" + n).then((r) => {
     nr.value = r
     notices.value = r.records
     p.value = r.current
@@ -62,7 +67,7 @@ onMounted(() => {
 
 function toSort(e: any) {
   e.svl = true
-  service.get("/notice/adm/sort?id=" + e.id).then((r) => {
+  service.get("/adm/notice/sort?id=" + e.id).then((r) => {
     e.svl = false
     if (r.code == 200) {
       e.sort = r.sort;
@@ -75,7 +80,7 @@ function toSort(e: any) {
 
 function toVs(e: any) {
   e.svl = true
-  service.get("/notice/adm/state?id=" + e.id).then((r) => {
+  service.get("/adm/notice/state?id=" + e.id).then((r) => {
     e.svl = false
     if (r.code == 200) {
       e.state = r.state;

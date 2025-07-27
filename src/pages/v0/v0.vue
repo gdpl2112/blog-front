@@ -52,9 +52,18 @@
             <el-icon>
               <setting/>
             </el-icon>
-            <span>管理</span>
+            <span>帖子管理</span>
           </el-menu-item>
         </RouterLink>
+        <RouterLink v-if="roles.includes('admin')" to="/v0/adminv1" style="text-decoration: none;">
+          <el-menu-item index="7">
+            <el-icon>
+              <setting/>
+            </el-icon>
+            <span>一言管理</span>
+          </el-menu-item>
+        </RouterLink>
+
       </el-menu>
     </el-col>
     <el-col :lg="1" :md="0">

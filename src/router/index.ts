@@ -18,6 +18,7 @@ import articles from '@/pages/v0/articles.vue'
 import aox from '@/pages/v0/aox.vue'
 import pnote from '@/pages/v0/pnote.vue'
 import adminv0 from '@/pages/v0/adminv0.vue'
+import adminv1 from '@/pages/v0/adminv1.vue'
 
 
 const routes = [{
@@ -83,6 +84,9 @@ const routes = [{
     },{
         path: 'adminv0',
         component: adminv0
+    },{
+        path: 'adminv1',
+        component: adminv1
     }
     ]
 },{
