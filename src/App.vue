@@ -1,13 +1,13 @@
 <style>
 body {
   margin: 0;
-  background: #333 url("/f/pc.jpg") no-repeat fixed center/cover;
+  background: #333 url("https://tc.z.wiki/autoupload/f/YcWxd1f3wXnQJ6FceNyJunzy4cewqsf7CyCHx61S1VGyl5f0KlZfm6UsKj-HyTuv/20250803/5x7I/2560X1440/pc.jpg") no-repeat fixed center/cover;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   body {
-    background-image: url("/f/pe.jpg");
+    background-image: url("https://tc.z.wiki/autoupload/f/YcWxd1f3wXnQJ6FceNyJunzy4cewqsf7CyCHx61S1VGyl5f0KlZfm6UsKj-HyTuv/20250803/Kfje/608X1080/pe.jpg");
     background-size: 100% auto;
   }
 }
