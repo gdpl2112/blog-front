@@ -7,7 +7,7 @@ body {
 
 @media (max-width: 768px) {
   body {
-    background-image: url("https://tc.z.wiki/autoupload/f/YcWxd1f3wXnQJ6FceNyJunzy4cewqsf7CyCHx61S1VGyl5f0KlZfm6UsKj-HyTuv/20250803/Kfje/608X1080/pe.jpg");
+    background-image: url("https://pvzh.giantapp.cn//upload/c06323ff2c0e43fa95e69cb90d9126d7/wallpapers/6892243892d000f81702a4bf/1754407979407_vtH0M.jpg");
     background-size: 100% auto;
   }
 }
@@ -74,7 +74,7 @@ audio {
   <div class="app">
     <nav id="main-nav" class="z-999 navbar navbar-expand-lg navbar-light">
       <RouterLink class="navbar-brand navbar"
-                  style="align-items: center;display: flex;color: #b845e7;text-decoration: none;" to="/">
+                  style="align-items: center;display: flex;color: #ff4dc3;text-decoration: none;" to="/">
         <img class="d-inline-block align-text-top" src="/favicon.ico"
              alt="kloping`s blog"
              style="opacity: 0.86; border-radius: 999px;max-width: 50px;margin-right: 15px;margin-left: 20px">
