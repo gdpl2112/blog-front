@@ -108,11 +108,13 @@ onMounted(() => {
 let percentage = ref(0)
 
 function onPercentChange(p: number) {
-  ap.seek(p / 100 * ap.audio.duration)
+  const t = (p / 100 * ap.audio.duration) as number
+  ap.seek(t)
 }
 
 function getFormatToolTip(v: number) {
-  return getTimeMs((v / 100 * ap.audio.duration).toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
+  v = (v / 100 * ap.audio.duration)
+  return getTimeMs(Number(v.toFixed(0))) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
 }
 
 const dialogVisible0 = ref(false)
@@ -202,7 +204,7 @@ let listType: String = "163"
 
 const handleSuccess = (data: Array, type: String) => {
   data.filter((item) => {
-    item.url = item.url + "&type=" + type;
+    item.url = item.url + "&px=false&type=" + type;
   });
   ap.list.clear();
   ap.list.add(data);
