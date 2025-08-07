@@ -6,12 +6,44 @@ on:
   pull_request:
     branches: [ "master" ]
 
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        node-version: [ 20.x ]
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Use Node.js ${{ matrix.node-version }}
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: ${{ matrix.node-version }}
+#          cache: 'npm'
+#      - run: npm install
+#      - run: npm run build
+#
+#      - name: Create ZIP Archive
+#        run: |
+#          zip -r build-artifact.zip ./dist   # 压缩 dist 目录
+#          echo "ZIP_PATH=$(pwd)/build-artifact.zip" >> $GITHUB_ENV  # 存储 ZIP 路径
+#
+#      #  替换部署方式：上传 ZIP 文件
+#      - name: Upload Build Artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: build-artifact   # 下载时显示的 ZIP 文件名
+#          path: ${{ env.ZIP_PATH }}  # 引用上一步生成的 ZIP 路径
+#          retention-days: 7      # 自动清理过期文件（可选）
+
 jobs:
   build:
+
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        node-version: [ 20.x ]
+        node-version: [20.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,15 +55,12 @@ jobs:
       - run: npm install
       - run: npm run build
 
-      - name: Create ZIP Archive
-        run: |
-          zip -r build-artifact.zip ./dist   # 压缩 dist 目录
-          echo "ZIP_PATH=$(pwd)/build-artifact.zip" >> $GITHUB_ENV  # 存储 ZIP 路径
-
-      #  替换部署方式：上传 ZIP 文件
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+      - name: Deploy to Server
+        uses: appleboy/scp-action@master
         with:
-          name: build-artifact   # 下载时显示的 ZIP 文件名
-          path: ${{ env.ZIP_PATH }}  # 引用上一步生成的 ZIP 路径
-          retention-days: 7      # 自动清理过期文件（可选）
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "./dist"
+          target: "/root/projects/blog-front"
