@@ -44,8 +44,9 @@ onMounted(() => {
   </div>
   <div class="container">
     <div class="row" id="api_list" style="background: rgba(239,239,239,0.75);border-radius: 10px">
+      <hr class="mt-3">
       <center><p> 接口仅用于娱乐 禁止用于非法用途</p></center>
-      <hr class="mt-3 mb-3">
+      <hr class="mb-3">
       <div class="col-2"></div>
       <div class="col-8 mb-3">
         <form class="d-flex">
