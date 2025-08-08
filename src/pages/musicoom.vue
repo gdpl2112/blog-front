@@ -204,7 +204,7 @@ let listType: String = "163"
 
 const handleSuccess = (data: Array, type: String) => {
   data.filter((item) => {
-    item.url = item.url + "&px=false&type=" + type;
+    item.url = item.url + "&type=" + type;
   });
   ap.list.clear();
   ap.list.add(data);
