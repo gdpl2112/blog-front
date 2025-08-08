@@ -38,15 +38,14 @@ onMounted(() => {
 })
 </script>
 <template>
-  <center><h5 style="background: rgba(254,253,255,0.45)"> 接口仅用于娱乐 禁止用于非法用途 </h5></center>
-  <div class="alert alert-danger opacity-75" aria-current="true">
-    <h4>
-      <center>API列表</center>
-    </h4>
+  <div class="alert alert-danger opacity-75 justify-content-center align-content-md-center"
+       style="left: 20%; width: 60%;border-radius: 10px; margin: 10px;" aria-current="true">
+    <h4><center>API列表</center></h4>
   </div>
   <div class="container">
     <div class="row" id="api_list" style="background: rgba(239,239,239,0.75);border-radius: 10px">
-      <hr class="mt-3">
+      <center><p> 接口仅用于娱乐 禁止用于非法用途</p></center>
+      <hr class="mt-3 mb-3">
       <div class="col-2"></div>
       <div class="col-8 mb-3">
         <form class="d-flex">
