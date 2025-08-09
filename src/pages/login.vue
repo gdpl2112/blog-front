@@ -36,7 +36,7 @@
           <el-button :loading="loading" round class="w-[160px] bg-rose-500" type="primary" @click="submitForm">
             登录
           </el-button>
-          <el-button round class="w-[78px] bg-cyan-200" @click="resetForm()">重置</el-button>
+          <el-button round class="w-[78px] bg-cyan-200" @click="resetEid()">忘记密码?</el-button>
         </el-form-item>
 
 
@@ -126,9 +126,22 @@ const submitForm = () => {
   })
 }
 
-const resetForm = () => {
-  form.username = ''
-  form.password = ''
+const resetEid = () => {
+  let eid = prompt("请输入已绑定邮箱")
+  const loadingf = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
+  service.get("/auth/reset_email?eid=" + eid).then(res => {
+    if (res.code === 200) {
+      toast("请检查你的邮箱/切勿重复操作", "success")
+    } else toast(res.msg)
+  }).catch(err => {
+    toast(err, "danger")
+  }).finally(() => {
+    loadingf.close()
+  });
 }
 
 const gotoGithub = () => {
@@ -162,6 +175,11 @@ function loginAuth() {
     if (key0.startsWith("#")) key0 = key0.substring(1)
     armap.set(key0, kvn[1])
   })
+  if (armap.get("msg")) {
+    let msg = decodeURI(armap.get("msg"))
+    toast(msg, "warning")
+    if (armap.size == 1) return
+  }
   if (n > 0) {
     loading.value = true
     const loadingf = ElLoading.service({
