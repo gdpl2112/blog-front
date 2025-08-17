@@ -11,6 +11,7 @@ body {
     background-size: 100% auto;
   }
 }
+
 #main-nav {
   transition: all 1s ease !important;
   border: 3px solid transparent;
@@ -59,6 +60,7 @@ audio {
   rotate: 1turn;
   max-width: 30px;
 }
+
 #bgVideo {
   position: fixed;
   top: 0;
@@ -124,16 +126,17 @@ audio {
                 github organization
               </a>
               <hr>
-              <p class="dropdown-item">
+              <p class="dropdown-item" style="font-size: small">
                 bront-vue3 update time on 25/08.17
               </p>
             </div>
           </li>
-          <li class="nav-item mr-sm-2" style="margin-right: 8px">
-            <a @click="jumpToflink" class="nav-link">友链</a>
-          </li>
+          <!--          <li class="nav-item mr-sm-2" style="margin-right: 8px">-->
+          <!--            <a @click="jumpToflink" class="nav-link">友链</a>-->
+          <!--          </li>-->
           <li class="nav-item">
-            <RouterLink to="/sponsors" class="nav-link" aria-current="page">赞助</RouterLink>
+            <RouterLink style="color: #ff8d3c;" to="/sponsors" class="nav-link" aria-current="page"><b>赞助</b>
+            </RouterLink>
           </li>
         </ul>
         <div v-show="us" class="d-flex flex-column"> {{ user.nickname }}</div>
@@ -158,7 +161,8 @@ audio {
            role="alert" class="opacity-95 alert alert-dark">
         <center style="opacity: 100%;color: white">
           欢迎您的访问 <br>
-          {{ host0 }} 版权所有 Power by <br>
+          <a style="color: #dcf3f2" :href="host0"> {{ host0 }} </a>
+          版权所有 Power by <br>
           <a style="color: #09a0ff" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
              class="alert-link">若生</a>&nbsp;
           <a style="color: rgba(195,195,195,0.99)" href="//github.com/kloping" class="alert-link">kloping</a>
@@ -191,7 +195,7 @@ audio {
 
 import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, ref} from "vue";
 import service from "@/axios";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
