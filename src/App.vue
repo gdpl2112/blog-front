@@ -91,7 +91,7 @@ audio {
             <RouterLink to="/" active-class="active" class="nav-link" aria-current="page">首页</RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink to="/apis" class="nav-link" aria-current="page">API</RouterLink>
+            <RouterLink to="/apis" class="nav-link" aria-current="page">公共API</RouterLink>
           </li>
           <li class="nav-item">
             <RouterLink to="/room" class="nav-link" aria-current="page">音乐厅</RouterLink>
@@ -103,28 +103,33 @@ audio {
               关于
             </div>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <hr>
               <a class="dropdown-item" target="_blank"
                  href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes">
-                <img style="opacity: 0.86;max-width: 35px" alt="qq" loading="lazy"
+                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="qq" loading="lazy"
                      src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/qq.png">
                 QQ
               </a>
               <a class="dropdown-item" target="_blank"
                  href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Bk2IrDI969mNd-R5G30Ridw9yeou0Mqd&authKey=TCtcOWnwzFw3NfZn%2F9XAXtRmPquOdFbRQmAAFFnf18WXusQBWqt8TFyoJpVVktj2&noverify=0&group_code=278681553">
-                <img style="opacity: 0.86;max-width: 35px" alt="qq" loading="lazy"
+                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="qq" loading="lazy"
                      src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/qq.png">
                 QQ GROUP
               </a>
               <a class="dropdown-item" target="_blank" href="https://github.com/kloping">
-                <img style="opacity: 0.86;max-width: 35px" alt="github" loading="lazy"
+                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="github" loading="lazy"
                      src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/github.png">
                 github
               </a>
               <a class="dropdown-item" target="_blank" href="https://github.com/gdpl2112">
-                <img style="opacity: 0.86;max-width: 35px" alt="github" loading="lazy"
+                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="github" loading="lazy"
                      src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/github.png">
                 github organization
               </a>
+              <hr>
+              <p class="dropdown-item">
+                bront-vue3 update time on 25/08.17
+              </p>
             </div>
           </li>
           <li class="nav-item mr-sm-2" style="margin-right: 8px">
@@ -157,9 +162,9 @@ audio {
         <center style="opacity: 100%;color: white">
           欢迎您的访问 <br>
           {{ host0 }} 版权所有 Power by <br>
-          <a style="color: #74e3c6" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
+          <a style="color: #468efa" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
              class="alert-link">若生</a>&nbsp;
-          <a style="color: #89eac1" href="//github.com/kloping" class="alert-link">kloping</a>
+          <a style="color: rgba(3,1,30,0.96)" href="//github.com/kloping" class="alert-link">kloping</a>
           <br>
           <!--公安备案信息-->
           <a style="color: #ead7d7;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>

@@ -203,9 +203,9 @@ let toggleListLoading = ref(false)
 let listType: String = "163"
 
 const handleSuccess = (data: Array, type: String) => {
-  data.filter((item) => {
-    item.url = item.url + "&type=" + type;
-  });
+  // data.filter((item) => {
+  //   item.url = item.url + "&type=" + type;
+  // });
   ap.list.clear();
   ap.list.add(data);
   listType = type;

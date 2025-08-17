@@ -34,19 +34,19 @@ const routes = [{
     path: '/apis',
     component: apis,
     meta: {
-        title: 'API列表'
+        title: 'kweb公共API列表'
     }
 }, {
     path: '/upload',
     component: upload,
     meta: {
-        title: '发布文章'
+        title: 'kweb发布文章'
     }
 }, {
     path: '/room',
     component: musicroom,
     meta: {
-        title: '听音乐'
+        title: 'kweb音乐'
     }
 }, {
     path: '/tem',
@@ -64,7 +64,7 @@ const routes = [{
     path: '/v0',
     component: v0,
     meta: {
-        title: '用户信息'
+        title: 'kweb用户信息'
     },
     children: [{
         path: '',
