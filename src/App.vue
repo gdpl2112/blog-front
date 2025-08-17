@@ -93,7 +93,8 @@ audio {
             <RouterLink to="/apis" class="nav-link" aria-current="page">公共API</RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink to="/room" class="nav-link" aria-current="page">音乐厅</RouterLink>
+            <RouterLink to="/room" class="nav-link" aria-current="page"
+                        style="border-radius: 12px;border-width: 2px;border-style: dashed; border-color: #00bf3c;">音乐厅</RouterLink>
           </li>
           <li class="nav-item dropdown">
             <div id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -175,9 +176,10 @@ audio {
           <h5 style='color: white' data-toggle="tooltip" data-placement="top" title="添加友链,请联系作者">
             友情链接
           </h5>
-          <div id="f-link-d0" class="container justify-content-center" style="display: none">
+          <div id="f-link-d0" class="container justify-content-center">
             <div class="row justify-content-center">
-              <a v-for="e in arr" :style="'color:'+e.color" :href="e.url" class="alert-link col-3">
+              <a v-for="e in arr"
+                 :style="'color:'+e.color" :href="e.url" class="alert-link col-3">
                 <img class="yl-img" :src="e.icon" alt=""/>
                 {{ e.name }}
               </a>
