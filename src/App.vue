@@ -162,7 +162,7 @@ audio {
            role="alert" class="opacity-95 alert alert-dark">
         <center style="opacity: 100%;color: white">
           欢迎您的访问 <br>
-          <a style="color: #dcf3f2" :href="host0"> {{ host0 }} </a>
+          <a style="color: #dcf3f2" :href="'//'+host0"> {{ host0 }} </a>
           版权所有 Power by <br>
           <a style="color: #09a0ff" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
              class="alert-link">若生</a>&nbsp;
