@@ -128,7 +128,7 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                bront-vue3 update time on 25/08.17
+                front-vue3 update time on 25/08.17.
               </p>
             </div>
           </li>
