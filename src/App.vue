@@ -88,9 +88,6 @@ audio {
       <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <RouterLink to="/" active-class="active" class="nav-link" aria-current="page">首页</RouterLink>
-          </li>
-          <li class="nav-item">
             <RouterLink to="/apis" class="nav-link" aria-current="page">公共API</RouterLink>
           </li>
           <li class="nav-item">
@@ -100,7 +97,7 @@ audio {
             <div id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                  data-toggle="dropdown"
                  aria-expanded="false">
-              关于
+              about
             </div>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <hr>
@@ -145,9 +142,9 @@ audio {
         <div class="form-inline mr-sm-2 my-2">
           <button v-show="us" class="mr-2 btn btn-outline-danger font-weight-light" @click="logout">点击登出
           </button>
-          <button class="mr-2 btn btn-outline-warning" type="button" @click="ttplayer">显示/隐藏歌单</button>
+          <button class="mr-2 btn btn-outline-warning" type="button" @click="ttplayer">显/隐歌单</button>
           <RouterLink to="/v0" class="mr-2 btn btn-outline-success" type="button">个人中心</RouterLink>
-          <RouterLink to="/upload" class="mr-2 btn btn-outline-success" type="button">发布帖子</RouterLink>
+          <RouterLink to="/upload" class="mr-2 btn btn-outline-success" type="button">发帖</RouterLink>
         </div>
       </div>
     </nav>
@@ -162,19 +159,19 @@ audio {
         <center style="opacity: 100%;color: white">
           欢迎您的访问 <br>
           {{ host0 }} 版权所有 Power by <br>
-          <a style="color: #468efa" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
+          <a style="color: #09a0ff" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
              class="alert-link">若生</a>&nbsp;
-          <a style="color: rgba(3,1,30,0.96)" href="//github.com/kloping" class="alert-link">kloping</a>
+          <a style="color: rgba(195,195,195,0.99)" href="//github.com/kloping" class="alert-link">kloping</a>
           <br>
           <!--公安备案信息-->
-          <a style="color: #ead7d7;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>
+          <a style="color: #f81144;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>
         </center>
         <br>
         <center>
           <h5 style='color: white' data-toggle="tooltip" data-placement="top" title="添加友链,请联系作者">
             友情链接
           </h5>
-          <div id="f-link-d0" class="container justify-content-center">
+          <div id="f-link-d0" class="container justify-content-center" style="display: none">
             <div class="row justify-content-center">
               <a v-for="e in arr" :style="'color:'+e.color" :href="e.url" class="alert-link col-3">
                 <img class="yl-img" :src="e.icon" alt=""/>
