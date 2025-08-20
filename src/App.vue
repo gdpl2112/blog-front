@@ -128,7 +128,7 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update time on 25/08.17.
+                front-vue3 update time on 25/08.20
               </p>
             </div>
           </li>
@@ -169,7 +169,7 @@ audio {
           <a style="color: rgba(195,195,195,0.99)" href="//github.com/kloping" class="alert-link">kloping</a>
           <br>
           <!--公安备案信息-->
-          <a style="color: #f81144;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>
+          <a target="_blank" style="color: #f81144;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>
         </center>
         <br>
         <center>
@@ -179,7 +179,7 @@ audio {
           <div id="f-link-d0" class="container justify-content-center">
             <div class="row justify-content-center">
               <a v-for="e in arr"
-                 :style="'color:'+e.color" :href="e.url" class="alert-link col-3">
+                 :style="'color:'+e.color"  :href="e.url" target="_blank" class="alert-link col-3">
                 <img class="yl-img" :src="e.icon" alt=""/>
                 {{ e.name }}
               </a>
