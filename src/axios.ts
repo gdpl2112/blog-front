@@ -48,21 +48,22 @@ export const userInfo = ref({})
 //登录状态
 export const login_state = ref(false)
 
-export function loadUser() {
-    service.get("/auth/state_info").then((res) => {
-        let data = res as unknown as StateInfo
+export async function loadUser() {
+    try {
+        const res = await service.get("/auth/state_info");
+        let data = res as unknown as StateInfo;
         if (data.code == 204) {
-            login_state.value = false
-            Cookie.remove("token")
-            Cookie.remove("authorization")
-            userInfo.value = {}
+            login_state.value = false;
+            Cookie.remove("token");
+            Cookie.remove("authorization");
+            userInfo.value = {};
         } else {
-            login_state.value = true
-            userInfo.value = data.data
+            login_state.value = true;
+            userInfo.value = data.data;
         }
-    }).catch((err) => {
-        toast("获取登录信息失败,请尝试重新登录")
-    })
+    } catch (err) {
+        toast("获取登录信息失败,请尝试重新登录");
+    }
 }
 
 export function userLogout() {

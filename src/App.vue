@@ -219,7 +219,7 @@ service.get("/user/flinks").then(res => {
 
 let ap: APlayer;
 //挂载完成加载player.
-onMounted(() => {
+onMounted(async () => {
   ap = new APlayer({
     container: document.getElementById('player'),
     autoplay: true,
@@ -227,9 +227,8 @@ onMounted(() => {
     audio: [],
     preload: "none"
   });
-  loadUser()
+  await loadUser()
   if (login_state.value) {
-
     service.get("/api/music/list").then(function (response) {
       let data = response.data
       ap.list.clear();

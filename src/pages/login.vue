@@ -74,7 +74,7 @@
 
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
-import {Lock, User} from '@element-plus/icons-vue'
+import {Lock} from '@element-plus/icons-vue'
 import {useRouter} from "vue-router";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie"
