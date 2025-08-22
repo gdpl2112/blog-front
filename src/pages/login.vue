@@ -18,7 +18,7 @@
           <el-input v-model="form.username" placeholder="请输入用户名/QQ/邮箱">
             <template #prefix>
               <el-icon>
-                <User/>
+                <userInfo/>
               </el-icon>
             </template>
           </el-input>
@@ -78,7 +78,7 @@ import {Lock, User} from '@element-plus/icons-vue'
 import {useRouter} from "vue-router";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie"
-import service, {loadUser, user, userLogin} from "@/axios";
+import service, {loadUser, userInfo, userLogin} from "@/axios";
 import {ElLoading} from "element-plus";
 
 const form = reactive({

@@ -30,7 +30,7 @@ service.interceptors.response.use(function (response) {
         Cookie.remove("token")
         Cookie.remove("authorization")
         toast("登录过期! 请尝试重新登录.", "warning")
-        user.value = {}
+        userInfo.value = {}
         login_state.value = false;
         router.push("/login")
     }
@@ -43,7 +43,7 @@ type StateInfo = {
     data: any
 }
 
-export const user = ref({})
+export const userInfo = ref({})
 
 //登录状态
 export const login_state = ref(false)
@@ -55,10 +55,10 @@ export function loadUser() {
             login_state.value = false
             Cookie.remove("token")
             Cookie.remove("authorization")
-            user.value = {}
+            userInfo.value = {}
         } else {
             login_state.value = true
-            user.value = data.data
+            userInfo.value = data.data
         }
     }).catch((err) => {
         toast("获取登录信息失败,请尝试重新登录")
@@ -71,7 +71,7 @@ export function userLogout() {
             toast("退出登录成功", "success")
             Cookie.remove("token")
             Cookie.remove("authorization")
-            user.value = {}
+            userInfo.value = {}
             login_state.value = false
         }
     })

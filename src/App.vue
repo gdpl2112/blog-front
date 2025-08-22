@@ -138,9 +138,9 @@ audio {
             </RouterLink>
           </li>
         </ul>
-        <div v-show="login_state" class="d-flex flex-column"> {{ user.nickname }}</div>
+        <div v-show="login_state" class="d-flex flex-column"> {{ userInfo.nickname }}</div>
         <img v-show="login_state" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
-             :src="user.icon" alt="icon">
+             :src="userInfo.icon" alt="icon">
         <div class="form-inline mr-sm-2 my-2">
           <button v-show="login_state" class="mr-2 btn btn-outline-danger font-weight-light" @click="logout">点击登出
           </button>
@@ -197,7 +197,7 @@ audio {
 import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
 import {onMounted, ref} from "vue";
-import {loadUser, login_state, service, user, userLogout} from "@/axios";
+import {loadUser, login_state, service, userInfo, userLogout} from "@/axios";
 import {toast} from "@/utils/utils";
 import APlayer from 'aplayer/dist/APlayer.min';
 

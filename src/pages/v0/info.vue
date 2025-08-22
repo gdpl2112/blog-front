@@ -13,22 +13,22 @@ td {
           :show-file-list="false"
           :before-upload="beforeAvatarUpload"
           :on-success="handleAvatarSuccess">
-        <el-image :src="user.icon" class="avatar"/>
+        <el-image :src="userInfo.icon" class="avatar"/>
       </el-upload>
     </el-descriptions-item>
 
-    <el-descriptions-item label="昵称(唯一)">{{ user.userId }}</el-descriptions-item>
-    <el-descriptions-item label="用户昵称">{{ user.nickname }}</el-descriptions-item>
-    <el-descriptions-item label="邮箱">{{ user.eid }}</el-descriptions-item>
-    <el-descriptions-item label="QQ">{{ user.qid }}</el-descriptions-item>
+    <el-descriptions-item label="昵称(唯一)">{{ userInfo.userId }}</el-descriptions-item>
+    <el-descriptions-item label="用户昵称">{{ userInfo.nickname }}</el-descriptions-item>
+    <el-descriptions-item label="邮箱">{{ userInfo.eid }}</el-descriptions-item>
+    <el-descriptions-item label="QQ">{{ userInfo.qid }}</el-descriptions-item>
     <el-descriptions-item label="注册方式">
-      <el-tag size="small">{{ user.type }}</el-tag>
+      <el-tag size="small">{{ userInfo.type }}</el-tag>
     </el-descriptions-item>
     <el-descriptions-item label="annex">隐藏
     </el-descriptions-item>
   </el-descriptions>
 
-  <el-form v-show="user.eid===''" ref="eidFormRef" style="max-width: 400px"
+  <el-form v-show="userInfo.eid===''" ref="eidFormRef" style="max-width: 400px"
            :model="edvfm"
            label-width="auto" class="demo-dynamic mt-2">
     tips: 邮箱空时可绑定
@@ -60,7 +60,7 @@ td {
     </el-form-item>
   </el-form>
 
-  <el-form v-show="user.qoId===''" style="max-width: 400px"
+  <el-form v-show="userInfo.qoId===''" style="max-width: 400px"
            label-width="auto" class="demo-dynamic mt-2">
     tips: 若账号已经注册则将覆盖!!!
     <el-button round class="w-[150px] bg-zinc-50" type="primary" @click="gotoQqb"
@@ -71,7 +71,7 @@ td {
     </el-button>
   </el-form>
 
-  <el-form v-show="user.qid<=0"
+  <el-form v-show="userInfo.qid<=0"
            ref="qqFormRef"
            style="max-width: 600px"
            :model="qqValidateForm"
@@ -153,7 +153,7 @@ td {
 </template>
 
 <script lang="ts" setup>
-import {service, user} from "@/axios";
+import {service, userInfo} from "@/axios";
 import {toast} from "@/utils/utils";
 import {reactive, ref} from "vue";
 import type {FormInstance, FormRules, UploadProps} from "element-plus";
@@ -180,7 +180,7 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
     service.post("/user/upload_head_img", formData).then((res) => {
       if (res.code == 200) {
         toast(res.msg, "success");
-        user.value.icon = res.url
+        userInfo.value.icon = res.url
       } else toast(res.msg)
     })
   }
@@ -202,7 +202,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
       service.get(`/auth/bind?eid=${edvfm.email}&code=${edvfm.code}`).then((res) => {
         if (res.code == 200) {
           toast(res.msg, "success")
-          user.value.eid = edvfm.email
+          userInfo.value.eid = edvfm.email
         } else toast(res.msg)
       }).catch((err) => {
         toast(err, "warning")
@@ -246,7 +246,7 @@ const submitQq = (formEl: FormInstance | undefined) => {
       service.get("/auth/bindqq?qid=" + qqValidateForm.qq).then((res) => {
         if (res.code == 200) {
           toast(res, "success")
-          user.value.qid = qqValidateForm.qq
+          userInfo.value.qid = qqValidateForm.qq
         } else toast(res.msg)
       }).catch((err) => {
         toast(err)
