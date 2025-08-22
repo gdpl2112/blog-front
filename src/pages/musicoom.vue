@@ -196,7 +196,7 @@ function onSearch() {
 
 //切换歌单
 let toggleListLoading = ref(false)
-let listType: String = "163"
+let listType: String = ""
 
 const handleSuccess = (data: Array, type: String) => {
   // data.filter((item) => {
