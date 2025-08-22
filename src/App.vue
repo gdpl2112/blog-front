@@ -228,15 +228,9 @@ onMounted(async () => {
     preload: "none"
   });
   await loadUser()
-  if (login_state.value) {
-    service.get("/api/music/list").then(function (response) {
-      let data = response.data
-      ap.list.clear();
-      ap.list.add(data);
-    })
-  } else {
+
+  function loadDefaultList() {
     service.get("/api/music/get-music-list").then(function (response) {
-      ap.list.clear()
       ap.list.add(response)
       ap.list.show()
       setTimeout(function () {
@@ -245,6 +239,19 @@ onMounted(async () => {
     }).catch(function (err) {
       toast("获取音乐失败" + err)
     });
+  }
+
+  if (login_state.value) {
+    service.get("/api/music/list").then(function (response) {
+      let data = response.data
+      if (data.length > 0) {
+        ap.list.add(data);
+      } else {
+        loadDefaultList();
+      }
+    })
+  } else {
+    loadDefaultList();
   }
 
   window.ap = ap
