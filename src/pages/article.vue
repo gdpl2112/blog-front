@@ -218,6 +218,7 @@ let privated = ref(false)
 onMounted(() => {
   service.get("/user/login_state").then(response => {
     lstate.value = response
+
     service.get("/notice/favorited?id=" + id).then(function (response) {
       fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
     }).catch(function (err) {

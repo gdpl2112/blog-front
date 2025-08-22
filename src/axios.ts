@@ -1,7 +1,10 @@
 import axios from "axios";
 import Cookie from "js-cookie";
+import router from "@/router";
+import {toast} from "@/utils/utils";
+import {ref} from "vue";
 
-const service = axios.create({
+export const service = axios.create({
     baseURL: '/',
     timeout: 30000,
 });
@@ -23,15 +26,62 @@ service.interceptors.response.use(function (response) {
     return response.data;
 }, function (err) {
     console.log(err.response)
+    if (err.response.status === 403) {
+        Cookie.remove("token")
+        Cookie.remove("authorization")
+        toast("登录过期! 请尝试重新登录.", "warning")
+        user.value = {}
+        login_state.value = false;
+        router.push("/login")
+    }
     return Promise.reject(err.response.data);
 });
 
-export default service;
-
-export function getToken(): string {
-    let token = Cookie.get("token");
-    if (!token) {
-        token = Cookie.get("authorization")
-    }
-    return token;
+type StateInfo = {
+    code: number,
+    msg: string,
+    data: any
 }
+
+export const user = ref({})
+
+//登录状态
+export const login_state = ref(false)
+
+export function loadUser() {
+    service.get("/auth/state_info").then((res) => {
+        let data = res as unknown as StateInfo
+        if (data.code == 204) {
+            login_state.value = false
+            Cookie.remove("token")
+            Cookie.remove("authorization")
+            user.value = {}
+        } else {
+            login_state.value = true
+            user.value = data.data
+        }
+    }).catch((err) => {
+        toast("获取登录信息失败,请尝试重新登录")
+    })
+}
+
+export function userLogout() {
+    service.post("/auth/logout").then(r => {
+        if (r.code == 200) {
+            toast("退出登录成功", "success")
+            Cookie.remove("token")
+            Cookie.remove("authorization")
+            user.value = {}
+            login_state.value = false
+        }
+    })
+}
+
+export function userLogin(username: string, password: string) {
+    return service.post("/auth/login", {
+        username,
+        password
+    })
+}
+
+export default service

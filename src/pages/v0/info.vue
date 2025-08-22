@@ -153,7 +153,7 @@ td {
 </template>
 
 <script lang="ts" setup>
-import service from "@/axios";
+import {service, user} from "@/axios";
 import {toast} from "@/utils/utils";
 import {reactive, ref} from "vue";
 import type {FormInstance, FormRules, UploadProps} from "element-plus";
@@ -165,13 +165,6 @@ const gotoQqb = () => {
     redirectURI: "https://kloping.top/login?t=qqb"
   });
 }
-
-const user = ref({})
-service.get("/auth/info").then((res) => {
-  user.value = res
-}).catch((err) => {
-  toast("获取登录信息失败,请尝试重新登录")
-})
 
 const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {
 }

@@ -75,11 +75,10 @@
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
 import {Lock, User} from '@element-plus/icons-vue'
-import {login} from '@/api/login'
 import {useRouter} from "vue-router";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie"
-import service from "@/axios";
+import service, {loadUser, user, userLogin} from "@/axios";
 import {ElLoading} from "element-plus";
 
 const form = reactive({
@@ -109,11 +108,12 @@ const submitForm = () => {
   formRef.value.validate((valid) => {
     if (valid) {
       loading.value = true
-      login(form.username, form.password).then(res => {
+      userLogin(form.username, form.password).then(res => {
         if (res.code === 200) {
-          toast("登录成功", "success")
           Cookie.set("token", res.token)
           router.push("/")
+          toast("登录成功", "success")
+          loadUser()
         } else toast(res.msg)
       }).catch(err => {
         toast(err.msg)

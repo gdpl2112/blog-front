@@ -1,27 +1,14 @@
 import router from "@/router";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
-import service from "@/axios";
 
-const urls = ["/index.html", "/login", "/index", "/", "/apis", "/article", "/reg", "/room", "/tem","/sponsors"]
+const urls = ["/index.html", "/login", "/index", "/", "/apis", "/article", "/reg", "/room", "/tem", "/sponsors"]
 
 router.beforeEach((to, from, next) => {
-    if (to.meta.title) {
-        document.title = to.meta.title
-    } else {
-        document.title = "若生er,WebSite"
-    }
+    document.title = (to.meta.title as string) || "若生er,WebSite"
     if (urls.includes(to.path.trim())) {
         next()
     } else {
-        service.get("/user/login_state").then(res => {
-            if (!res) {
-                Cookie.remove("token")
-                Cookie.remove("authorization")
-            }
-        }).catch(() => {
-
-        })
         const token = Cookie.get("token")
         if (token) {
             next()

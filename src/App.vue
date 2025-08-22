@@ -94,7 +94,8 @@ audio {
           </li>
           <li class="nav-item">
             <RouterLink to="/room" class="nav-link" aria-current="page"
-                        style="border-radius: 12px;border-width: 2px;border-style: dashed; border-color: #00bf3c;">音乐厅</RouterLink>
+                        style="border-radius: 12px;border-width: 2px;border-style: dashed; border-color: #00bf3c;">音乐厅
+            </RouterLink>
           </li>
           <li class="nav-item dropdown">
             <div id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -128,23 +129,20 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update time on 25/08.20
+                front-vue3 update time on 25/08.22
               </p>
             </div>
           </li>
-          <!--          <li class="nav-item mr-sm-2" style="margin-right: 8px">-->
-          <!--            <a @click="jumpToflink" class="nav-link">友链</a>-->
-          <!--          </li>-->
           <li class="nav-item">
             <RouterLink style="color: #ff8d3c;" to="/sponsors" class="nav-link" aria-current="page"><b>赞助</b>
             </RouterLink>
           </li>
         </ul>
-        <div v-show="us" class="d-flex flex-column"> {{ user.nickname }}</div>
-        <img v-show="us" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
+        <div v-show="login_state" class="d-flex flex-column"> {{ user.nickname }}</div>
+        <img v-show="login_state" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
              :src="user.icon" alt="icon">
         <div class="form-inline mr-sm-2 my-2">
-          <button v-show="us" class="mr-2 btn btn-outline-danger font-weight-light" @click="logout">点击登出
+          <button v-show="login_state" class="mr-2 btn btn-outline-danger font-weight-light" @click="logout">点击登出
           </button>
           <button class="mr-2 btn btn-outline-warning" type="button" @click="ttplayer">显/隐歌单</button>
           <RouterLink to="/v0" class="mr-2 btn btn-outline-success" type="button">个人中心</RouterLink>
@@ -169,7 +167,8 @@ audio {
           <a style="color: rgba(195,195,195,0.99)" href="//github.com/kloping" class="alert-link">kloping</a>
           <br>
           <!--公安备案信息-->
-          <a target="_blank" style="color: #f81144;font-size: small" href="https://beian.miit.gov.cn/" class="alert-link">皖ICP备2025088299号-1</a>
+          <a target="_blank" style="color: #f81144;font-size: small" href="https://beian.miit.gov.cn/"
+             class="alert-link">皖ICP备2025088299号-1</a>
         </center>
         <br>
         <center>
@@ -179,7 +178,7 @@ audio {
           <div id="f-link-d0" class="container justify-content-center">
             <div class="row justify-content-center">
               <a v-for="e in arr"
-                 :style="'color:'+e.color"  :href="e.url" target="_blank" class="alert-link col-3">
+                 :style="'color:'+e.color" :href="e.url" target="_blank" class="alert-link col-3">
                 <img class="yl-img" :src="e.icon" alt=""/>
                 {{ e.name }}
               </a>
@@ -198,14 +197,14 @@ audio {
 import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
 import {onMounted, ref} from "vue";
-import service from "@/axios";
+import {loadUser, login_state, service, user, userLogout} from "@/axios";
 import {toast} from "@/utils/utils";
-import Cookie from "js-cookie";
-import router from "@/router";
 import APlayer from 'aplayer/dist/APlayer.min';
 
 let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"}])
+
 let host0 = ref("")
+
 service.get("/get-host?url=" + document.location).then(res => {
   host0.value = res.toString()
 }).catch(err => {
@@ -218,14 +217,6 @@ service.get("/user/flinks").then(res => {
   toast("获取友链失败" + err)
 });
 
-function jumpToflink() {
-  $("html, body").animate({
-    scrollTop: $("#f-link-d0").offset().top
-  }, {duration: 100, easing: "swing"});
-  return false;
-}
-
-
 let ap: APlayer;
 //挂载完成加载player.
 onMounted(() => {
@@ -236,16 +227,26 @@ onMounted(() => {
     audio: [],
     preload: "none"
   });
-  service.get("/api/music/get-music-list").then(function (response) {
-    ap.list.clear()
-    ap.list.add(response)
-    ap.list.show()
-    setTimeout(function () {
-      ap.list.hide()
-    }, 1500)
-  }).catch(function (err) {
-    toast("获取音乐失败" + err)
-  });
+  loadUser()
+  if (login_state.value) {
+
+    service.get("/api/music/list").then(function (response) {
+      let data = response.data
+      ap.list.clear();
+      ap.list.add(data);
+    })
+  } else {
+    service.get("/api/music/get-music-list").then(function (response) {
+      ap.list.clear()
+      ap.list.add(response)
+      ap.list.show()
+      setTimeout(function () {
+        ap.list.hide()
+      }, 1500)
+    }).catch(function (err) {
+      toast("获取音乐失败" + err)
+    });
+  }
 
   window.ap = ap
 })
@@ -254,41 +255,8 @@ function ttplayer() {
   $("#player").toggle()
 }
 
-const user = ref({})
-const us = ref(false)
-
-function loadUser() {
-  service.get("/user/login_state").then(response => {
-    if (response == true) {
-      us.value = true
-      service.get("/auth/info").then((res) => {
-        user.value = res
-      }).catch((err) => {
-        toast("获取登录信息失败,请尝试重新登录")
-      })
-    } else if (response == false) {
-      us.value = false
-      Cookie.remove("token")
-      user.value = {}
-    }
-  }).catch(err => {
-    toast("获取登录信息失败")
-    console.log(err)
-  })
-}
-
-router.afterEach((to, from, f) => {
-  loadUser()
-});
-
 function logout() {
-  service.post("/auth/logout").then(r => {
-    if (r.code == 200) {
-      toast("退出登录成功", "success")
-      Cookie.remove("token")
-      user.value = {}
-    }
-  })
+  userLogout()
 }
 
 </script>

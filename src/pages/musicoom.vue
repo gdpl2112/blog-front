@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 import {onMounted, reactive, ref} from "vue";
-import service from "@/axios";
+import service, {login_state} from "@/axios";
 import {getTimeMs, toast} from "@/utils/utils";
 import parseLyrics, {getNearst} from "@/api/lyric";
 
@@ -89,19 +89,15 @@ onMounted(() => {
     }
   }, 101)
 
-  service.get("/user/login_state").then(response => {
-    if (response == true) {
-      service.get("/api/music/list").then((r) => {
-        if (r.code == 200) {
-          tableData.value = r.data
-        }
-      }).catch(function (err) {
-        toast("获取音乐失败" + err)
-      });
-    }
-  }).catch(err => {
-    toast("获取登录信息失败")
-  })
+  if (login_state.value) {
+    service.get("/api/music/list").then((r) => {
+      if (r.code == 200) {
+        tableData.value = r.data
+      }
+    }).catch(function (err) {
+      toast("获取音乐失败" + err)
+    });
+  }
 
 })
 
