@@ -141,7 +141,7 @@ const handleTempPlay = (index: number, row) => {
     cover: "/api/music/get-cover-by-id?id=" + row.id,
     url: "/api/music/get-url-by-id?id=" + row.id
   })
-
+  toast("临时歌曲.添加成功!", "success")
 }
 /**
  * 添加歌

@@ -129,7 +129,7 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update time on 25/08.23
+                front-vue3 update 25/08.23
               </p>
             </div>
           </li>
