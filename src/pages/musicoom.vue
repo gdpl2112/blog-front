@@ -6,6 +6,7 @@ import {onMounted, reactive, ref} from "vue";
 import service, {login_state} from "@/axios";
 import {getTimeMs, toast} from "@/utils/utils";
 import parseLyrics, {getNearst} from "@/api/lyric";
+import {FolderAdd} from "@element-plus/icons-vue";
 
 let now_id = ref("")
 
@@ -124,7 +125,24 @@ const searchLoading = ref(false)
 const rmop = ref(true)
 //私有歌单
 let isPri = false
+/**
+ * 添加歌
+ * @param index
+ * @param row
+ */
+const handleTempPlay = (index: number, row) => {
+  isPri = false
+  if (listType != "temp") {
+    listType = "temp"
+    ap.list.clear()
+  }
+  ap.list.add({
+    songId: row.id, name: row.name, artist: row.artist,
+    cover: "/api/music/get-cover-by-id?id=" + row.id,
+    url: "/api/music/get-url-by-id?id=" + row.id
+  })
 
+}
 /**
  * 添加歌
  * @param index
@@ -163,13 +181,12 @@ const handleRmp = (index: number, row) => {
   });
 }
 
-const tableData = ref([
-  {
-    id: '0',
-    name: '歌曲示例名',
-    artists: '歌手示例名'
-  }
-])
+type SongOne0 = {
+  id: string,
+  name: string,
+  artists: string
+}
+const tableData = ref(new Array<SongOne0>())
 
 function onSearch() {
   if (search.value.length == 0) {
@@ -199,9 +216,6 @@ let toggleListLoading = ref(false)
 let listType: String = ""
 
 const handleSuccess = (data: Array, type: String) => {
-  // data.filter((item) => {
-  //   item.url = item.url + "&type=" + type;
-  // });
   ap.list.clear();
   ap.list.add(data);
   listType = type;
@@ -365,9 +379,21 @@ const joinRoom = () => {
       <el-table :data="tableData" style="width: 100%;height: 400px">
         <el-table-column label="曲名" prop="name"/>
         <el-table-column label="歌手名" prop="artist"/>
+        <el-table-column v-if="!rmop" align="left">
+          <template #header>
+            <div v-html="'临时歌单'"></div>
+          </template>
+          <template #default="scope">
+            <el-button size="small" type="success" @click="handleTempPlay(scope.$index, scope.row)">
+              <el-icon>
+                <FolderAdd/>
+              </el-icon>
+            </el-button>
+          </template>
+        </el-table-column>
         <el-table-column align="right">
           <template #header>
-            <div v-html="rmop?'移除从个人歌单':'添加至个人歌单'"></div>
+            <div v-html="rmop?'移除从歌单':'添加至歌单'"></div>
           </template>
           <template #default="scope">
             <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)">＋
