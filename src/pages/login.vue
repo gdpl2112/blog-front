@@ -192,9 +192,10 @@ function loginAuth() {
       service.get("/auth/qq/login?access_token=" + armap.get("access_token")).then(res => {
         if (res.code === 200) {
           loadingf.close()
-          toast("登录成功", "success")
           Cookie.set("token", res.token)
           router.push("/")
+          toast("登录成功", "success")
+          loadUser()
         } else {
           toast(res.msg)
         }
@@ -227,9 +228,10 @@ function loginAuth() {
       service.get("/auth/github/callback?" + pu).then(res => {
         if (res.code === 200) {
           loadingf.close()
-          toast("登录成功", "success")
           Cookie.set("token", res.token)
           router.push("/")
+          toast("登录成功", "success")
+          loadUser()
         } else {
           toast(res.msg)
         }
