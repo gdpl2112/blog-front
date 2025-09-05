@@ -129,7 +129,7 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/08.26
+                front-vue3 update 25/09.05
               </p>
             </div>
           </li>
@@ -152,7 +152,7 @@ audio {
     </nav>
 
     <div class="container" style="margin-top: 10px">
-      <RouterView :apl="ap"></RouterView>
+      <RouterView v-if="isDataLoaded" :apl="ap"></RouterView>
     </div>
 
     <footer>
@@ -205,6 +205,8 @@ let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"
 
 let host0 = ref("")
 
+let isDataLoaded = ref(false)
+
 service.get("/get-host?url=" + document.location).then(res => {
   host0.value = res.toString()
 }).catch(err => {
@@ -255,6 +257,7 @@ onMounted(async () => {
   }
 
   window.ap = ap
+  isDataLoaded.value = true
 })
 
 function ttplayer() {

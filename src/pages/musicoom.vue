@@ -20,6 +20,8 @@ let cover0 = ref("")
 
 const ap = reactive(window.ap)
 
+let currentPn = ref("")
+
 onMounted(() => {
   //调整界面到整个屏幕都是音乐组件
   document.getElementById("froom").scrollIntoView();
@@ -76,6 +78,11 @@ onMounted(() => {
   loadRes()
 
   setInterval(() => {
+    if (!ap) return
+    currentPn.value =
+        getTimeMs(ap.audio.currentTime.toFixed(0))
+        + '/' + getTimeMs(ap.audio.duration.toFixed(0))
+
     if (ap.audio.paused == false) {
       rting++;
       if (rting % 8 == 0) {
@@ -100,19 +107,24 @@ onMounted(() => {
     });
   }
 
+  onPercentChange = (p: number) => {
+    const t = (p / 100 * ap.audio.duration) as number
+    ap.seek(t)
+  }
+
+  getFormatToolTip = (v: number) => {
+    v = (v / 100 * ap.audio.duration)
+    return getTimeMs(Number(v.toFixed(0))) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
+  }
 })
+
+type int2void = (p: number) => void
+
+let onPercentChange: int2void
+let getFormatToolTip: int2void
 
 let percentage = ref(0)
 
-function onPercentChange(p: number) {
-  const t = (p / 100 * ap.audio.duration) as number
-  ap.seek(t)
-}
-
-function getFormatToolTip(v: number) {
-  v = (v / 100 * ap.audio.duration)
-  return getTimeMs(Number(v.toFixed(0))) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
-}
 
 const dialogVisible0 = ref(false)
 const dialogVisibleRoom = ref(false)
@@ -143,6 +155,22 @@ const handleTempPlay = (index: number, row) => {
   })
   toast("临时歌曲.添加成功!", "success")
 }
+
+function addAllToTemp() {
+  isPri = false
+  if (listType != "temp") {
+    listType = "temp"
+    ap.list.clear()
+  }
+  tableData.value.forEach(row => {
+    ap.list.add({
+      songId: row.id, name: row.name, artist: row.artist,
+      cover: "/api/music/get-cover-by-id?id=" + row.id,
+      url: "/api/music/get-url-by-id?id=" + row.id
+    })
+  })
+}
+
 /**
  * 添加歌
  * @param index
@@ -187,8 +215,10 @@ type SongOne0 = {
   artists: string
 }
 const tableData = ref(new Array<SongOne0>())
+let isSearchData = (ref(false))
 
 function onSearch() {
+  isSearchData.value = false
   if (search.value.length == 0) {
     service.get("/api/music/list").then((r) => {
       if (r.code == 200) {
@@ -203,6 +233,7 @@ function onSearch() {
     searchLoading.value = true
     service.get(`/api/music/search?keyword=${search.value}`).then((r) => {
       tableData.value = r
+      isSearchData.value = true
     }).catch((e) => {
       toast("搜索失败:" + e)
     }).finally(() => {
@@ -357,9 +388,7 @@ const joinRoom = () => {
           <el-button @click="ap.skipForward();" type="info" round plain>下一曲</el-button>
         </div>
         <div class="slider-demo-block col-12 ml-5 text-center">
-          <span class="demonstration">{{
-              getTimeMs(ap.audio.currentTime.toFixed(0)) + '/' + getTimeMs(ap.audio.duration.toFixed(0))
-            }}</span>
+          <span class="demonstration" v-text="currentPn"></span>
           <div style="width: 80%;margin-left: 10%" class="text-center">
             <el-slider @change="onPercentChange" :format-tooltip="getFormatToolTip" v-model="percentage"/>
           </div>
@@ -374,6 +403,9 @@ const joinRoom = () => {
         </el-form-item>
         <el-form-item>
           <el-button :loading="searchLoading" type="primary" @click="onSearch">搜索</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button v-if="isSearchData" type="success" @click="addAllToTemp">全部播放</el-button>
         </el-form-item>
       </el-form>
       <el-table :data="tableData" style="width: 100%;height: 400px">
@@ -393,7 +425,7 @@ const joinRoom = () => {
         </el-table-column>
         <el-table-column align="right">
           <template #header>
-            <div v-html="rmop?'移除从歌单':'添加至歌单'"></div>
+            <div v-html="rmop?'移除从歌单':'保存至歌单'"></div>
           </template>
           <template #default="scope">
             <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)">＋
