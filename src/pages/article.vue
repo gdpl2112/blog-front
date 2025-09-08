@@ -243,7 +243,7 @@ onMounted(() => {
 })
 
 function commentDo() {
-  if (!lstate.value) {
+  if (!login_state.value) {
     toast("请先登录")
     router.push("/login");
   } else {
