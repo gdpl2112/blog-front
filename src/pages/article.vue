@@ -2,16 +2,18 @@
   <div class="container" style="background-color: rgba(255,255,255,0.78)">
     <br>
     <button type="button" class="btn btn-danger bi bi-x-square" v-show="deletable"
-            data-toggle="modal" @click="remove"></button>
+            data-toggle="modal" @click="remove"><span>删除</span></button>
 
     <button type="button" :class="'bi bi-file-earmark-lock btn '+pClassEnd"
             v-show="deletable" data-toggle="modal" @click="_private" style="margin: 5px;">
+      <span>私有</span>
     </button>
 
-    <button type="button" :class="'bi bi-bookmark-heart btn '+fClassEnd"
-            v-show="lstate" v-on:click="favorite()" style="margin-left: 5px"></button>
 
-    <h5 v-show="!lstate">tips:登录可收藏/删除评论</h5>
+    <button type="button" :class="'bi bi-bookmark-heart btn '+fClassEnd"
+            v-show="login_state" v-on:click="favorite()" style="margin-left: 5px"><span>收藏</span></button>
+
+    <h5 v-show="!login_state">tips:登录可收藏/删除评论</h5>
     <hr/>
     <center><h3 v-text="data.title"></h3></center>
     <hr/>
@@ -110,8 +112,8 @@
 <script lang="ts" setup>
 import {useRoute} from "vue-router";
 import {formatMsgTime, toast} from "@/utils/utils";
-import {onMounted, reactive, ref} from "vue";
-import service from "@/axios";
+import {onMounted, ref} from "vue";
+import service, {login_state} from "@/axios";
 
 import {MdPreview} from 'md-editor-v3';
 import 'md-editor-v3/lib/preview.css';
@@ -157,7 +159,7 @@ function del(id: number) {
   service.get("/comments/del-comment?id=" + id).then(function (response) {
     if (response) {
       cs.value = cs.value.filter((d) => d.commentId !== id);
-      toast("删除完成!","success")
+      toast("删除完成!", "success")
     }
   }).catch(function (err) {
     console.log(err)
@@ -172,7 +174,7 @@ function remove() {
 function deleteNow() {
   service.get("/notice/delete?id=" + id).then(function (response) {
     if (response.toString() === "OK") {
-      toast("删除成功","success")
+      toast("删除成功", "success")
       router.push("/")
     }
   }).catch(function (err) {
@@ -209,16 +211,12 @@ function privateNow() {
   })
 }
 
-let lstate = ref(false)
-
 let deletable = ref(false)
 
 let privated = ref(false)
 
 onMounted(() => {
-  service.get("/user/login_state").then(response => {
-    lstate.value = response
-
+  if (login_state.value) {
     service.get("/notice/favorited?id=" + id).then(function (response) {
       fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
     }).catch(function (err) {
@@ -241,10 +239,7 @@ onMounted(() => {
     }).catch(function (err) {
       console.log(err);
     })
-
-  }).catch(err => {
-    toast("获取登录信息失败")
-  })
+  }
 })
 
 function commentDo() {
