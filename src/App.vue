@@ -131,6 +131,9 @@ audio {
               <p class="dropdown-item" style="font-size: small">
                 front-vue3 update 25/09.08
               </p>
+              <p class="dropdown-item" style="font-size: small">
+                最新日志: 修复详情和评论异常
+              </p>
             </div>
           </li>
           <li class="nav-item">
