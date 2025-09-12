@@ -77,7 +77,7 @@ onMounted(() => {
 
 function removed(e: any) {
   e.svl = true
-  service.get("/adm/yiyan/remove?id=" + e.date).then((r) => {
+  service.get("/adm/yiyan/remove?id=" + e.id).then((r) => {
     e.svl = false
     if (r.code == 200) {
       loadData(p.value)
