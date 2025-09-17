@@ -129,10 +129,10 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/09.12
+                front-vue3 update 25/09.17
               </p>
               <p class="dropdown-item" style="font-size: small">
-                ----
+                新增博客ID和昵称可修改
               </p>
             </div>
           </li>

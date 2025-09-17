@@ -17,14 +17,22 @@ td {
       </el-upload>
     </el-descriptions-item>
 
-    <el-descriptions-item label="昵称(唯一)">{{ userInfo.userId }}</el-descriptions-item>
-    <el-descriptions-item label="用户昵称">{{ userInfo.nickname }}</el-descriptions-item>
+    <el-descriptions-item label="博客ID">
+    <span v-on:click="tipsBlogId">
+        {{ userInfo.userId }}
+    </span>
+    </el-descriptions-item>
+    <el-descriptions-item label="用户昵称(点击修改)">
+      <span v-on:click="modifyNick">
+        {{ userInfo.nickname }}
+      </span>
+    </el-descriptions-item>
     <el-descriptions-item label="邮箱">{{ userInfo.eid }}</el-descriptions-item>
     <el-descriptions-item label="QQ">{{ userInfo.qid }}</el-descriptions-item>
     <el-descriptions-item label="注册方式">
       <el-tag size="small">{{ userInfo.type }}</el-tag>
     </el-descriptions-item>
-    <el-descriptions-item label="annex">隐藏
+    <el-descriptions-item label="annex">隐藏 字段可点击提示
     </el-descriptions-item>
   </el-descriptions>
 
@@ -91,6 +99,31 @@ td {
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="submitQq(qqFormRef)">绑定</el-button>
+    </el-form-item>
+  </el-form>
+
+  <el-form v-show="userInfo.modify_bid==true"
+           ref="bidFormRef" style="max-width: 600px"
+           :model="bidValidateForm"
+           label-width="auto"
+           class="demo-ruleForm">
+    tips: 修改博客ID需谨慎，可能影响相关链接
+    <el-form-item
+        label="博客ID"
+        prop="bid"
+        :rules="[
+          { required: true, message: '博客ID不能为空', trigger: 'blur' },
+          { pattern: /^[a-zA-Z0-9._-]+$/, message: '博客ID只能包含字母、数字、点(.)、下划线(_)或连字符(-)', trigger: 'blur' },
+          { min: 7, max: 12, message: '博客ID长度必须在7-12位之间', trigger: 'blur' }
+        ]"
+    >
+      <el-input
+          v-model="bidValidateForm.bid"
+          type="text"
+          autocomplete="off"/>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="submitBid(bidFormRef)">修改博客ID</el-button>
     </el-form-item>
   </el-form>
 
@@ -235,8 +268,14 @@ const reqCode = (formEl: FormInstance | undefined) => {
 
 const qqFormRef = ref<FormInstance>()
 
+const bidFormRef = ref<FormInstance>()
+
 const qqValidateForm = reactive({
   qq: '',
+})
+
+const bidValidateForm = reactive({
+  bid: userInfo.value.userId || '',
 })
 
 const submitQq = (formEl: FormInstance | undefined) => {
@@ -256,6 +295,26 @@ const submitQq = (formEl: FormInstance | undefined) => {
     }
   })
 }
+
+const submitBid = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (valid) {
+      service.post("/auth/modifyBolgId", {t: bidValidateForm.bid}).then((res) => {
+        if (res.code == 200) {
+          toast(res.msg, "success")
+          userInfo.value.userId = bidValidateForm.bid
+          userInfo.value.modify_bid = false
+        } else toast(res.msg)
+      }).catch((err) => {
+        toast(err)
+      });
+    } else {
+      toast("请确保博客ID填写正确")
+    }
+  })
+}
+
 // 以下修改密码段
 
 const ruleFormRef = ref<FormInstance>()
@@ -334,6 +393,23 @@ function forgetPass() {
     dialogVisible.value = false
     dialogLoading.value = false
   })
+}
+
+function tipsBlogId() {
+  service.get("/auth/modifyBolgIdTips").then((res) => {
+    toast(res, "warning")
+  })
+}
+
+function modifyNick() {
+  const nick = prompt(`请输入要修改的昵称`, '');
+  if (nick === null || nick === '') return; // 用户点击取消
+  service.post("/auth/modifyNick", {t: nick}).then((res) => {
+    if (res.code == 200) {
+      toast(res.msg, "success")
+      userInfo.value.nickname = nick
+    } else toast(res.msg)
+  });
 }
 
 </script>

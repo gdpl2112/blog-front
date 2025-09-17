@@ -23,7 +23,7 @@ service.interceptors.request.use(function (config) {
 service.interceptors.response.use(function (response) {
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
-    return response.data;
+    return response.data as any;
 }, function (err) {
     console.log(err.response)
     if (err.response.status === 403) {
@@ -34,7 +34,7 @@ service.interceptors.response.use(function (response) {
         login_state.value = false;
         router.push("/login")
     }
-    return Promise.reject(err.response.data);
+    return Promise.reject(err.response.data as any);
 });
 
 type StateInfo = {
@@ -43,7 +43,7 @@ type StateInfo = {
     data: any
 }
 
-export const userInfo = ref({})
+export const userInfo = ref({} as any)
 
 //登录状态
 export const login_state = ref(false)
