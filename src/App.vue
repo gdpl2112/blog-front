@@ -227,7 +227,7 @@ let ap: APlayer;
 onMounted(async () => {
   ap = new APlayer({
     container: document.getElementById('player'),
-    autoplay: true,
+    autoplay: false,
     listMaxHeight: 60,
     audio: [],
     preload: "none"

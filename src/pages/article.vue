@@ -9,7 +9,6 @@
       <span>私有</span>
     </button>
 
-
     <button type="button" :class="'bi bi-bookmark-heart btn '+fClassEnd"
             v-show="login_state" v-on:click="favorite()" style="margin-left: 5px"><span>收藏</span></button>
 
@@ -72,7 +71,23 @@
     </div>
   </div>
 
-  <div class="modal fade" id="dtips0" tabindex="-1" aria-labelledby="dtips0Label" aria-hidden="true">
+
+  <el-dialog v-model="deleteDialogV" title="提示!" width="500" center>
+    <span>
+      确定删除此文章吗!?
+    </span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="deleteDialogV = false">取消</el-button>
+        <el-button type="primary" @click="deleteNow">
+          确定
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <div class="modal fade" id="dtips0" tabindex="-1" aria-labelledby="dtips0Label" aria-hidden="true"
+       data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -88,24 +103,19 @@
       </div>
     </div>
   </div>
-
-  <div class="modal fade" id="dtips1" tabindex="-1" aria-labelledby="dtips1Label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="dtips1Label">提示</h5>
-        </div>
-        <div class="modal-body">
-          <h3 style="color:#dc0551;">{{ dtips1text }}</h3>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="privateNow()">确定</button>
-        </div>
+  <el-dialog v-model="privateDialogV" title="提示!" width="500" center>
+    <span>
+      确定将此文章 取消/设置 为私有吗!?
+    </span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="privateDialogV = false">取消</el-button>
+        <el-button type="primary" @click="privateNow">
+          确定
+        </el-button>
       </div>
-    </div>
-  </div>
-
+    </template>
+  </el-dialog>
 
 </template>
 
@@ -118,11 +128,10 @@ import service, {login_state} from "@/axios";
 import {MdPreview} from 'md-editor-v3';
 import 'md-editor-v3/lib/preview.css';
 import router from "@/router";
-import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min"
 import $ from "jquery";
 
 function getMsgTime(time: string) {
-  return formatMsgTime(time)
+  return formatMsgTime(Number(time))
 }
 
 const route = useRoute()
@@ -150,7 +159,7 @@ function favorite() {
 const cs = ref([])
 
 service.get("/comments/get-comment?nid=" + id).then(function (response) {
-  cs.value = response
+  cs.value = response as  any
 }).catch(function (err) {
   alert(err);
 })
@@ -167,8 +176,11 @@ function del(id: number) {
   })
 }
 
+let deleteDialogV = ref(false)
+let privateDialogV = ref(false)
+
 function remove() {
-  new bootstrap.Modal('#dtips0', {keyboard: false}).show()
+  deleteDialogV.value = true
 }
 
 function deleteNow() {
@@ -180,18 +192,13 @@ function deleteNow() {
   }).catch(function (err) {
     console.log(err)
     toast("删除异常")
+  }).finally(function () {
+    deleteDialogV.value = false
   })
 }
 
-let dtips1text = ref("确定设置为仅自己可见吗?")
-
 function _private() {
-  if (privated.value) {
-    dtips1text.value = "确定取消仅自己可见吗?"
-  } else {
-    dtips1text.value = "确定设置为仅自己可见吗?"
-  }
-  new bootstrap.Modal('#dtips1', {keyboard: false}).show()
+  privateDialogV.value = true
 }
 
 function privateNow() {
@@ -199,7 +206,7 @@ function privateNow() {
     if (response.toString() === "OK") {
       toast("设置成功", "success")
     }
-    privated.value = response
+    privated.value = Boolean(response)
     if (privated.value) {
       pClassEnd.value = "btn-secondary"
     } else {
@@ -208,6 +215,8 @@ function privateNow() {
   }).catch(function (err) {
     console.log(err)
     toast("设置异常")
+  }).finally(function () {
+    privateDialogV.value = false
   })
 }
 
@@ -224,13 +233,13 @@ onMounted(() => {
     })
 
     service.get("/notice/deletable?id=" + id).then(function (response) {
-      deletable.value = response
+      deletable.value = Boolean(response)
     }).catch(function (err) {
       console.log(err);
     })
 
     service.get("/notice/privated?id=" + id).then(function (response) {
-      privated.value = response
+      privated.value = Boolean(response)
       if (privated.value) {
         pClassEnd.value = "btn-secondary"
       } else {
