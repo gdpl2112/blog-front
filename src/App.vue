@@ -129,7 +129,7 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/09.17
+                front-vue3 update 25/09.18
               </p>
               <p class="dropdown-item" style="font-size: small">
                 新增博客ID和昵称可修改

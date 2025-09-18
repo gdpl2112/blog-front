@@ -397,7 +397,13 @@ function forgetPass() {
 
 function tipsBlogId() {
   service.get("/auth/modifyBolgIdTips").then((res) => {
-    toast(res, "warning")
+    if (res.code == 200) {
+      toast(res.msg, "success")
+      userInfo.value.modify_bid = true
+    } else {
+      toast(res.msg)
+      userInfo.value.modify_bid = false
+    }
   })
 }
 

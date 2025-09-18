@@ -23,7 +23,7 @@ service.interceptors.request.use(function (config) {
 service.interceptors.response.use(function (response) {
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
-    return response.data as any;
+    return (response.data as any);
 }, function (err) {
     console.log(err.response)
     if (err.response.status === 403) {

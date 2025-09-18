@@ -159,7 +159,7 @@ function favorite() {
 const cs = ref([])
 
 service.get("/comments/get-comment?nid=" + id).then(function (response) {
-  cs.value = response as  any
+  cs.value = response as any
 }).catch(function (err) {
   alert(err);
 })
