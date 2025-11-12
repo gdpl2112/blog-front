@@ -1,7 +1,7 @@
 <style>
 body {
   margin: 0;
-  background: #333 url("http://127.0.0.1:82/a5a2bde2-d277-479e-8a21-6ed1c81e6f18.jpg") no-repeat fixed center/cover;
+  background: #333 url("https://file.kloping.top/a5a2bde2-d277-479e-8a21-6ed1c81e6f18.jpg") no-repeat fixed center/cover;
   min-height: 100vh;
 }
 
