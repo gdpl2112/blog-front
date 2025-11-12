@@ -22,7 +22,7 @@
               @click="switchSession(session.id)"
               style="cursor: pointer;">
               <div class="d-flex justify-content-between align-items-center">
-                <div class="fw-bold">{{ session.title || '新会话' }}</div>
+                <div class="fw-bold">{{ session.title || (session.title_temp || '新会话') }}</div>
                 <button 
                   v-if="sessions.length > 1"
                   class="btn btn-sm"
@@ -41,7 +41,7 @@
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-              <h5 class="mb-0">{{ currentSession?.title || '新对话' }}</h5>
+              <h5 class="mb-0">{{ currentSession?.title || (currentSession?.title_temp || '新会话') }}</h5>
               <small class="text-muted">{{ currentSession?.messages.length || 0 }} 条消息. 会话历史最长保存7日</small>
             </div>
             <button class="btn btn-sm btn-outline-secondary" @click="clearCurrentSession">
@@ -205,7 +205,7 @@ function addSession() {
   const newSession: Session = {
     id: generateChatId(),
     title: '',
-    title_temp: '会话ID',
+    title_temp: '新会话',
     messages: [{
       role: 'assistant',
       content: welcome_text
@@ -229,6 +229,7 @@ async function switchSession(sessionId: string) {
     messages.value = [...session.messages];
     scrollToBottom();
   }
+  thinkingContent.value = '[对话已停止]';
 }
 
 // 删除会话
