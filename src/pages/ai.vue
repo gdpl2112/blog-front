@@ -229,7 +229,7 @@ async function switchSession(sessionId: string) {
     messages.value = [...session.messages];
     scrollToBottom();
   }
-  thinkingContent.value = '[对话已停止]';
+  thinkingContent.value = '';
 }
 
 // 删除会话
