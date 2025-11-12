@@ -22,7 +22,7 @@
               @click="switchSession(session.id)"
               style="cursor: pointer;">
               <div class="d-flex justify-content-between align-items-center">
-                <div class="fw-bold">{{ session.title || '新对话' }}</div>
+                <div class="fw-bold">{{ session.title || '历史会话' }}</div>
                 <button 
                   v-if="sessions.length > 1"
                   class="btn btn-sm"
@@ -274,7 +274,7 @@ async function loadChatSessions() {
     for (const chatId of chatIds) {
       const session: Session = {
         id: chatId,
-        title: '历史会话',
+        title: '',
         messages: []
       };
 
