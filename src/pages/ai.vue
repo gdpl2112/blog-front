@@ -274,7 +274,7 @@ async function loadChatSessions() {
     for (const chatId of chatIds) {
       const session: Session = {
         id: chatId,
-        title: '',
+        title: '历史会话',
         messages: []
       };
 
