@@ -1,13 +1,13 @@
 <style>
 body {
   margin: 0;
-  background: #333 url("https://tc.z.wiki/autoupload/f/YcWxd1f3wXnQJ6FceNyJunzy4cewqsf7CyCHx61S1VGyl5f0KlZfm6UsKj-HyTuv/20250803/5x7I/2560X1440/pc.jpg") no-repeat fixed center/cover;
+  background: #333 url("http://127.0.0.1:82/a5a2bde2-d277-479e-8a21-6ed1c81e6f18.jpg") no-repeat fixed center/cover;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   body {
-    background-image: url("https://pvzh.giantapp.cn//upload/c06323ff2c0e43fa95e69cb90d9126d7/wallpapers/6892243892d000f81702a4bf/1754407979407_vtH0M.jpg");
+    background-image: url("https://pvzh.giantapp.cn/upload/c06323ff2c0e43fa95e69cb90d9126d7/wallpapers/6892243892d000f81702a4bf/1754407979407_vtH0M.jpg");
     background-size: 100% auto;
   }
 }
@@ -129,16 +129,19 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/09.18
+                front-vue3 update 25/11.12
               </p>
               <p class="dropdown-item" style="font-size: small">
-                新增博客ID和昵称可修改
+                新增.博客内AI助手.
               </p>
             </div>
           </li>
           <li class="nav-item">
             <RouterLink style="color: #ff8d3c;" to="/sponsors" class="nav-link" aria-current="page"><b>赞助</b>
             </RouterLink>
+          </li>
+          <li class="nav-item">
+            <RouterLink to="/ai" class="nav-link" aria-current="page">AI对话</RouterLink>
           </li>
         </ul>
         <div v-show="login_state" class="d-flex flex-column"> {{ userInfo.nickname }}</div>

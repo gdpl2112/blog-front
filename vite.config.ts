@@ -26,7 +26,7 @@ export default defineConfig({
         port: 80, // 指定启动端口
         open: false, //启动后是否自动打开浏览器
         proxy: {
-            '/api': {
+            '/api/': {
                 target: baseUrl,
                 changeOrigin: false,
                 // rewrite: (path) => path.replace(/^\/api/, '/api')

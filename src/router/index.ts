@@ -11,6 +11,7 @@ import upload from '@/pages/upload.vue'
 import musicroom from '@/pages/musicoom.vue'
 import tem from '@/pages/tem.vue'
 import sponsors from '@/pages/sponsors.vue'
+import ai from '@/pages/ai.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -59,6 +60,12 @@ const routes = [{
     component: sponsors,
     meta: {
         title: '友友们的赞助'
+    }
+}, {
+    path: '/ai',
+    component: ai,
+    meta: {
+        title: 'AI对话'
     }
 }, {
     path: '/v0',
