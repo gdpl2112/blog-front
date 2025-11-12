@@ -181,6 +181,7 @@ const sessions = ref<Session[]>([
   {
     id: generateChatId(),
     title: '欢迎使用AI助手',
+    title_temp: '会话ID',
     messages: [{
       role: 'assistant',
       content: welcome_text
@@ -204,6 +205,7 @@ function addSession() {
   const newSession: Session = {
     id: generateChatId(),
     title: '',
+    title_temp: '会话ID',
     messages: [{
       role: 'assistant',
       content: welcome_text
@@ -266,7 +268,7 @@ function clearCurrentSession() {
 // 从服务器加载会话列表
 async function loadChatSessions() {
   try {
-    const response = await service.get("/api/chat/chatIds");
+    const response = await service.get("/api/chat/chatIds") as string[];
     const chatIds = response || [];
 
     const loadedSessions: Session[] = [];
@@ -297,7 +299,7 @@ async function loadChatSessions() {
 // 从服务器加载特定会话的历史记录
 async function loadChatHistory(chatId: string) {
   try {
-    const response = await service.get(`/api/chat/list?chatId=${chatId}`);
+    const response = await service.get(`/api/chat/list?chatId=${chatId}`) as Message[];
     const chatData = response || [];
 
     const session = sessions.value.find(s => s.id === chatId);
@@ -530,6 +532,7 @@ onMounted(async () => {
       sessions.value.push({
         id: generateChatId(),
         title: '',
+        title_temp: '会话ID',
         messages: [{
           role: 'assistant',
           content: welcome_text
@@ -543,6 +546,7 @@ onMounted(async () => {
       sessions.value.push({
         id: generateChatId(),
         title: '',
+        title_temp: '会话ID',
         messages: [{
           role: 'assistant',
           content: welcome_text
@@ -559,11 +563,6 @@ onMounted(async () => {
 <style scoped>
 .session-item:hover {
   background-color: #f0f0f0;
-}
-
-.markdown-content {
-  background: transparent !important;
-  font-size: 0.9rem;
 }
 
 .markdown-content :deep(pre) {
