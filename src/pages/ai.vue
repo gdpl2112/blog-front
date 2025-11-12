@@ -1,5 +1,5 @@
 <template>
-  <div class="container" style="background-color: rgba(255,255,255,0.85); min-height: 85vh;">
+  <div class="container" style="background-color: rgba(255,255,255,0.85); min-height: 92vh;">
     <br>
     <h2 class="text-center" style="color: #333;">小生AI博客智能助手</h2>
     <hr>
