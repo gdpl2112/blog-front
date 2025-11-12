@@ -65,7 +65,7 @@ const routes = [{
     path: '/ai',
     component: ai,
     meta: {
-        title: 'AI对话'
+        title: '小生AI对话'
     }
 }, {
     path: '/v0',
