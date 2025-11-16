@@ -70,6 +70,14 @@ audio {
   z-index: -1;
   object-fit: cover;
 }
+
+.about-avatar {
+  display: inline-block;
+  opacity: 0.86;
+  max-width: 35px;
+  border-radius: 25px;
+}
+
 </style>
 
 <template>
@@ -101,38 +109,43 @@ audio {
             <div id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                  data-toggle="dropdown"
                  aria-expanded="false">
-              about
+              ABOUT
             </div>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <hr>
               <a class="dropdown-item" target="_blank"
                  href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes">
-                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="qq" loading="lazy"
-                     src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/qq.png">
-                QQ
+                <img class="about-avatar" alt="qq" loading="lazy"
+                     src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640">
+                QQ (owner)
               </a>
               <a class="dropdown-item" target="_blank"
                  href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Bk2IrDI969mNd-R5G30Ridw9yeou0Mqd&authKey=TCtcOWnwzFw3NfZn%2F9XAXtRmPquOdFbRQmAAFFnf18WXusQBWqt8TFyoJpVVktj2&noverify=0&group_code=278681553">
-                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="qq" loading="lazy"
-                     src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/qq.png">
-                QQ GROUP
+                <img class="about-avatar" loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640">
+                QQ GROUP (闲聊)
+              </a>
+              <a class="dropdown-item" target="_blank"
+                 href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Bk2IrDI969mNd-R5G30Ridw9yeou0Mqd&authKey=TCtcOWnwzFw3NfZn%2F9XAXtRmPquOdFbRQmAAFFnf18WXusQBWqt8TFyoJpVVktj2&noverify=0&group_code=278681553">
+                <img class="about-avatar" alt="qq" loading="lazy"
+                     src="http://p.qlogo.cn/gh/794238572/794238572/640">
+                QQ GROUP (技术)
               </a>
               <a class="dropdown-item" target="_blank" href="https://github.com/kloping">
-                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="github" loading="lazy"
-                     src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/github.png">
+                <img class="about-avatar" alt="github" loading="lazy"
+                     src="https://avatars.githubusercontent.com/u/87743020?v=4">
                 github
               </a>
               <a class="dropdown-item" target="_blank" href="https://github.com/gdpl2112">
-                <img style="display: inline-block;opacity: 0.86;max-width: 35px" alt="github" loading="lazy"
-                     src="https://s.nmxc.ltd/sakurairo_vision/@2.6/display_icon/sora/github.png">
+                <img class="about-avatar" alt="github" loading="lazy"
+                     src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4">
                 github organization
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/11.12.
+                front-vue3 update 25/11.16
               </p>
               <p class="dropdown-item" style="font-size: small">
-                新增.博客内AI助手.
+                新增.博客内AI助手.关于列表更新
               </p>
             </div>
           </li>
