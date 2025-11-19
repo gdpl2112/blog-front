@@ -142,10 +142,13 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/11.16
+                front-vue3 update 25/11.19
               </p>
               <p class="dropdown-item" style="font-size: small">
-                新增.博客内AI助手.关于列表更新
+                新增.博客内AI助手.关于列表更新.
+              </p>
+              <p class="dropdown-item" style="font-size: small">
+                新增修改.AI界面优化
               </p>
             </div>
           </li>

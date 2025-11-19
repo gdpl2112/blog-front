@@ -73,11 +73,18 @@
                     <MdPreview :modelValue="message.content" class="message-bubble"/>
                     <div class="d-flex justify-content-end mt-1">
                       <button 
-                        class="btn btn-sm btn-outline-secondary py-0 px-2"
+                        class="btn btn-sm btn-outline-secondary py-0 px-2 mx-1"
                         @click="copyMessageContent(message.content)"
                         title="复制内容"
                       >
                         <i class="bi bi-clipboard"></i>
+                      </button>
+                      <button 
+                        class="btn btn-sm btn-outline-secondary py-0 px-2"
+                        @click="showFullScreenMessage(message)"
+                        title="全屏查看"
+                      >
+                        <i class="bi bi-arrows-fullscreen"></i>
                       </button>
                     </div>
                   </div>
@@ -141,6 +148,40 @@
       </div>
     </div>
   </div>
+  
+  <!-- 全屏显示模态框 -->
+  <div 
+    v-if="isFullScreenMode" 
+    class="fixed inset-0 bg-black bg-opacity-90 z-50 d-flex flex-column justify-center items-center p-4" 
+    @click.self="exitFullScreenMode"
+  >
+    <div class="absolute top-4 right-4">
+      <button 
+        class="btn btn-lg btn-outline-light rounded-full w-10 h-10 flex items-center justify-center"
+        @click="exitFullScreenMode"
+        title="退出全屏"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full max-h-[80vh] overflow-auto">
+      <div class="mb-4">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 mb-2 message-avatar bg-primary inline-flex">
+          {{ fullScreenMessage?.role === 'assistant' ? 'AI' : '我' }}
+        </div>
+      </div>
+      <MdPreview :modelValue="fullScreenMessage?.content || ''" class="markdown-fullscreen" />
+      <div class="mt-4 d-flex justify-end">
+        <button 
+          class="btn btn-sm btn-outline-secondary py-1 px-3"
+          @click="copyMessageContent(fullScreenMessage?.content || '')"
+          title="复制内容"
+        >
+          <i class="bi bi-clipboard me-1"></i> 复制内容
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -175,6 +216,9 @@ const isLoading = ref(false);
 const chatHistory = ref<HTMLElement | null>(null);
 const thinkingContent = ref("");
 const abortController = ref<AbortController | null>(null);
+// 全屏显示相关数据
+const isFullScreenMode = ref(false);
+const fullScreenMessage = ref<Message | null>(null);
 
 // 会话相关数据
 const sessions = ref<Session[]>([
@@ -369,6 +413,22 @@ async function copyMessageContent(content: string) {
     console.error("复制失败:", err);
     toast("复制失败");
   }
+}
+
+// 显示全屏消息
+function showFullScreenMessage(message: Message) {
+  fullScreenMessage.value = message;
+  isFullScreenMode.value = true;
+  // 防止页面滚动
+  document.body.style.overflow = 'hidden';
+}
+
+// 退出全屏模式
+function exitFullScreenMode() {
+  isFullScreenMode.value = false;
+  fullScreenMessage.value = null;
+  // 恢复页面滚动
+  document.body.style.overflow = 'auto';
 }
 
 // 调用后端流式接口
@@ -608,5 +668,95 @@ onMounted(async () => {
   height: 30px !important;
   min-width: 30px !important;
   font-size: 14px !important;
+}
+
+/* 全屏模式下的markdown样式 */
+.markdown-fullscreen :deep(h1),
+.markdown-fullscreen :deep(h2),
+.markdown-fullscreen :deep(h3),
+.markdown-fullscreen :deep(h4),
+.markdown-fullscreen :deep(h5),
+.markdown-fullscreen :deep(h6) {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-fullscreen :deep(h1) { font-size: 2rem; }
+.markdown-fullscreen :deep(h2) { font-size: 1.5rem; }
+.markdown-fullscreen :deep(h3) { font-size: 1.25rem; }
+.markdown-fullscreen :deep(h4) { font-size: 1rem; }
+.markdown-fullscreen :deep(h5) { font-size: 0.875rem; }
+.markdown-fullscreen :deep(h6) { font-size: 0.75rem; }
+
+.markdown-fullscreen :deep(p) {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.markdown-fullscreen :deep(pre) {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #e9ecef;
+}
+
+.markdown-fullscreen :deep(code) {
+  background: #f1f3f4;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-fullscreen :deep(ul),
+.markdown-fullscreen :deep(ol) {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.markdown-fullscreen :deep(li) {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-fullscreen :deep(blockquote) {
+  border-left: 4px solid #6c757d;
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 1rem;
+  font-style: italic;
+  color: #6c757d;
+}
+
+.markdown-fullscreen :deep(img) {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+}
+
+.markdown-fullscreen :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.markdown-fullscreen :deep(th),
+.markdown-fullscreen :deep(td) {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+}
+
+.markdown-fullscreen :deep(th) {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* 全屏按钮悬停效果 */
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
 }
 </style>

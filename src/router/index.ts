@@ -8,6 +8,7 @@ import reg from '@/pages/reg.vue'
 import apis from '@/pages/apis.vue'
 import article from '@/pages/article.vue'
 import upload from '@/pages/upload.vue'
+import update from '@/pages/update.vue'
 import musicroom from '@/pages/musicoom.vue'
 import tem from '@/pages/tem.vue'
 import sponsors from '@/pages/sponsors.vue'
@@ -42,6 +43,12 @@ const routes = [{
     component: upload,
     meta: {
         title: 'kweb发布文章'
+    }
+}, {
+    path: '/update',
+    component: update,
+    meta: {
+        title: '帖子修改'
     }
 }, {
     path: '/room',

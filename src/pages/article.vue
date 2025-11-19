@@ -8,6 +8,10 @@
             v-show="deletable" data-toggle="modal" @click="_private" style="margin: 5px;">
       <span>私有</span>
     </button>
+    <button type="button" :class="'bi bi-pen btn '+pClassEnd"
+            v-show="deletable" data-toggle="modal" @click="_update" style="margin: 5px;">
+      <span>修改</span>
+    </button>
 
     <button type="button" :class="'bi bi-bookmark-heart btn '+fClassEnd"
             v-show="login_state" v-on:click="favorite()" style="margin-left: 5px"><span>收藏</span></button>
@@ -199,6 +203,15 @@ function deleteNow() {
 
 function _private() {
   privateDialogV.value = true
+}
+
+function _update() {
+  router.push({
+    path: '/update',
+    query: {
+      id: id
+    }
+  })
 }
 
 function privateNow() {
