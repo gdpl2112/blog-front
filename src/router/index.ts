@@ -10,7 +10,6 @@ import article from '@/pages/article.vue'
 import upload from '@/pages/upload.vue'
 import update from '@/pages/update.vue'
 import musicroom from '@/pages/musicoom.vue'
-import tem from '@/pages/tem.vue'
 import sponsors from '@/pages/sponsors.vue'
 import ai from '@/pages/ai.vue'
 
@@ -18,6 +17,7 @@ import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
 import articles from '@/pages/v0/articles.vue'
 import aox from '@/pages/v0/aox.vue'
+import app from '@/pages/v0/app.vue'
 import pnote from '@/pages/v0/pnote.vue'
 import adminv0 from '@/pages/v0/adminv0.vue'
 import adminv1 from '@/pages/v0/adminv1.vue'
@@ -57,12 +57,6 @@ const routes = [{
         title: 'kweb音乐'
     }
 }, {
-    path: '/tem',
-    component: tem,
-    meta: {
-        title: '测试'
-    }
-}, {
     path: '/sponsors',
     component: sponsors,
     meta: {
@@ -93,6 +87,9 @@ const routes = [{
         path: 'aox',
         component: aox
     },{
+        path: 'app',
+        component: app
+    },{
         path: 'pnote',
         component: pnote
     },{
@@ -109,7 +106,7 @@ const routes = [{
     meta: {
         title: 'kloping登录'
     }
-},{
+}, {
     path: '/reg',
     component: reg,
     meta: {

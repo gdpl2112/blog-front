@@ -32,6 +32,14 @@
             <span>API管理</span>
           </el-menu-item>
         </RouterLink>
+        <RouterLink to="/v0/app" style="text-decoration: none;">
+          <el-menu-item index="4">
+            <el-icon>
+              <document/>
+            </el-icon>
+            <span>应用管理</span>
+          </el-menu-item>
+        </RouterLink>
 
 <!--        <RouterLink to="/v0/bgi" style="text-decoration: none;">-->
 <!--          <el-menu-item index="4">-->
