@@ -36,7 +36,7 @@ export default defineConfig({
             }, '/adm': {
                 target: baseUrl,
                 changeOrigin: false,
-            }, '/auth': {
+            }, '/auth/': {
                 target: baseUrl,
                 changeOrigin: false,
             }, '/notice': {

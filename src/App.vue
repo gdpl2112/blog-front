@@ -142,13 +142,13 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/11.21
+                front-vue3 update 25/11.21.
               </p>
               <p class="dropdown-item" style="font-size: small">
                 新增授权应用
               </p>
               <p class="dropdown-item" style="font-size: small">
-                修复AI调用登录过期问题
+                修复AI调用登录过期问题,授权完成
               </p>
             </div>
           </li>

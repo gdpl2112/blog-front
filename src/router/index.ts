@@ -12,6 +12,7 @@ import update from '@/pages/update.vue'
 import musicroom from '@/pages/musicoom.vue'
 import sponsors from '@/pages/sponsors.vue'
 import ai from '@/pages/ai.vue'
+import authc from '@/pages/authc.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -111,6 +112,12 @@ const routes = [{
     component: reg,
     meta: {
         title: 'kloping`s blog注册'
+    }
+}, {
+    path: '/authc',
+    component: authc,
+    meta: {
+        title: '应用授权'
     }
 }, {
     path: '/:pathMatch(.*)*',

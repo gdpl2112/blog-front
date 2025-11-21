@@ -1,8 +1,13 @@
 import router from "@/router";
-import { toast } from "@/utils/utils";
+import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
 
-const urls = ["/index.html", "/login", "/index", "/", "/apis", "/article", "/reg", "/room", "/tem", "/sponsors","/ai"]
+const urls = ["/index.html",
+    "/login", "/index", "/", "/apis",
+    "/article", "/reg", "/room", "/tem",
+    "/sponsors", "/ai"
+    ,"/authc"
+]
 
 router.beforeEach((to, from, next) => {
     document.title = (to.meta.title as string) || "若生er,WebSite"
@@ -18,7 +23,7 @@ router.beforeEach((to, from, next) => {
                 next()
             } else {
                 toast("登录后访问")
-                return next({ path: "/login" })
+                return next({path: "/login"})
             }
         }
     }

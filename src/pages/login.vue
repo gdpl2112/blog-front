@@ -111,9 +111,9 @@ const submitForm = () => {
       userLogin(form.username, form.password).then(res => {
         if (res.code === 200) {
           Cookie.set("token", res.token)
-          router.push("/")
           toast("登录成功", "success")
           loadUser()
+          onLoginSuccess()
         } else toast(res.msg)
       }).catch(err => {
         toast(err.msg)
@@ -194,9 +194,8 @@ function loginAuth() {
         if (res.code === 200) {
           loadingf.close()
           Cookie.set("token", res.token)
-          router.push("/")
-          toast("登录成功", "success")
           loadUser()
+          onLoginSuccess()
         } else {
           toast(res.msg)
         }
@@ -225,27 +224,51 @@ function loginAuth() {
         loading.value = false
       })
     } else {
-      // 无p值 github
-      service.get("/auth/github/callback?" + pu).then(res => {
-        if (res.code === 200) {
-          loadingf.close()
-          Cookie.set("token", res.token)
-          router.push("/")
-          toast("登录成功", "success")
-          loadUser()
-        } else {
-          toast(res.msg)
-        }
-      }).catch(err => {
-        console.log(err)
-        toast("登录失败:" + err)
-      }).finally(() => {
+      if (armap.get("app_id")) {
         loadingf.close()
         loading.value = false
-      })
+      } else {
+        // 无p值 github
+        service.get("/auth/github/callback?" + pu).then(res => {
+          if (res.code === 200) {
+            loadingf.close()
+            Cookie.set("token", res.token)
+            toast("登录成功", "success")
+            loadUser()
+            onLoginSuccess()
+          } else {
+            toast(res.msg)
+          }
+        }).catch(err => {
+          console.log(err)
+          toast("登录失败:" + err)
+        }).finally(() => {
+          loadingf.close()
+          loading.value = false
+        })
+      }
     }
   }
+}
 
+function onLoginSuccess() {
+  const url = document.location.toString()
+  const n = url.indexOf("?");
+  const pu = url.substring(n + 1)
+  const armap = new Map()
+  pu.split("&").forEach(function (kv) {
+    const kvn = kv.split("=")
+    let key0 = kvn[0];
+    if (key0.startsWith("#")) key0 = key0.substring(1)
+    armap.set(key0, kvn[1])
+  })
+  // 检查是否有重定向URI，如果有则重定向到授权页面
+  if (armap.get("redirect_uri")) {
+    const redirectUri = decodeURIComponent(armap.get("redirect_uri"))
+    router.push(`/authc?app_id=${armap.get("app_id")}&redirect_uri=${encodeURIComponent(redirectUri)}`)
+  } else {
+    router.push("/")
+  }
 }
 
 onMounted(() => {
