@@ -133,7 +133,8 @@ const resetEid = () => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   })
-  service.get("/auth/reset_email?eid=" + eid).then(res => {
+  service.get("/auth/reset_email?eid=" + eid).then(r0 => {
+    let res = r0 as any;
     if (res.code === 200) {
       toast("请检查你的邮箱/切勿重复操作", "success")
     } else toast(res.msg)

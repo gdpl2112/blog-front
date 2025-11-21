@@ -14,20 +14,20 @@
             </button>
           </div>
           <div class="card-body p-0" style="max-height: 60vh; overflow-y: auto;">
-            <div 
-              v-for="session in sessions" 
-              :key="session.id"
-              class="border-bottom p-3 session-item"
-              :class="{ 'bg-primary text-white': currentSessionId === session.id }"
-              @click="switchSession(session.id)"
-              style="cursor: pointer;">
+            <div
+                v-for="session in sessions"
+                :key="session.id"
+                class="border-bottom p-3 session-item"
+                :class="{ 'bg-primary text-white': currentSessionId === session.id }"
+                @click="switchSession(session.id)"
+                style="cursor: pointer;">
               <div class="d-flex justify-content-between align-items-center">
                 <div class="fw-bold">{{ session.title || (session.title_temp || '新会话') }}</div>
-                <button 
-                  v-if="sessions.length > 1"
-                  class="btn btn-sm"
-                  :class="currentSessionId === session.id ? 'btn-light' : 'btn-outline-danger'"
-                  @click.stop="deleteSession(session.id)">
+                <button
+                    v-if="sessions.length > 1"
+                    class="btn btn-sm"
+                    :class="currentSessionId === session.id ? 'btn-light' : 'btn-outline-danger'"
+                    @click.stop="deleteSession(session.id)">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 聊天主区域 -->
       <div class="col-lg-9 col-md-12">
         <div class="card">
@@ -48,47 +48,49 @@
               <i class="bi bi-trash"></i> 清空
             </button>
           </div>
-          
+
           <div class="card-body p-0" style="height: 60vh; overflow-y: auto;" ref="chatHistory">
             <!-- 消息列表 -->
             <div v-if="messages.length > 0">
-              <div 
-                v-for="(message, index) in messages" 
-                :key="index"
-                class="border-bottom py-2 chat-message"
-                :class="{
+              <div
+                  v-for="(message, index) in messages"
+                  :key="index"
+                  class="border-bottom py-2 chat-message"
+                  :class="{
                   'bg-primary bg-opacity-10': message.role === 'assistant',
                   'text-end': message.role === 'user'
                 }"
               >
-                <div class="d-flex align-items-start" 
+                <div class="d-flex align-items-start"
                      :class="message.role === 'user' ? 'justify-content-end' : 'justify-content-start'">
 
-                  <div v-if="message.role === 'assistant'" class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 ms-2 message-avatar bg-primary">
+                  <div v-if="message.role === 'assistant'"
+                       class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 ms-2 message-avatar bg-primary">
                     {{ 'AI' }}
                   </div>
-                  <div class="rounded message-bubble" 
+                  <div class="rounded message-bubble"
                        :class="message.role === 'user' ? 'bg-success text-dark' : 'bg-light'"
                        style="max-width: 80%;">
                     <MdPreview :modelValue="message.content" class="message-bubble"/>
                     <div class="d-flex justify-content-end mt-1">
-                      <button 
-                        class="btn btn-sm btn-outline-secondary py-0 px-2 mx-1"
-                        @click="copyMessageContent(message.content)"
-                        title="复制内容"
+                      <button
+                          class="btn btn-sm btn-outline-secondary py-0 px-2 mx-1"
+                          @click="copyMessageContent(message.content)"
+                          title="复制内容"
                       >
                         <i class="bi bi-clipboard"></i>
                       </button>
-                      <button 
-                        class="btn btn-sm btn-outline-secondary py-0 px-2"
-                        @click="showFullScreenMessage(message)"
-                        title="全屏查看"
+                      <button
+                          class="btn btn-sm btn-outline-secondary py-0 px-2"
+                          @click="showFullScreenMessage(message)"
+                          title="全屏查看"
                       >
                         <i class="bi bi-arrows-fullscreen"></i>
                       </button>
                     </div>
                   </div>
-                 <div v-if="message.role === 'user'" class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 ms-2 message-avatar bg-success">
+                  <div v-if="message.role === 'user'"
+                       class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 ms-2 message-avatar bg-success">
                     {{ '我' }}
                   </div>
                 </div>
@@ -100,7 +102,7 @@
               <h5>开始新的对话</h5>
               <p class="mb-0">输入您的问题，AI助手将为您提供帮助</p>
             </div>
-            
+
             <!-- 思考指示器 -->
             <div v-if="thinkingContent" class="p-3 border-bottom bg-warning bg-opacity-10">
               <div class="d-flex align-items-center">
@@ -111,25 +113,25 @@
               </div>
             </div>
           </div>
-          
+
           <!-- 输入区域 -->
           <div class="card-footer">
             <div class="input-group">
               <textarea
-                v-model="userInput"
-                @keydown.enter.exact.prevent="sendMessage"
-                @keydown.enter.shift.exact.prevent="userInput += '\n'"
-                class="form-control"
-                placeholder="输入您的问题...(Enter发送，Shift+Enter换行);&#10;内容由AI生成仅供参考! 会话上下文长度最大有限"
-                :disabled="isLoading"
-                rows="2"
-                style="resize: none;"
+                  v-model="userInput"
+                  @keydown.enter.exact.prevent="sendMessage"
+                  @keydown.enter.shift.exact.prevent="userInput += '\n'"
+                  class="form-control"
+                  placeholder="输入您的问题...(Enter发送，Shift+Enter换行);&#10;内容由AI生成仅供参考! 会话上下文长度最大有限"
+                  :disabled="isLoading"
+                  rows="2"
+                  style="resize: none;"
               ></textarea>
-              <button 
-                class="btn" 
-                :class="isLoading ? 'btn-danger' : 'btn-primary'"
-                @click="isLoading ? stopStreaming() : sendMessage()"
-                :disabled="(!userInput.trim() && !isLoading) || !login_state"
+              <button
+                  class="btn"
+                  :class="isLoading ? 'btn-danger' : 'btn-primary'"
+                  @click="isLoading ? stopStreaming() : sendMessage()"
+                  :disabled="(!userInput.trim() && !isLoading) || !login_state"
               >
                 <span v-if="isLoading">
                   <span class="spinner-border spinner-border-sm me-1" role="status"></span>
@@ -141,41 +143,44 @@
               </button>
             </div>
             <div v-if="!login_state" class="text-center mt-2 text-danger">
-              <small>需要登录才能使用AI对话功能，请先 <router-link to="/login">登录</router-link></small>
+              <small>需要登录才能使用AI对话功能，请先
+                <router-link to="/login">登录</router-link>
+              </small>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
+
   <!-- 全屏显示模态框 -->
-  <div 
-    v-if="isFullScreenMode" 
-    class="fixed inset-0 bg-black bg-opacity-90 z-50 d-flex flex-column justify-center items-center p-4" 
-    @click.self="exitFullScreenMode"
+  <div
+      v-if="isFullScreenMode"
+      class="fixed inset-0 bg-black bg-opacity-90 z-50 d-flex flex-column justify-center items-center p-4"
+      @click.self="exitFullScreenMode"
   >
     <div class="absolute top-4 right-4">
-      <button 
-        class="btn btn-lg btn-outline-light rounded-full w-10 h-10 flex items-center justify-center"
-        @click="exitFullScreenMode"
-        title="退出全屏"
+      <button
+          class="btn btn-lg btn-outline-light rounded-full w-10 h-10 flex items-center justify-center"
+          @click="exitFullScreenMode"
+          title="退出全屏"
       >
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
     <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full max-h-[80vh] overflow-auto">
       <div class="mb-4">
-        <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 mb-2 message-avatar bg-primary inline-flex">
+        <div
+            class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 mb-2 message-avatar bg-primary inline-flex">
           {{ fullScreenMessage?.role === 'assistant' ? 'AI' : '我' }}
         </div>
       </div>
-      <MdPreview :modelValue="fullScreenMessage?.content || ''" class="markdown-fullscreen" />
+      <MdPreview :modelValue="fullScreenMessage?.content || ''" class="markdown-fullscreen"/>
       <div class="mt-4 d-flex justify-end">
-        <button 
-          class="btn btn-sm btn-outline-secondary py-1 px-3"
-          @click="copyMessageContent(fullScreenMessage?.content || '')"
-          title="复制内容"
+        <button
+            class="btn btn-sm btn-outline-secondary py-1 px-3"
+            @click="copyMessageContent(fullScreenMessage?.content || '')"
+            title="复制内容"
         >
           <i class="bi bi-clipboard me-1"></i> 复制内容
         </button>
@@ -185,13 +190,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick, computed } from "vue";
-import { formatMsgTime, toast } from "@/utils/utils";
-import { login_state } from "@/axios";
+import {computed, nextTick, onMounted, ref} from "vue";
+import {toast} from "@/utils/utils";
+import service, {login_state} from "@/axios";
 import router from "@/router";
-import { MdPreview } from "md-editor-v3";
-import service from "@/axios";
-import type { AxiosResponse } from "axios";
+import {MdPreview} from "md-editor-v3";
+import Cookie from "js-cookie";
 
 // 定义消息类型
 interface Message {
@@ -323,7 +327,7 @@ async function loadChatSessions() {
       const session: Session = {
         id: chatId,
         title: '',
-        title_temp: '会话_'+chatId.substring(chatId.length-5, chatId.length),
+        title_temp: '会话_' + chatId.substring(chatId.length - 5, chatId.length),
         messages: []
       };
 
@@ -438,8 +442,10 @@ async function callAIStreamAPI(question: string) {
 
     const response = await fetch('/api/chat/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      headers: {
+        'Content-Type': 'application/json'
+        , 'Authorization': (Cookie.get("token") || Cookie.get("authorization")) as string
+      }, body: JSON.stringify({
         q: question,
         chatId: currentSessionId.value
       }),
@@ -468,10 +474,10 @@ async function callAIStreamAPI(question: string) {
 
     try {
       while (true) {
-        const { done, value } = await reader.read();
+        const {done, value} = await reader.read();
         if (done) break;
 
-        accumulatedData += decoder.decode(value, { stream: true });
+        accumulatedData += decoder.decode(value, {stream: true});
 
         const lines = accumulatedData.split('\n');
         accumulatedData = lines.pop() || '';
@@ -493,7 +499,7 @@ async function callAIStreamAPI(question: string) {
               });
             } else if (data.type === 'content') {
               appendContent(aiMessageIndex, data.content);
-              if(thinkingContent.value !== "")
+              if (thinkingContent.value !== "")
                 thinkingContent.value = "";
             } else if (data.type === 'done') {
               console.log('流式响应结束');
@@ -580,7 +586,7 @@ onMounted(async () => {
   if (login_state.value) {
     // 加载用户的会话列表
     await loadChatSessions();
-    
+
     // 如果有会话列表，加载第一个会话的内容
     if (sessions.value.length > 0) {
       // 确保第一个会话的内容已加载
@@ -683,12 +689,29 @@ onMounted(async () => {
   line-height: 1.25;
 }
 
-.markdown-fullscreen :deep(h1) { font-size: 2rem; }
-.markdown-fullscreen :deep(h2) { font-size: 1.5rem; }
-.markdown-fullscreen :deep(h3) { font-size: 1.25rem; }
-.markdown-fullscreen :deep(h4) { font-size: 1rem; }
-.markdown-fullscreen :deep(h5) { font-size: 0.875rem; }
-.markdown-fullscreen :deep(h6) { font-size: 0.75rem; }
+.markdown-fullscreen :deep(h1) {
+  font-size: 2rem;
+}
+
+.markdown-fullscreen :deep(h2) {
+  font-size: 1.5rem;
+}
+
+.markdown-fullscreen :deep(h3) {
+  font-size: 1.25rem;
+}
+
+.markdown-fullscreen :deep(h4) {
+  font-size: 1rem;
+}
+
+.markdown-fullscreen :deep(h5) {
+  font-size: 0.875rem;
+}
+
+.markdown-fullscreen :deep(h6) {
+  font-size: 0.75rem;
+}
 
 .markdown-fullscreen :deep(p) {
   margin-bottom: 1rem;

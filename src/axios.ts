@@ -67,7 +67,8 @@ export async function loadUser() {
 }
 
 export function userLogout() {
-    service.post("/auth/logout").then(r => {
+    service.post("/auth/logout").then(r0 => {
+        let r = r0 as unknown as StateInfo;
         if (r.code == 200) {
             toast("退出登录成功", "success")
             Cookie.remove("token")
