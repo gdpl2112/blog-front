@@ -13,6 +13,7 @@ export const service = axios.create({
 service.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
     config.headers['Token'] = Cookie.get("token")
+    config.headers['Authorization'] = Cookie.get("authorization")
     return config;
 }, function (error) {
     // 对请求错误做些什么
