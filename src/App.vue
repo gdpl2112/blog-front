@@ -268,6 +268,36 @@ body {
     width: 100%;
     text-align: center;
   }
+  
+  /* 确保品牌名称在移动端正确居中 */
+  .navbar-brand {
+    margin: 0 auto !important;
+    position: relative;
+    left: 0 !important;
+    transform: none !important;
+    justify-content: center !important;
+  }
+  
+  /* 修复移动端导航栏布局 */
+  #main-nav {
+    position: relative;
+  }
+  
+  /* 调整移动端菜单按钮位置 */
+  .navbar-toggler {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    z-index: 1000;
+    margin: 0;
+  }
+  
+  /* 确保容器正常工作 */
+  .container-fluid {
+    padding-right: 70px !important;
+    padding-left: 15px !important;
+  }
 }
 
 audio {
@@ -315,13 +345,16 @@ audio {
     </div>
     
     <nav id="main-nav" class="z-999 navbar navbar-expand-lg navbar-light">
-      <RouterLink class="navbar-brand navbar nav-button"
-                  style="z-index: auto;align-items: center;display: flex;color: #ff4dc3;text-decoration: none;" to="/">
-        <img class="d-inline-block align-text-top" src="/favicon.ico"
-             alt="kloping`s blog"
-             style="opacity: 0.86; border-radius: 999px;max-width: 50px;margin-right: 15px;margin-left: 20px">
-        kloping`s blog
-      </RouterLink>
+      <div class="container-fluid d-flex justify-content-between align-items-center w-100 px-3">
+        <RouterLink class="navbar-brand nav-button flex-shrink-0"
+                    style="display: flex; align-items: center; justify-content: center; color: #ff4dc3; text-decoration: none;"
+                    to="/">
+          <img class="d-inline-block align-text-top me-2"
+               src="/favicon.ico"
+               alt="kloping`s blog"
+               style="opacity: 0.86; border-radius: 999px; max-width: 40px;">
+          kloping`s blog
+        </RouterLink>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
               data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent"
               aria-expanded="false" aria-label="Toggle navigation">
@@ -398,6 +431,7 @@ audio {
           <RouterLink to="/v0" class="mr-2 btn btn-outline-success nav-button" type="button">个人中心</RouterLink>
           <RouterLink to="/upload" class="mr-2 btn btn-outline-success nav-button" type="button">发帖</RouterLink>
         </div>
+      </div>
       </div>
     </nav>
 
