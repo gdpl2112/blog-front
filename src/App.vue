@@ -1,13 +1,13 @@
 <style>
 body {
   margin: 0;
-  background: #333 url("https://file.kloping.top/a5a2bde2-d277-479e-8a21-6ed1c81e6f18.jpg") no-repeat fixed center/cover;
+  background: #333 url("https://file.kloping.top/a12333dddff.png") no-repeat fixed center/cover;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   body {
-    background-image: url("https://pvzh.giantapp.cn/upload/c06323ff2c0e43fa95e69cb90d9126d7/wallpapers/6892243892d000f81702a4bf/1754407979407_vtH0M.jpg");
+    background-image: url("https://file.kloping.top/3081369a-3969-4e6c-be22-05e086212fbb.jpg");
     background-size: 100% auto;
   }
 }
@@ -406,10 +406,10 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/11.23
+                front-vue3 update 25/12.06
               </p>
               <p class="dropdown-item" style="font-size: small">
-                主体界面优化
+                主体界面优化,壁纸更新
               </p>
             </div>
           </li>
