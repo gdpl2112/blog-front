@@ -7,7 +7,7 @@ body {
 
 @media (max-width: 768px) {
   body {
-    background-image: url("https://file.kloping.top/3081369a-3969-4e6c-be22-05e086212fbb.jpg");
+    background-image: url("https://file.kloping.top/3081369a-3969-4e6c-be22-05e086212fbb.jpg") no-repeat fixed center/cover;
     background-size: 100% auto;
   }
 }
