@@ -1,14 +1,28 @@
 <style>
+/* 基础样式 */
 body {
   margin: 0;
-  background: #333 url("https://img.cdn1.vip/i/6933cb9943b14_1765002137.webp") no-repeat fixed center/cover;
   min-height: 100vh;
+  background-color: #333; /* 添加默认背景色防止加载延迟闪现 */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
+/* 大屏幕（桌面端） */
+@media (min-width: 769px) {
+  body {
+    background-image: url("https://img.cdn1.vip/i/6933cb9943b14_1765002137.webp");
+    background-size: cover; /* 保持比例填满屏幕 */
+  }
+}
+
+/* 小屏幕（移动端） */
 @media (max-width: 768px) {
   body {
-    background-image: url("https://img.cdn1.vip/i/6933cbdc32eb9_1765002204.webp") no-repeat fixed center/cover;
-    background-size: 100% auto;
+    background-image: url("https://img.cdn1.vip/i/6933cbdc32eb9_1765002204.webp") ;
+    background-size: cover; /* 保持比例适应屏幕 铺满屏幕 */
+    background-position: top center; /* 根据图片内容调整对齐方式 */
   }
 }
 
