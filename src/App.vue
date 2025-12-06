@@ -1,13 +1,13 @@
 <style>
 body {
   margin: 0;
-  background: #333 url("https://file.kloping.top/a12333dddff.png") no-repeat fixed center/cover;
+  background: #333 url("https://img.cdn1.vip/i/6933cb9943b14_1765002137.webp") no-repeat fixed center/cover;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   body {
-    background-image: url("https://file.kloping.top/3081369a-3969-4e6c-be22-05e086212fbb.jpg") no-repeat fixed center/cover;
+    background-image: url("https://img.cdn1.vip/i/6933cbdc32eb9_1765002204.webp") no-repeat fixed center/cover;
     background-size: 100% auto;
   }
 }
