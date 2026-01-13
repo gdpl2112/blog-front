@@ -12,7 +12,7 @@ body {
 /* 大屏幕（桌面端） */
 @media (min-width: 769px) {
   body {
-    background-image: url("https://img.cdn1.vip/i/6933cb9943b14_1765002137.webp");
+    background-image: url("https://file.kloping.top/a12333dddff.png");
     background-size: cover; /* 保持比例填满屏幕 */
   }
 }
@@ -20,7 +20,7 @@ body {
 /* 小屏幕（移动端） */
 @media (max-width: 768px) {
   body {
-    background-image: url("https://img.cdn1.vip/i/6933cbdc32eb9_1765002204.webp") ;
+    background-image: url("https://file.kloping.top/26-0112-640.png") ;
     background-size: cover; /* 保持比例适应屏幕 铺满屏幕 */
     background-position: top center; /* 根据图片内容调整对齐方式 */
   }
@@ -420,10 +420,10 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 25/12.06
+                front-vue3 update 26.0113
               </p>
               <p class="dropdown-item" style="font-size: small">
-                主体界面优化,壁纸更新
+                壁纸更新
               </p>
             </div>
           </li>
