@@ -33,19 +33,23 @@ onMounted(() => {
       </p>
     </div>
 
-    <el-row :gutter="20" justify="center">
-      <el-col :span="8">
-        <el-card class="text-center">
+    <el-row :gutter="20" justify="center" :xs="24" :sm="12" :md="8">
+      <el-col :span="8" :xs="24">
+        <el-card class="text-center sponsor-card">
           <h4 class="mb-3">微信支付</h4>
-          <img style="width: 1080px" src="/images/wechat-qrcode.png" alt="微信收款码" class="qrcode mb-2"/>
-          <p>使用Wechat</p>
+          <div class="qrcode-container">
+            <img src="/images/wechat-qrcode.png" alt="微信收款码" class="qrcode"/>
+          </div>
+          <p style="margin-top: 10px">使用Wechat</p>
         </el-card>
       </el-col>
-      <el-col :span="8">
-        <el-card class="text-center">
+      <el-col :span="8" :xs="24">
+        <el-card class="text-center sponsor-card">
           <h4 class="mb-3">支付宝支付</h4>
-          <img style="width: 1080px" src="/images/alipay-qrcode.png" alt="支付宝收款码" class="qrcode mb-2"/>
-          <p>使用Alipay</p>
+          <div class="qrcode-container">
+            <img src="/images/alipay-qrcode.png" alt="支付宝收款码" class="qrcode"/>
+          </div>
+          <p style="margin-top: 10px">使用Alipay</p>
         </el-card>
       </el-col>
     </el-row>
@@ -68,7 +72,6 @@ onMounted(() => {
     <hr>
     <br>
   </div>
-
 </template>
 
 <style scoped>
@@ -78,14 +81,52 @@ onMounted(() => {
 }
 
 .qrcode {
-  width: 250px;
-  height: 250px;
+  max-width: 100%;
+  height: 100%;
   object-fit: contain;
+  display: block;
+}
+
+.sponsor-card {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.sponsor-card .qrcode-container {
+  width: 250px;
+  height: 260px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .sponsor-list {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .el-col {
+    margin-bottom: 20px;
+  }
+  
+  .el-col:last-child {
+    margin-bottom: 0;
+  }
+  
+  .qrcode {
+    max-width: 80%;
+    height: auto;
+  }
 }
 </style>
