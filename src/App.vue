@@ -12,7 +12,7 @@ body {
 /* 大屏幕（桌面端） */
 @media (min-width: 769px) {
   body {
-    background-image: url("https://file.kloping.top/a12333dddff.png");
+    background-image: url("/f/a12333dddff.png");
     background-size: cover; /* 保持比例填满屏幕 */
   }
 }
@@ -20,7 +20,7 @@ body {
 /* 小屏幕（移动端） */
 @media (max-width: 768px) {
   body {
-    background-image: url("https://file.kloping.top/26-0112-640.png") ;
+    background-image: url("/f/26-0112-640.png") ;
     background-size: cover; /* 保持比例适应屏幕 铺满屏幕 */
     background-position: top center; /* 根据图片内容调整对齐方式 */
   }
