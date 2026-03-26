@@ -420,10 +420,10 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 26.0113
+                front-vue3 update 26.0326
               </p>
               <p class="dropdown-item" style="font-size: small">
-                壁纸更新
+                优化部分问题
               </p>
             </div>
           </li>
