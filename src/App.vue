@@ -420,7 +420,7 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 26.0326
+                front-vue3 update 26.04.02
               </p>
               <p class="dropdown-item" style="font-size: small">
                 优化部分问题

@@ -406,6 +406,9 @@ const isLoading = ref(false);
 const chatHistory = ref<HTMLElement | null>(null);
 const thinkingContent = ref("");
 const abortController = ref<AbortController | null>(null);
+const STREAM_RESPONSE_TIMEOUT = 10 * 60 * 1000;
+let streamTimeoutId: number | null = null;
+let streamTimedOut = false;
 // 全屏显示相关数据
 const isFullScreenMode = ref(false);
 const fullScreenMessage = ref<Message | null>(null);
@@ -865,6 +868,17 @@ function exitFullScreenMode() {
 async function callAIStreamAPI(question: string) {
   try {
     abortController.value = new AbortController();
+    streamTimedOut = false;
+
+    if (streamTimeoutId !== null) {
+      clearTimeout(streamTimeoutId);
+      streamTimeoutId = null;
+    }
+
+    streamTimeoutId = window.setTimeout(() => {
+      streamTimedOut = true;
+      abortController.value?.abort();
+    }, STREAM_RESPONSE_TIMEOUT);
 
     const response = await fetch('/api/chat/', {
       method: 'POST',
@@ -981,14 +995,25 @@ async function callAIStreamAPI(question: string) {
       reader.releaseLock();
       isLoading.value = false;
       thinkingContent.value = "";
+      if (streamTimeoutId !== null) {
+        clearTimeout(streamTimeoutId);
+        streamTimeoutId = null;
+      }
       scrollToBottom();
     }
   } catch (error: any) {
+    if (streamTimeoutId !== null) {
+      clearTimeout(streamTimeoutId);
+      streamTimeoutId = null;
+    }
+
     if (error && error.name === 'AbortError') {
-      thinkingContent.value = '[对话已停止]';
+      thinkingContent.value = streamTimedOut ? '[请求超时，请重试]' : '[对话已停止]';
     } else {
       thinkingContent.value = '[发生错误，请重试]';
     }
+
+    streamTimedOut = false;
     isLoading.value = false;
     scrollToBottom();
   }
@@ -1010,6 +1035,11 @@ function appendContent(messageIndex: number, content: string) {
 // 停止流式传输
 function stopStreaming() {
   if (abortController.value) {
+    if (streamTimeoutId !== null) {
+      clearTimeout(streamTimeoutId);
+      streamTimeoutId = null;
+    }
+    streamTimedOut = false;
     abortController.value.abort();
     isLoading.value = false;
     thinkingContent.value = '[对话已停止]';
