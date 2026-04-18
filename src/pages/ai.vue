@@ -121,6 +121,25 @@
                         :class="isDarkMode ? 'markdown-dark' : ''"
                       />
                     </div>
+                    <div v-if="message.images && message.images.length > 0" class="message-images px-2 pb-1">
+                      <div class="d-flex flex-wrap gap-2" :class="message.role === 'user' ? 'justify-content-end' : 'justify-content-start'">
+                        <a
+                            v-for="(image, imageIndex) in message.images"
+                            :key="`${index}-img-${imageIndex}`"
+                            :href="image.src"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="message-image-link"
+                            :title="`查看图片 ${imageIndex + 1}`"
+                        >
+                          <img
+                              :src="image.src"
+                              :alt="`消息图片 ${imageIndex + 1}`"
+                              class="message-image-thumb"
+                          />
+                        </a>
+                      </div>
+                    </div>
                     <div class="d-flex justify-content-end mt-1 px-2 pb-1">
                       <span class="text-xs text-muted mr-2">
                         {{ formatMessageTime(message) }}
@@ -253,10 +272,80 @@
                 Enter发送，Shift+Enter换行
               </span>
             </div>
+
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="d-flex gap-2">
+                  <button
+                      class="btn btn-sm btn-outline-secondary"
+                      type="button"
+                      :class="isDarkMode ? 'btn-outline-gray-500' : ''"
+                      :disabled="isLoading || !login_state"
+                      @click="triggerImageUpload"
+                  >
+                    <i class="bi bi-image me-1"></i> 上传图片
+                  </button>
+                  <button
+                      v-if="imageAttachments.length > 0"
+                      class="btn btn-sm btn-outline-danger"
+                      type="button"
+                      :disabled="isLoading || !login_state"
+                      @click="clearImageAttachments"
+                  >
+                    清空图片
+                  </button>
+                </div>
+              </div>
+
+              <input
+                  ref="imageFileInputRef"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  class="d-none"
+                  :disabled="isLoading || !login_state"
+                  @change="handleImageFileChange"
+              />
+
+<!--              <textarea-->
+<!--                  v-model="imageInput"-->
+<!--                  @paste="handleImagePaste"-->
+<!--                  class="form-control transition-all focus:ring-2 focus:ring-primary/50"-->
+<!--                  :class="isDarkMode ? 'bg-gray-700 text-white border-gray-600' : ''"-->
+<!--                  placeholder="可选：每行输入一个图片（URL / Base64 / DataURL / JSON对象）"-->
+<!--                  :disabled="isLoading || !login_state"-->
+<!--                  rows="2"-->
+<!--                  style="resize: none;"-->
+<!--              ></textarea>-->
+
+              <div v-if="imageAttachments.length > 0" class="d-flex flex-wrap gap-2 mt-2">
+                <div
+                    v-for="item in imageAttachments"
+                    :key="item.id"
+                    class="position-relative border rounded overflow-hidden"
+                    style="width: 72px; height: 72px;"
+                >
+                  <img
+                      :src="item.dataUrl"
+                      :alt="item.name"
+                      style="width: 100%; height: 100%; object-fit: cover;"
+                  />
+                  <button
+                      class="btn btn-sm btn-danger position-absolute top-0 end-0 py-0 px-1"
+                      type="button"
+                      :disabled="isLoading"
+                      @click="removeImageAttachment(item.id)"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            </div>
             
             <div class="input-group">
               <textarea
                   v-model="userInput"
+                  @paste="handleImagePaste"
                   @keydown.enter.exact.prevent="sendMessage"
                   @keydown.enter.shift.exact.prevent="userInput += '\n'"
                   class="form-control transition-all focus:ring-2 focus:ring-primary/50"
@@ -271,7 +360,7 @@
                   class="btn transition-all hover:shadow-md"
                   :class="isLoading ? 'btn-danger' : 'btn-primary'"
                   @click="isLoading ? stopStreaming() : sendMessage()"
-                  :disabled="(!userInput.trim() && !isLoading) || !login_state"
+                  :disabled="(!canSendMessage && !isLoading) || !login_state"
                   :title="isLoading ? '停止生成' : '发送消息'"
               >
                 <span v-if="isLoading">
@@ -319,13 +408,32 @@
     <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full max-h-[80vh] overflow-auto animate-scale-in">
       <div class="mb-4">
         <div
-            class="rounded-circle d-flex align-items-center justify-center text-white me-2 mb-2 message-avatar bg-primary inline-flex">
+            class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 mb-2 message-avatar bg-primary inline-flex">
           <i :class="fullScreenMessage?.role === 'assistant' ? 'bi bi-robot' : 'bi bi-person'"></i>
         </div>
         <h3 class="text-lg font-semibold">{{ fullScreenMessage?.role === 'assistant' ? 'AI 回复' : '我的消息' }}</h3>
       </div>
       <div class="mb-4">
         <MdPreview :modelValue="fullScreenMessage?.content || ''" class="markdown-fullscreen"/>
+      </div>
+      <div v-if="fullScreenMessage?.images && fullScreenMessage.images.length > 0" class="mb-4">
+        <div class="text-sm text-muted mb-2">附带图片</div>
+        <div class="d-flex flex-wrap gap-3">
+          <a
+              v-for="(image, imageIndex) in fullScreenMessage.images"
+              :key="`fullscreen-img-${imageIndex}`"
+              :href="image.src"
+              target="_blank"
+              rel="noopener noreferrer"
+              :title="`查看图片 ${imageIndex + 1}`"
+          >
+            <img
+                :src="image.src"
+                :alt="`全屏消息图片 ${imageIndex + 1}`"
+                class="fullscreen-message-image"
+            />
+          </a>
+        </div>
       </div>
       <div class="mt-4 d-flex justify-between">
         <div class="text-sm text-muted">
@@ -380,12 +488,18 @@ import router from "@/router";
 import {MdPreview} from "md-editor-v3";
 import Cookie from "js-cookie";
 
+interface MessageImage {
+  src: string;
+  mimeType: string;
+}
+
 // 定义消息类型，增加时间戳属性
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: number; // 新增时间戳
   edited?: boolean; // 新增编辑标记
+  images?: MessageImage[];
 }
 
 // 定义会话类型
@@ -397,11 +511,55 @@ interface Session {
   lastUpdated?: number; // 新增最后更新时间
 }
 
+interface ImageObjectInput {
+  url?: string;
+  base64?: string;
+  data?: string;
+  mimeType?: string;
+  type?: string;
+}
+
+type ChatImageInput = string | ImageObjectInput;
+
+interface ChatRequestPayload {
+  chatId: string;
+  q?: string;
+  message?: string;
+  images?: ChatImageInput[];
+}
+
+interface StreamEventPayload {
+  type: 'thinking' | 'content' | 'error' | 'done' | string;
+  content?: string;
+}
+
+interface ParsedImageInputResult {
+  images: ChatImageInput[];
+  invalidCount: number;
+}
+
+interface ImageAttachment {
+  id: string;
+  name: string;
+  mimeType: string;
+  dataUrl: string;
+}
+
+interface HistoryMessageResponse {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: number;
+  edited?: boolean;
+  images?: ChatImageInput[];
+}
+
 const welcome_text = "你好!我是\"小生AI博客智能助手\",有什么我可以帮助你的吗？"
+const DEFAULT_IMAGE_ANALYSIS_PROMPT = "请帮我分析这组图片的内容并给出建议。";
 
 // 响应式数据
 const messages = ref<Message[]>([]);
 const userInput = ref("");
+const imageInput = ref("");
 const isLoading = ref(false);
 const chatHistory = ref<HTMLElement | null>(null);
 const thinkingContent = ref("");
@@ -409,6 +567,11 @@ const abortController = ref<AbortController | null>(null);
 const STREAM_RESPONSE_TIMEOUT = 10 * 60 * 1000;
 let streamTimeoutId: number | null = null;
 let streamTimedOut = false;
+const imageFileInputRef = ref<HTMLInputElement | null>(null);
+const imageAttachments = ref<ImageAttachment[]>([]);
+const canSendMessage = computed(() => {
+  return !!userInput.value.trim() || !!imageInput.value.trim() || imageAttachments.value.length > 0;
+});
 // 全屏显示相关数据
 const isFullScreenMode = ref(false);
 const fullScreenMessage = ref<Message | null>(null);
@@ -770,17 +933,23 @@ async function loadChatSessions() {
 // 从服务器加载特定会话的历史记录
 async function loadChatHistory(chatId: string) {
   try {
-    const response = await service.get(`/api/chat/list?chatId=${chatId}`) as Message[];
+    const response = await service.get(`/api/chat/list?chatId=${chatId}`) as HistoryMessageResponse[];
     const chatData = response || [];
 
     const session = sessions.value.find(s => s.id === chatId);
     if (session) {
-      session.messages = chatData.map((item: any) => ({
-        role: item.role,
-        content: item.content,
-        timestamp: item.timestamp || Date.now(),
-        edited: item.edited || false
-      }));
+      session.messages = chatData.map((item: HistoryMessageResponse) => {
+        // 关键逻辑：将后端 images 统一转换为可直接渲染的图片地址
+        const messageImages = normalizeMessageImages(item.images);
+
+        return {
+          role: item.role,
+          content: item.content,
+          timestamp: item.timestamp || Date.now(),
+          edited: item.edited || false,
+          images: messageImages.length > 0 ? messageImages : undefined
+        };
+      });
 
       if (chatData.length > 0 && !session.title) {
         const firstUserMessage = chatData.find(msg => msg.role === 'user');
@@ -799,9 +968,363 @@ async function loadChatHistory(chatId: string) {
   }
 }
 
+// 构建鉴权请求头，兼容已带 Bearer 前缀与纯 token 两种格式
+function buildAuthorizationHeader(): string {
+  const token = (Cookie.get("token") || Cookie.get("authorization") || "").trim();
+  if (!token) {
+    return "";
+  }
+
+  return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+}
+
+// 判断是否为 HTTP(S) 图片地址
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+// 判断是否为图片 DataURL
+function isImageDataUrl(value: string): boolean {
+  return /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/.test(value);
+}
+
+// 判断是否为可能的 Base64 字符串
+function isLikelyBase64(value: string): boolean {
+  const normalized = value.replace(/\s/g, '');
+  return normalized.length >= 64 && normalized.length % 4 === 0 && /^[A-Za-z0-9+/]+=*$/.test(normalized);
+}
+
+// 从 DataURL 中提取 mimeType
+function extractMimeTypeFromDataUrl(dataUrl: string): string {
+  if (!dataUrl.startsWith('data:')) {
+    return 'image/png';
+  }
+
+  const mimeTypePart = dataUrl.slice(5).split(/[;,]/)[0] || '';
+  if (mimeTypePart.startsWith('image/')) {
+    return mimeTypePart;
+  }
+
+  return 'image/png';
+}
+
+// 标准化 mimeType，兜底为 image/png
+function normalizeImageMimeType(mimeType?: string): string {
+  if (!mimeType) {
+    return 'image/png';
+  }
+
+  const normalizedMimeType = mimeType.trim();
+  if (!normalizedMimeType) {
+    return 'image/png';
+  }
+
+  return normalizedMimeType.startsWith('image/') ? normalizedMimeType : 'image/png';
+}
+
+// 将原始图片字符串转换为可渲染的图片地址
+function normalizeImageSource(rawValue: string, mimeType?: string): string | null {
+  const normalizedValue = rawValue.trim();
+  if (!normalizedValue) {
+    return null;
+  }
+
+  if (isHttpUrl(normalizedValue) || isImageDataUrl(normalizedValue)) {
+    return normalizedValue;
+  }
+
+  if (!isLikelyBase64(normalizedValue)) {
+    return null;
+  }
+
+  // 关键逻辑：纯 Base64 需要补全 DataURL 前缀才能在历史消息中正确预览
+  return `data:${normalizeImageMimeType(mimeType)};base64,${normalizedValue.replace(/\s/g, '')}`;
+}
+
+// 将后端/本地图片输入转换为消息渲染模型
+function normalizeMessageImage(rawImage: ChatImageInput): MessageImage | null {
+  if (typeof rawImage === 'string') {
+    const src = normalizeImageSource(rawImage);
+    if (!src) {
+      return null;
+    }
+
+    return {
+      src,
+      mimeType: isImageDataUrl(src) ? extractMimeTypeFromDataUrl(src) : 'image/png'
+    };
+  }
+
+  const imageObject = rawImage as ImageObjectInput;
+  const objectMimeType = normalizeImageMimeType(imageObject.mimeType || imageObject.type);
+
+  const src =
+      (typeof imageObject.url === 'string' && normalizeImageSource(imageObject.url, objectMimeType)) ||
+      (typeof imageObject.data === 'string' && normalizeImageSource(imageObject.data, objectMimeType)) ||
+      (typeof imageObject.base64 === 'string' && normalizeImageSource(imageObject.base64, objectMimeType));
+
+  if (!src) {
+    return null;
+  }
+
+  return {
+    src,
+    mimeType: isImageDataUrl(src) ? extractMimeTypeFromDataUrl(src) : objectMimeType
+  };
+}
+
+// 归一化消息中的图片列表，过滤无效图片
+function normalizeMessageImages(rawImages?: ChatImageInput[]): MessageImage[] {
+  if (!rawImages || rawImages.length === 0) {
+    return [];
+  }
+
+  const normalizedImages: MessageImage[] = [];
+  for (const rawImage of rawImages) {
+    const messageImage = normalizeMessageImage(rawImage);
+    if (messageImage) {
+      normalizedImages.push(messageImage);
+    }
+  }
+
+  return normalizedImages;
+}
+
+// 归一化单个图片输入，过滤无效项
+function normalizeImageInput(rawItem: unknown): ChatImageInput | null {
+  if (typeof rawItem === 'string') {
+    const normalizedText = rawItem.trim();
+    if (!normalizedText) {
+      return null;
+    }
+
+    if (isHttpUrl(normalizedText) || isImageDataUrl(normalizedText) || isLikelyBase64(normalizedText)) {
+      return normalizedText;
+    }
+
+    return null;
+  }
+
+  if (!rawItem || typeof rawItem !== 'object' || Array.isArray(rawItem)) {
+    return null;
+  }
+
+  const item = rawItem as ImageObjectInput;
+  const normalizedItem: ImageObjectInput = {};
+
+  const url = typeof item.url === 'string' ? item.url.trim() : '';
+  const base64 = typeof item.base64 === 'string' ? item.base64.trim() : '';
+  const data = typeof item.data === 'string' ? item.data.trim() : '';
+  const mimeType = typeof item.mimeType === 'string' ? item.mimeType.trim() : '';
+  const type = typeof item.type === 'string' ? item.type.trim() : '';
+
+  if (url) {
+    if (!isHttpUrl(url) && !isImageDataUrl(url)) {
+      return null;
+    }
+    normalizedItem.url = url;
+  } else if (base64) {
+    normalizedItem.base64 = base64;
+  } else if (data) {
+    normalizedItem.data = data;
+  } else {
+    return null;
+  }
+
+  if (mimeType) {
+    normalizedItem.mimeType = mimeType;
+  } else if (type) {
+    normalizedItem.mimeType = type;
+  }
+
+  return normalizedItem;
+}
+
+// 解析图片输入，支持按行输入与 JSON 输入，非法项会被自动跳过
+function parseImagesInput(rawInput: string): ParsedImageInputResult {
+  const trimmedInput = rawInput.trim();
+  if (!trimmedInput) {
+    return {
+      images: [],
+      invalidCount: 0
+    };
+  }
+
+  const images: ChatImageInput[] = [];
+  let invalidCount = 0;
+
+  const appendNormalizedImage = (candidate: unknown) => {
+    const normalizedImage = normalizeImageInput(candidate);
+    if (normalizedImage) {
+      images.push(normalizedImage);
+    } else {
+      invalidCount += 1;
+    }
+  };
+
+  if (
+      (trimmedInput.startsWith('[') && trimmedInput.endsWith(']')) ||
+      (trimmedInput.startsWith('{') && trimmedInput.endsWith('}')) ||
+      (trimmedInput.startsWith('"') && trimmedInput.endsWith('"'))
+  ) {
+    try {
+      const parsedInput = JSON.parse(trimmedInput) as unknown;
+      if (Array.isArray(parsedInput)) {
+        parsedInput.forEach(item => appendNormalizedImage(item));
+      } else {
+        appendNormalizedImage(parsedInput);
+      }
+
+      return {
+        images,
+        invalidCount
+      };
+    } catch {
+      // JSON 解析失败时继续按行解析，避免中断整次请求
+    }
+  }
+
+  const lines = trimmedInput.split('\n').map(line => line.trim()).filter(Boolean);
+  for (const line of lines) {
+    if (
+        (line.startsWith('{') && line.endsWith('}')) ||
+        (line.startsWith('"') && line.endsWith('"'))
+    ) {
+      try {
+        appendNormalizedImage(JSON.parse(line) as unknown);
+        continue;
+      } catch {
+        // 单行 JSON 非法时，回退到字符串模式继续兼容
+      }
+    }
+
+    appendNormalizedImage(line);
+  }
+
+  return {
+    images,
+    invalidCount
+  };
+}
+
+// 生成本地图片附件唯一ID
+function generateImageAttachmentId(): string {
+  return `img_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+// 将文件读取为 DataURL，便于直接参与后端多模态请求
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === 'string' && result) {
+        resolve(result);
+        return;
+      }
+      reject(new Error('图片读取失败'));
+    };
+    reader.onerror = () => reject(new Error('图片读取失败'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// 将上传/粘贴得到的文件加入图片附件列表
+async function appendImageFiles(files: File[]): Promise<void> {
+  if (files.length === 0) {
+    return;
+  }
+
+  let addedCount = 0;
+  let skippedCount = 0;
+
+  for (const file of files) {
+    if (!file.type || !file.type.startsWith('image/')) {
+      skippedCount += 1;
+      continue;
+    }
+
+    try {
+      // 关键逻辑：将本地文件转为 DataURL，后端可直接构建 Spring AI Media
+      const dataUrl = await fileToDataUrl(file);
+      imageAttachments.value.push({
+        id: generateImageAttachmentId(),
+        name: file.name || `image-${Date.now()}`,
+        mimeType: file.type,
+        dataUrl
+      });
+      addedCount += 1;
+    } catch {
+      skippedCount += 1;
+    }
+  }
+
+  if (addedCount > 0) {
+    toast(`已添加 ${addedCount} 张图片`, 'success');
+  }
+  if (skippedCount > 0) {
+    toast(`已跳过 ${skippedCount} 个无效文件`, 'warning');
+  }
+}
+
+// 触发文件选择器
+function triggerImageUpload() {
+  imageFileInputRef.value?.click();
+}
+
+// 处理按钮上传图片
+async function handleImageFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files ? Array.from(input.files) : [];
+  await appendImageFiles(files);
+  // 重置 input，确保重复选择同一文件时 change 事件也会触发
+  input.value = '';
+}
+
+// 处理粘贴图片，支持截图直接 Ctrl+V
+async function handleImagePaste(event: ClipboardEvent) {
+  const items = event.clipboardData?.items;
+  if (!items || items.length === 0) {
+    return;
+  }
+
+  const files: File[] = [];
+  for (const item of Array.from(items)) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) {
+        files.push(file);
+      }
+    }
+  }
+
+  if (files.length === 0) {
+    return;
+  }
+
+  // 关键逻辑：检测到图片粘贴时阻止默认行为，避免 DataURL 直接插入文本框
+  event.preventDefault();
+  await appendImageFiles(files);
+}
+
+// 删除单个已添加图片
+function removeImageAttachment(attachmentId: string) {
+  imageAttachments.value = imageAttachments.value.filter(item => item.id !== attachmentId);
+}
+
+// 清空全部已添加图片
+function clearImageAttachments() {
+  imageAttachments.value = [];
+}
+
 // 发送消息
 function sendMessage() {
-  if (!userInput.value.trim() || isLoading.value) return;
+  if (isLoading.value) return;
 
   if (!login_state.value) {
     toast("需要登录才能与AI对话，请先登录。");
@@ -809,10 +1332,39 @@ function sendMessage() {
     return;
   }
 
+  if (!currentSessionId.value) {
+    toast("会话ID缺失，请刷新页面后重试。", "warning");
+    return;
+  }
+
+  const question = userInput.value.trim();
+  const {images, invalidCount} = parseImagesInput(imageInput.value);
+  const attachmentImages: ChatImageInput[] = imageAttachments.value.map(item => ({
+    data: item.dataUrl,
+    mimeType: item.mimeType
+  }));
+  const allImages: ChatImageInput[] = [...images, ...attachmentImages];
+  const messageImages = normalizeMessageImages(allImages);
+
+  if (!question && allImages.length === 0) {
+    return;
+  }
+
+  if (invalidCount > 0) {
+    toast(`已跳过 ${invalidCount} 个无效图片输入`, "warning");
+  }
+
+  // 文本为空但有图片时，自动补默认提示语以触发图片分析
+  const finalQuestion = question || DEFAULT_IMAGE_ANALYSIS_PROMPT;
+  const userMessageContent = question
+      ? question
+      : `${DEFAULT_IMAGE_ANALYSIS_PROMPT}\n\n[已附带 ${allImages.length} 张图片]`;
+
   const userMessage: Message = {
     role: 'user',
-    content: userInput.value.trim(),
-    timestamp: Date.now()
+    content: userMessageContent,
+    timestamp: Date.now(),
+    images: messageImages.length > 0 ? messageImages : undefined
   };
 
   messages.value.push(userMessage);
@@ -822,19 +1374,26 @@ function sendMessage() {
     currentSession.value.lastUpdated = Date.now();
 
     if (!currentSession.value.title) {
-      currentSession.value.title = userInput.value.trim().substring(0, 20) + (userInput.value.trim().length > 20 ? '...' : '');
+      currentSession.value.title = finalQuestion.substring(0, 20) + (finalQuestion.length > 20 ? '...' : '');
     }
   }
 
-  const userQuestion = userInput.value.trim();
   userInput.value = "";
+  imageInput.value = "";
+  imageAttachments.value = [];
 
   isLoading.value = true;
   thinkingContent.value = "正在思考...";
 
   scrollToBottom();
 
-  callAIStreamAPI(userQuestion);
+  callAIStreamAPI({
+    chatId: currentSessionId.value,
+    // 兼容策略：同时传 q 与 message，后端按约定优先使用 q
+    q: finalQuestion,
+    message: finalQuestion,
+    images: allImages.length > 0 ? allImages : undefined
+  });
 }
 
 // 复制消息内容
@@ -865,7 +1424,7 @@ function exitFullScreenMode() {
 }
 
 // 调用后端流式接口
-async function callAIStreamAPI(question: string) {
+async function callAIStreamAPI(payload: ChatRequestPayload) {
   try {
     abortController.value = new AbortController();
     streamTimedOut = false;
@@ -880,20 +1439,23 @@ async function callAIStreamAPI(question: string) {
       abortController.value?.abort();
     }, STREAM_RESPONSE_TIMEOUT);
 
+    const authorization = buildAuthorizationHeader();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (authorization) {
+      headers['Authorization'] = authorization;
+    }
+
     const response = await fetch('/api/chat/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': (Cookie.get("token") || Cookie.get("authorization")) as string
-      }, body: JSON.stringify({
-        q: question,
-        chatId: currentSessionId.value
-      }),
+      headers,
+      body: JSON.stringify(payload),
       signal: abortController.value.signal
     });
 
     if (!response.ok || !response.body) {
-      throw new Error('请求失败');
+      throw new Error(`请求失败: ${response.status}`);
     }
 
     const reader = response.body.getReader();
@@ -913,83 +1475,103 @@ async function callAIStreamAPI(question: string) {
     }
 
     let accumulatedData = '';
+    let streamEnded = false;
     
     // 添加打字机效果的延迟
     const typingDelay = 30; // 毫秒
     let lastContentUpdate = Date.now();
 
+    const handleStreamEvent = async (data: StreamEventPayload) => {
+      const eventContent = typeof data.content === 'string' ? data.content : '';
+
+      if (data.type === 'thinking') {
+        thinkingContent.value = eventContent;
+        nextTick(() => {
+          scrollToBottom();
+        });
+        return;
+      }
+
+      if (data.type === 'content') {
+        // 实现打字机效果 - 限制更新频率
+        const now = Date.now();
+        if (now - lastContentUpdate > typingDelay) {
+          appendContent(aiMessageIndex, eventContent);
+          lastContentUpdate = now;
+        } else {
+          // 如果更新太频繁，添加短暂延迟后再更新
+          await new Promise(resolve => setTimeout(resolve, typingDelay));
+          appendContent(aiMessageIndex, eventContent);
+          lastContentUpdate = Date.now();
+        }
+
+        if (thinkingContent.value !== "") {
+          thinkingContent.value = "";
+        }
+        return;
+      }
+
+      if (data.type === 'error') {
+        const errorText = eventContent || '请求处理失败';
+        const previousContent = messages.value[aiMessageIndex]?.content || '';
+        const prefix = previousContent ? '\n' : '';
+        appendContent(aiMessageIndex, `${prefix}[错误] ${errorText}`);
+        thinkingContent.value = "";
+        toast(errorText, 'warning');
+        streamEnded = true;
+        return;
+      }
+
+      if (data.type === 'done') {
+        streamEnded = true;
+      }
+    };
+
+    const processDataBlock = async (block: string) => {
+      const dataLine = block.split('\n').find(line => line.startsWith('data:'));
+      if (!dataLine) {
+        return;
+      }
+
+      const dataStr = dataLine.slice(5).trim();
+      if (dataStr === '' || dataStr === '[DONE]') {
+        return;
+      }
+
+      try {
+        const data = JSON.parse(dataStr) as StreamEventPayload;
+        await handleStreamEvent(data);
+      } catch {
+        // 兼容后端偶发直接返回文本片段
+        appendContent(aiMessageIndex, dataStr);
+      }
+    };
+
     try {
-      while (true) {
+      while (!streamEnded) {
         const {done, value} = await reader.read();
         if (done) break;
 
         accumulatedData += decoder.decode(value, {stream: true});
 
-        const lines = accumulatedData.split('\n');
-        accumulatedData = lines.pop() || '';
+        const blocks = accumulatedData.split('\n\n');
+        accumulatedData = blocks.pop() || '';
 
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (trimmedLine === '' || trimmedLine === '[DONE]') continue;
-
-          const dataStr = trimmedLine.replace(/^data:\s*/, '').trim();
-          if (dataStr === '') continue;
-
-          try {
-            const data = JSON.parse(dataStr);
-
-            if (data.type === 'thinking') {
-              thinkingContent.value = data.content;
-              nextTick(() => {
-                scrollToBottom();
-              });
-            } else if (data.type === 'content') {
-              // 实现打字机效果 - 限制更新频率
-              const now = Date.now();
-              if (now - lastContentUpdate > typingDelay) {
-                appendContent(aiMessageIndex, data.content);
-                lastContentUpdate = now;
-              } else {
-                // 如果更新太频繁，添加短暂延迟后再更新
-                await new Promise(resolve => setTimeout(resolve, typingDelay));
-                appendContent(aiMessageIndex, data.content);
-                lastContentUpdate = Date.now();
-              }
-              
-              if (thinkingContent.value !== "") {
-                thinkingContent.value = "";
-              }
-            } else if (data.type === 'done') {
-              console.log('流式响应结束');
+        for (const block of blocks) {
+          await processDataBlock(block);
+          if (streamEnded) {
+            try {
+              await reader.cancel();
+            } catch {
+              // 流已结束时忽略取消异常
             }
-          } catch (e) {
-            if (dataStr) {
-              appendContent(aiMessageIndex, dataStr);
-            } else {
-              console.error('解析JSON失败:', e, '原始数据:', dataStr);
-            }
+            break;
           }
         }
       }
 
-      if (accumulatedData) {
-        const trimmedLine = accumulatedData.trim();
-        if (trimmedLine !== '' && trimmedLine !== '[DONE]') {
-          const dataStr = trimmedLine.replace(/^data:\s*/, '').trim();
-          if (dataStr) {
-            try {
-              const data = JSON.parse(dataStr);
-
-              if (data.type === 'content') {
-                appendContent(aiMessageIndex, data.content);
-              }
-            } catch (e) {
-              if (dataStr) {
-                appendContent(aiMessageIndex, dataStr);
-              }
-            }
-          }
-        }
+      if (!streamEnded && accumulatedData.trim()) {
+        await processDataBlock(accumulatedData.trim());
       }
     } finally {
       reader.releaseLock();
@@ -1646,6 +2228,46 @@ onBeforeUnmount(() => {
   color: #e0e0e0;
 }
 
+/* 消息图片样式 */
+.message-images {
+  margin-top: -4px;
+}
+
+.message-image-link {
+  display: inline-flex;
+}
+
+.message-image-thumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #dce3eb;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message-image-thumb:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode .message-image-thumb {
+  border-color: #4a4a4a;
+}
+
+/* 全屏消息图片样式 */
+.fullscreen-message-image {
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.dark-mode .fullscreen-message-image {
+  border-color: #4a4a4a;
+}
+
 /* 动画效果 */
 @keyframes fadeIn {
   from {
@@ -1737,6 +2359,15 @@ button {
   
   .message-bubble {
     max-width: 85%;
+  }
+
+  .message-image-thumb {
+    width: 80px;
+    height: 80px;
+  }
+
+  .fullscreen-message-image {
+    width: 128px;
   }
 }
 

@@ -420,10 +420,13 @@ audio {
               </a>
               <hr>
               <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 26.04.02
+                front-vue3 update 26.04.18
               </p>
               <p class="dropdown-item" style="font-size: small">
                 优化部分问题
+              </p>
+              <p class="dropdown-item" style="font-size: small">
+                AI 对话 可以输入图片
               </p>
             </div>
           </li>
