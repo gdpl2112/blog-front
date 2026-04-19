@@ -1,5 +1,5 @@
 <template>
-  <div class="container" :class="{ 'dark-mode': isDarkMode }" style="min-height: 92vh;">
+  <div class="container chat-page py-3" :class="{ 'dark-mode': isDarkMode }" style="min-height: 92vh;">
     <div class="chat-container">
       <header class="chat-header">
         <div class="header-left">
@@ -12,28 +12,40 @@
           <p class="subtitle">高效智能，随时为您服务</p>
         </div>
         <div class="header-right">
-          <button class="btn btn-outline-secondary btn-sm" @click="toggleDarkMode">
+          <button
+            class="btn btn-outline-primary btn-sm sidebar-toggle-btn"
+            type="button"
+            @click="toggleSidebar"
+            :title="isSidebarCollapsed ? '展开会话列表' : '收起会话列表'"
+            :aria-expanded="!isSidebarCollapsed"
+            aria-controls="chatSidebarPanel"
+            aria-label="切换会话侧边栏"
+          >
+            <i :class="isSidebarCollapsed ? 'bi bi-list' : 'bi bi-x-lg'"></i>
+            <span class="toggle-label">会话</span>
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" @click="toggleDarkMode" aria-label="切换深色模式">
             <i :class="isDarkMode ? 'bi bi-sun' : 'bi bi-moon'"></i>
           </button>
         </div>
       </header>
-      <div class="row">
+      <div class="chat-layout" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
       <!-- 会话列表侧边栏 -->
-      <div class="col-lg-3 col-md-12 mb-3">
-        <div class="card" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-light'">
+      <aside id="chatSidebarPanel" class="chat-sidebar" :aria-hidden="isSidebarCollapsed ? 'true' : 'false'">
+        <div class="card sidebar-card chat-sidebar-card shadow-sm" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-light'">
           <div class="card-header d-flex justify-content-between align-items-center">
             <span class="sidebar-title">会话历史</span>
             <button class="btn btn-sm btn-primary" @click="addSession" :title="'新建会话'">
               <i class="bi bi-plus-circle"></i> 新建
             </button>
           </div>
-          <div class="card-body p-0" style="max-height: 60vh; overflow-y: auto;">
+          <div class="card-body p-0 session-list-scroll">
             <div
                 v-for="session in sessions"
                 :key="session.id"
                 class="border-bottom p-3 session-item transition-all duration-200"
                 :class="{ 
-                  'bg-primary text-white': currentSessionId === session.id,
+                  'bg-primary text-white is-active-session': currentSessionId === session.id,
                   'hover:bg-primary/10': !isDarkMode && currentSessionId !== session.id,
                   'hover:bg-gray-700': isDarkMode && currentSessionId !== session.id
                 }"
@@ -64,11 +76,11 @@
             </div>
           </div>
         </div>
-      </div>
+      </aside>
 
       <!-- 聊天主区域 -->
-      <div class="col-lg-9 col-md-12">
-        <div class="card h-100" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : ''">
+      <section class="chat-main">
+        <div class="card h-100 main-card chat-main-card shadow-sm" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : ''">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div>
               <h5 class="mb-0">{{ currentSession?.title || (currentSession?.title_temp || '新会话') }}</h5>
@@ -84,8 +96,7 @@
           </div>
 
           <div 
-            class="card-body p-0" 
-            style="height: 60vh; overflow-y: auto;" 
+            class="card-body p-0 chat-history-scroll" 
             ref="chatHistory"
             :class="isDarkMode ? 'bg-gray-900' : ''"
           >
@@ -94,7 +105,7 @@
               <div
                   v-for="(message, index) in messages"
                   :key="index"
-                  class="p-4 chat-message transition-all"
+                  class="p-4 chat-message transition-all message-row"
                   :class="{
                   'bg-primary bg-opacity-5 hover:bg-primary bg-opacity-10': !isDarkMode && message.role === 'assistant',
                   'text-end': message.role === 'user',
@@ -109,7 +120,7 @@
                        class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 ms-2 message-avatar bg-primary">
                       <i class="bi bi-robot"></i>
                   </div>
-                  <div class="rounded message-bubble transition-all hover:shadow-md"
+                  <div class="rounded message-bubble message-shell transition-all hover:shadow-md"
                        :class="message.role === 'user' ? 
                          (isDarkMode ? 'bg-gray-600 text-white' : 'bg-primary text-white') : 
                          (isDarkMode ? 'bg-gray-700 text-white' : 'bg-light')"
@@ -147,6 +158,7 @@
                       <button
                           class="btn btn-sm btn-outline-secondary py-0 px-2 mx-1 opacity-70 hover:opacity-100 transition-opacity"
                           @click="copyMessageContent(message.content)"
+                          aria-label="复制消息内容"
                           title="复制内容"
                       >
                         <i class="bi bi-clipboard"></i>
@@ -154,6 +166,7 @@
                       <button
                           class="btn btn-sm btn-outline-secondary py-0 px-2 opacity-70 hover:opacity-100 transition-opacity"
                           @click="showFullScreenMessage(message)"
+                          aria-label="全屏查看消息"
                           title="全屏查看"
                       >
                         <i class="bi bi-arrows-fullscreen"></i>
@@ -162,6 +175,7 @@
                         v-if="message.role === 'user' && !isLoading && canEditOrDeleteMessage(message)"
                         class="btn btn-sm btn-outline-secondary py-0 px-2 mx-1 opacity-70 hover:opacity-100 transition-opacity"
                         @click="editMessage(message, index)"
+                        aria-label="编辑消息"
                         title="编辑消息"
                       >
                         <i class="bi bi-pen"></i>
@@ -170,6 +184,7 @@
                         v-if="message.role === 'user' && !isLoading && canEditOrDeleteMessage(message)"
                         class="btn btn-sm btn-outline-secondary py-0 px-2 opacity-70 hover:opacity-100 transition-opacity"
                         @click="confirmDeleteMessage(message, index)"
+                        aria-label="删除消息"
                         title="删除消息"
                       >
                         <i class="bi bi-trash"></i>
@@ -185,7 +200,7 @@
               </div>
             </div>
             <!-- 空状态 -->
-            <div v-else class="text-center p-8 text-muted" :class="isDarkMode ? 'bg-gray-900' : ''">
+            <div v-else class="text-center p-8 text-muted empty-state" :class="isDarkMode ? 'bg-gray-900' : ''">
               <div class="display-1 mb-4">🤖</div>
               <h5 class="mb-2">开始新的对话</h5>
               <p class="mb-4 max-w-md mx-auto">输入您的问题，AI助手将为您提供帮助。试试以下常见问题：</p>
@@ -193,7 +208,7 @@
                 <button 
                   v-for="prompt in quickPrompts" 
                   :key="prompt"
-                  class="btn btn-outline-secondary btn-sm"
+                  class="btn btn-outline-secondary btn-sm quick-prompt-btn"
                   @click="useQuickPrompt(prompt)"
                   :class="isDarkMode ? 'btn-outline-gray-500' : ''"
                 >
@@ -203,7 +218,7 @@
             </div>
 
             <!-- 思考指示器 -->
-            <div v-if="thinkingContent" class="p-3 border-bottom" :class="isDarkMode ? 'bg-gray-750' : 'bg-warning bg-opacity-10'">
+            <div v-if="thinkingContent" class="p-3 border-bottom thinking-indicator" :class="isDarkMode ? 'bg-gray-750' : 'bg-warning bg-opacity-10'">
               <div class="d-flex align-items-center">
                 <div class="spinner-grow spinner-grow-sm me-2" role="status">
                   <span class="visually-hidden">思考中...</span>
@@ -225,9 +240,9 @@
           </div>
 
           <!-- 输入区域 -->
-          <div class="card-footer" :class="isDarkMode ? 'bg-gray-800 border-gray-700' : ''">
+          <div class="card-footer input-footer" :class="isDarkMode ? 'bg-gray-800 border-gray-700' : ''">
             <!-- 格式化工具栏 -->
-            <div class="toolbar mb-2">
+            <div class="toolbar chat-toolbar mb-2">
               <button 
                 class="btn btn-sm btn-outline-secondary mr-1" 
                 @click="formatText('**')"
@@ -318,21 +333,24 @@
 <!--                  style="resize: none;"-->
 <!--              ></textarea>-->
 
-              <div v-if="imageAttachments.length > 0" class="d-flex flex-wrap gap-2 mt-2">
+              <div v-if="imageAttachments.length > 0" class="d-flex flex-wrap gap-2 mt-2 attachment-grid">
                 <div
                     v-for="item in imageAttachments"
                     :key="item.id"
-                    class="position-relative border rounded overflow-hidden"
+                    class="position-relative border rounded overflow-hidden attachment-item"
                     style="width: 72px; height: 72px;"
                 >
                   <img
+                      class="attachment-thumb"
                       :src="item.dataUrl"
                       :alt="item.name"
                       style="width: 100%; height: 100%; object-fit: cover;"
                   />
                   <button
-                      class="btn btn-sm btn-danger position-absolute top-0 end-0 py-0 px-1"
+                      class="btn btn-sm btn-danger position-absolute top-0 end-0 py-0 px-1 attachment-remove-btn"
                       type="button"
+                      aria-label="移除图片"
+                      title="移除图片"
                       :disabled="isLoading"
                       @click="removeImageAttachment(item.id)"
                   >
@@ -342,13 +360,13 @@
               </div>
             </div>
             
-            <div class="input-group">
+            <div class="input-group message-input-group">
               <textarea
                   v-model="userInput"
                   @paste="handleImagePaste"
                   @keydown.enter.exact.prevent="sendMessage"
                   @keydown.enter.shift.exact.prevent="userInput += '\n'"
-                  class="form-control transition-all focus:ring-2 focus:ring-primary/50"
+                  class="form-control transition-all focus:ring-2 focus:ring-primary/50 message-textarea"
                   :class="isDarkMode ? 'bg-gray-700 text-white border-gray-600' : ''"
                   placeholder="输入您的问题..."
                   :disabled="isLoading || !login_state"
@@ -357,7 +375,7 @@
                   ref="textareaRef"
               ></textarea>
               <button
-                  class="btn transition-all hover:shadow-md"
+                  class="btn transition-all hover:shadow-md send-btn"
                   :class="isLoading ? 'btn-danger' : 'btn-primary'"
                   @click="isLoading ? stopStreaming() : sendMessage()"
                   :disabled="(!canSendMessage && !isLoading) || !login_state"
@@ -373,19 +391,19 @@
               </button>
             </div>
             
-            <div v-if="!login_state" class="text-center mt-2 text-danger">
+            <div v-if="!login_state" class="text-center mt-2 text-danger login-tip">
               <small>需要登录才能使用AI对话功能，请先
                 <router-link to="/login" class="text-primary hover:underline">登录</router-link>
               </small>
             </div>
             
             <!-- 字数统计 -->
-            <div v-else class="text-right mt-1">
+            <div v-else class="text-right mt-1 input-meta">
               <small class="text-muted">{{ userInput.length }} 字符</small>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </div>
@@ -394,6 +412,7 @@
   <div
       v-if="isFullScreenMode"
       class="fixed inset-0 bg-black bg-opacity-90 z-50 d-flex flex-column justify-center items-center p-4 animate-fade-in"
+      :class="{ 'modal-dark': isDarkMode }"
       @click.self="exitFullScreenMode"
   >
     <div class="absolute top-4 right-4">
@@ -405,7 +424,7 @@
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
-    <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full max-h-[80vh] overflow-auto animate-scale-in">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full max-h-[80vh] overflow-auto animate-scale-in fullscreen-panel">
       <div class="mb-4">
         <div
             class="rounded-circle d-flex align-items-center justify-content-center text-white me-2 mb-2 message-avatar bg-primary inline-flex">
@@ -451,8 +470,8 @@
   </div>
   
   <!-- 确认对话框 -->
-  <div v-if="showConfirmDialog" class="fixed inset-0 bg-black bg-opacity-50 z-50 d-flex justify-center items-center">
-    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-5">
+  <div v-if="showConfirmDialog" class="fixed inset-0 bg-black bg-opacity-50 z-50 d-flex justify-center items-center" :class="{ 'modal-dark': isDarkMode }">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-5 dialog-panel">
       <h4 class="text-lg font-semibold mb-3">{{ confirmTitle }}</h4>
       <p class="mb-4">{{ confirmMessage }}</p>
       <div class="d-flex justify-end gap-2">
@@ -463,12 +482,12 @@
   </div>
   
   <!-- 编辑消息对话框 -->
-  <div v-if="editingMessage" class="fixed inset-0 bg-black bg-opacity-50 z-50 d-flex justify-center items-center">
-    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-5">
+  <div v-if="editingMessage" class="fixed inset-0 bg-black bg-opacity-50 z-50 d-flex justify-center items-center" :class="{ 'modal-dark': isDarkMode }">
+    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-5 dialog-panel">
       <h4 class="text-lg font-semibold mb-3">编辑消息</h4>
       <textarea
         v-model="editMessageContent"
-        class="form-control mb-4"
+        class="form-control mb-4 edit-textarea"
         rows="4"
         placeholder="编辑您的消息..."
       ></textarea>
@@ -587,6 +606,9 @@ const confirmAction = ref<() => void>(() => {});
 const editingMessage = ref<Message | null>(null);
 const editingMessageIndex = ref(-1);
 const editMessageContent = ref("");
+const MOBILE_LAYOUT_BREAKPOINT = 992;
+const isMobileLayout = ref(false);
+const isSidebarCollapsed = ref(false);
 
 // 快捷提示语
 const quickPrompts = [
@@ -651,6 +673,26 @@ function toggleDarkMode() {
   } else {
     document.documentElement.classList.remove('dark');
   }
+}
+
+// 根据窗口宽度同步布局状态：移动端默认收起会话侧栏，桌面端默认展开
+function updateLayoutByViewport() {
+  const mobileLayout = window.innerWidth <= MOBILE_LAYOUT_BREAKPOINT;
+
+  if (mobileLayout !== isMobileLayout.value) {
+    isMobileLayout.value = mobileLayout;
+    isSidebarCollapsed.value = mobileLayout;
+    return;
+  }
+
+  if (!isMobileLayout.value && isSidebarCollapsed.value) {
+    isSidebarCollapsed.value = false;
+  }
+}
+
+// 切换会话侧栏显示/隐藏
+function toggleSidebar() {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value;
 }
 
 // 格式化消息时间
@@ -854,6 +896,9 @@ async function switchSession(sessionId: string) {
     currentSessionId.value = sessionId;
     messages.value = [...session.messages];
     scrollToBottom();
+    if (isMobileLayout.value) {
+      isSidebarCollapsed.value = true;
+    }
   }
   thinkingContent.value = '';
 }
@@ -1639,6 +1684,8 @@ function scrollToBottom() {
 
 // 监听深色模式设置
 onMounted(async () => {
+  updateLayoutByViewport();
+
   // 从本地存储加载深色模式设置
   const savedDarkMode = localStorage.getItem('chatDarkMode');
   if (savedDarkMode === 'true') {
@@ -1695,6 +1742,7 @@ onMounted(async () => {
 
 // 监听窗口大小变化，自动调整聊天区域高度
 const handleResize = () => {
+  updateLayoutByViewport();
   nextTick(() => {
     scrollToBottom();
   });
@@ -2440,6 +2488,581 @@ button {
   100% {
     transform: scale(1);
     opacity: 0;
+  }
+}
+
+/* 页面风格与可用性增强（不改功能） */
+.chat-page {
+  --chat-bg: radial-gradient(circle at 0% 0%, rgba(13, 110, 253, 0.08), transparent 40%),
+    radial-gradient(circle at 100% 10%, rgba(20, 184, 166, 0.08), transparent 35%),
+    linear-gradient(180deg, #f7f9fc 0%, #f3f7fb 100%);
+  --panel-bg: rgba(255, 255, 255, 0.88);
+  --panel-border: rgba(15, 23, 42, 0.1);
+  --panel-soft-bg: rgba(255, 255, 255, 0.72);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --primary-main: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --primary-soft: rgba(13, 110, 253, 0.12);
+  --user-bubble: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  --assistant-bubble: #f8fafc;
+  --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 14px 30px rgba(15, 23, 42, 0.1);
+  --focus-ring: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+  background: var(--chat-bg);
+  border-radius: 18px;
+  position: relative;
+  color: var(--text-primary);
+}
+
+.chat-page.dark-mode {
+  --chat-bg: radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.2), transparent 40%),
+    radial-gradient(circle at 100% 10%, rgba(45, 212, 191, 0.18), transparent 35%),
+    linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+  --panel-bg: rgba(15, 23, 42, 0.82);
+  --panel-border: rgba(148, 163, 184, 0.2);
+  --panel-soft-bg: rgba(15, 23, 42, 0.68);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --primary-main: #60a5fa;
+  --primary-hover: #93c5fd;
+  --primary-soft: rgba(96, 165, 250, 0.16);
+  --user-bubble: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  --assistant-bubble: #1f2937;
+  --shadow-soft: 0 12px 26px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 16px 34px rgba(0, 0, 0, 0.45);
+  --focus-ring: 0 0 0 0.2rem rgba(96, 165, 250, 0.24);
+}
+
+.chat-page .chat-container {
+  max-width: 1360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.chat-page .chat-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  min-height: clamp(560px, calc(100vh - 190px), 760px);
+  transition: grid-template-columns 0.24s ease;
+}
+
+.chat-page .header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.chat-page .sidebar-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 10px;
+  padding-inline: 0.6rem;
+}
+
+.chat-page .sidebar-toggle-btn .toggle-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.chat-page .chat-sidebar,
+.chat-page .chat-main {
+  min-width: 0;
+}
+
+.chat-page .chat-sidebar {
+  overflow: hidden;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.chat-page .chat-layout.sidebar-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.chat-page .chat-layout.sidebar-collapsed .chat-sidebar {
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+}
+
+.chat-page .chat-sidebar-card,
+.chat-page .chat-main-card {
+  height: 100%;
+}
+
+.chat-page .chat-sidebar-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-page .chat-sidebar-card .session-list-scroll {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+
+.chat-page .chat-main-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+}
+
+.chat-page .chat-main-card .chat-history-scroll {
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+
+.chat-page .chat-header {
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: var(--panel-soft-bg);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+.chat-page .header-left {
+  background: transparent;
+  padding: 0;
+}
+
+.chat-page .logo-icon {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0d6efd 0%, #14b8a6 100%);
+  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.28);
+}
+
+.chat-page .title {
+  font-size: 1.35rem;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+  text-shadow: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.chat-page .subtitle {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  padding: 0;
+  margin-top: 0.2rem;
+}
+
+.chat-page .sidebar-card,
+.chat-page .main-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.chat-page.dark-mode .sidebar-card.bg-gray-800,
+.chat-page.dark-mode .main-card.bg-gray-800 {
+  background: var(--panel-bg) !important;
+  border-color: var(--panel-border) !important;
+  color: var(--text-primary) !important;
+}
+
+.chat-page .sidebar-card .card-header,
+.chat-page .main-card .card-header {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0));
+}
+
+.chat-page.dark-mode .sidebar-card .card-header,
+.chat-page.dark-mode .main-card .card-header {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0));
+  border-bottom-color: var(--panel-border) !important;
+}
+
+.chat-page .session-list-scroll,
+.chat-page .chat-history-scroll {
+  scrollbar-gutter: stable;
+}
+
+.chat-page .session-item {
+  border-bottom-color: rgba(148, 163, 184, 0.24);
+  transition: transform 0.18s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-page .session-item:hover {
+  transform: translateX(2px);
+  background-color: var(--primary-soft) !important;
+}
+
+.chat-page .session-item.is-active-session {
+  background: var(--user-bubble) !important;
+  border-bottom-color: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.chat-page .session-item .text-xs.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.chat-page .main-card .chat-history-scroll {
+  background: transparent !important;
+}
+
+.chat-page .message-row {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  transition: background-color 0.2s ease;
+}
+
+.chat-page .message-row:last-child {
+  border-bottom: none;
+}
+
+.chat-page .message-shell {
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.chat-page:not(.dark-mode) .message-shell.bg-primary {
+  background: var(--user-bubble) !important;
+  border-color: transparent;
+}
+
+.chat-page:not(.dark-mode) .message-shell.bg-light {
+  background: var(--assistant-bubble) !important;
+}
+
+.chat-page.dark-mode .message-shell.bg-gray-700 {
+  background: #1f2937 !important;
+  border-color: #334155;
+}
+
+.chat-page.dark-mode .message-shell.bg-gray-600 {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+  border-color: rgba(148, 163, 184, 0.26);
+}
+
+.chat-page .message-avatar {
+  width: 34px;
+  height: 34px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+}
+
+.chat-page .message-shell :deep(.md-editor-v3-preview-wrapper) {
+  padding: 0;
+}
+
+.chat-page .message-shell :deep(.md-editor-v3-preview) {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.chat-page .message-shell :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.chat-page .message-shell .btn-outline-secondary {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.chat-page .message-shell .btn-outline-secondary:hover {
+  background-color: rgba(148, 163, 184, 0.14);
+}
+
+.chat-page.dark-mode .message-shell .btn-outline-secondary {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.36);
+}
+
+.chat-page .thinking-indicator {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  backdrop-filter: blur(4px);
+}
+
+.chat-page .empty-state {
+  padding-top: 3.25rem;
+  padding-bottom: 3.25rem;
+}
+
+.chat-page .quick-prompt-btn {
+  border-radius: 999px;
+  border-color: rgba(148, 163, 184, 0.45);
+  padding: 0.36rem 0.78rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.chat-page .quick-prompt-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.1);
+}
+
+.chat-page .input-footer {
+  border-top: 1px solid var(--panel-border) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(13, 110, 253, 0.03));
+}
+
+.chat-page.dark-mode .input-footer {
+  border-top-color: var(--panel-border) !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(59, 130, 246, 0.1));
+}
+
+.chat-page .chat-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.chat-page .chat-toolbar .btn {
+  border-radius: 10px;
+}
+
+.chat-page .message-input-group {
+  display: flex;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.chat-page .message-input-group .message-textarea {
+  border-radius: 12px !important;
+  min-height: 74px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  line-height: 1.55;
+}
+
+.chat-page .message-input-group .message-textarea:focus {
+  box-shadow: var(--focus-ring);
+}
+
+.chat-page .message-input-group .send-btn {
+  border-radius: 12px !important;
+  min-width: 94px;
+  font-weight: 600;
+  margin-left: 0 !important;
+}
+
+.chat-page .attachment-grid {
+  padding-top: 0.15rem;
+}
+
+.chat-page .attachment-item {
+  border-color: rgba(148, 163, 184, 0.45) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.chat-page .attachment-thumb {
+  transition: transform 0.24s ease;
+}
+
+.chat-page .attachment-item:hover .attachment-thumb {
+  transform: scale(1.06);
+}
+
+.chat-page .attachment-remove-btn {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 0 0 0 8px;
+  line-height: 1;
+}
+
+.chat-page .login-tip {
+  border: 1px dashed rgba(220, 53, 69, 0.35);
+  border-radius: 10px;
+  padding: 0.38rem 0.65rem;
+  background: rgba(220, 53, 69, 0.06);
+}
+
+.chat-page .input-meta {
+  color: var(--text-secondary);
+}
+
+.chat-page .message-image-link {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.chat-page .message-image-thumb {
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+.fullscreen-panel,
+.dialog-panel {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 16px !important;
+}
+
+.chat-page button:focus-visible,
+.chat-page a:focus-visible,
+.chat-page textarea:focus-visible {
+  outline: 2px solid rgba(13, 110, 253, 0.58);
+  outline-offset: 2px;
+}
+
+.modal-dark .fullscreen-panel,
+.modal-dark .dialog-panel {
+  background-color: #0f172a !important;
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-dark .dialog-panel .form-control,
+.modal-dark .fullscreen-panel .form-control,
+.modal-dark .edit-textarea {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.modal-dark .dialog-panel .text-muted,
+.modal-dark .fullscreen-panel .text-muted {
+  color: #94a3b8 !important;
+}
+
+.modal-dark .dialog-panel .btn-outline-secondary,
+.modal-dark .fullscreen-panel .btn-outline-secondary {
+  color: #cbd5e1;
+  border-color: #64748b;
+}
+
+@media (max-width: 992px) {
+  .chat-page .chat-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    gap: 0.75rem;
+  }
+
+  .chat-page .chat-layout.sidebar-collapsed .chat-sidebar {
+    display: none;
+  }
+
+  .chat-page .chat-layout:not(.sidebar-collapsed) .chat-sidebar {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .chat-page .chat-sidebar-card {
+    max-height: 320px;
+  }
+
+  .chat-page .chat-sidebar-card .session-list-scroll {
+    max-height: 252px;
+  }
+
+  .chat-page .chat-main-card {
+    min-height: 62vh;
+  }
+
+  .chat-page {
+    border-radius: 14px;
+  }
+
+  .chat-page .sidebar-card,
+  .chat-page .main-card {
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-page {
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+
+  .chat-page .chat-container {
+    gap: 0.75rem;
+  }
+
+  .chat-page .chat-layout {
+    gap: 0.65rem;
+  }
+
+  .chat-page .chat-sidebar-card {
+    max-height: 280px;
+  }
+
+  .chat-page .chat-sidebar-card .session-list-scroll {
+    max-height: 212px;
+  }
+
+  .chat-page .chat-main-card {
+    min-height: 64vh;
+  }
+
+  .chat-page .chat-header {
+    padding: 0.85rem;
+    border-radius: 12px;
+  }
+
+  .chat-page .title {
+    font-size: 1.14rem;
+  }
+
+  .chat-page .subtitle {
+    font-size: 0.84rem;
+  }
+
+  .chat-page .message-row {
+    padding: 0.85rem !important;
+  }
+
+  .chat-page .message-shell {
+    max-width: 92% !important;
+  }
+
+  .chat-page .chat-toolbar {
+    gap: 0.3rem;
+  }
+
+  .chat-page .message-input-group {
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .chat-page .message-input-group .send-btn {
+    width: 100%;
+  }
+
+  .chat-page .attachment-item {
+    width: 64px !important;
+    height: 64px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .chat-page .sidebar-toggle-btn {
+    padding-inline: 0.5rem;
+  }
+
+  .chat-page .sidebar-toggle-btn .toggle-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-page *,
+  .chat-page *::before,
+  .chat-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 </style>
