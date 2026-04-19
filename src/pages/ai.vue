@@ -1,33 +1,57 @@
 <template>
-  <div class="container" :class="{ 'dark-mode': isDarkMode }" style="min-height: 92vh;">
+  <div class="container chat-page" :class="{ 'dark-mode': isDarkMode }">
     <div class="chat-container">
       <header class="chat-header">
-        <div class="header-left">
+        <button
+            class="header-left header-toggle"
+            type="button"
+            @click="toggleSessionSidebar"
+            :aria-expanded="!isSessionSidebarCollapsed"
+            :title="isSessionSidebarCollapsed ? '展开会话历史' : '折叠会话历史'"
+        >
           <div class="logo-container">
             <div class="logo-icon bg-primary text-white rounded-full p-2">
               <i class="bi bi-robot"></i>
             </div>
             <h1 class="title">小生AI博客智能助手</h1>
           </div>
-          <p class="subtitle">高效智能，随时为您服务</p>
-        </div>
+          <div class="header-meta">
+            <p class="subtitle">高效智能，随时为您服务</p>
+            <span class="header-hint">
+              <i :class="isSessionSidebarCollapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar'"></i>
+              {{ isSessionSidebarCollapsed ? '展开会话历史' : '折叠会话历史' }}
+            </span>
+          </div>
+        </button>
         <div class="header-right">
+          <div class="header-stat">
+            <span>{{ sessions.length }} 个会话</span>
+            <span class="header-stat-divider"></span>
+            <span>{{ messages.length }} 条消息</span>
+          </div>
           <button class="btn btn-outline-secondary btn-sm" @click="toggleDarkMode">
             <i :class="isDarkMode ? 'bi bi-sun' : 'bi bi-moon'"></i>
           </button>
         </div>
       </header>
-      <div class="row">
+      <div class="chat-layout" :class="{ 'sidebar-collapsed': isSessionSidebarCollapsed }">
         <!-- 会话列表侧边栏 -->
-        <div class="col-lg-3 col-md-12 mb-3">
-          <div class="card" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-light'">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span class="sidebar-title">会话历史</span>
+        <aside class="chat-sidebar" :class="{ 'is-collapsed': isSessionSidebarCollapsed }">
+          <div
+              v-show="!isSessionSidebarCollapsed"
+              class="card sidebar-card"
+              :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-light'"
+          >
+            <div class="card-header sidebar-card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center gap-2">
+                <span class="sidebar-title">会话历史</span>
+                <span class="sidebar-badge">{{ sessions.length }}</span>
+              </div>
               <button class="btn btn-sm btn-primary" @click="addSession" :title="'新建会话'">
                 <i class="bi bi-plus-circle"></i> 新建
               </button>
             </div>
-            <div class="card-body p-0" style="max-height: 60vh; overflow-y: auto;">
+            <div class="card-body sidebar-body p-0">
               <div
                   v-for="session in sessions"
                   :key="session.id"
@@ -64,12 +88,22 @@
               </div>
             </div>
           </div>
-        </div>
+          <button
+              v-if="isSessionSidebarCollapsed"
+              class="sidebar-expand-handle"
+              type="button"
+              @click="toggleSessionSidebar"
+              :title="'展开会话历史'"
+          >
+            <i class="bi bi-layout-sidebar-inset"></i>
+            <span>会话历史</span>
+          </button>
+        </aside>
 
         <!-- 聊天主区域 -->
-        <div class="col-lg-9 col-md-12">
-          <div class="card h-100" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : ''">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <section class="chat-main">
+          <div class="card chat-main-card h-100" :class="isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : ''">
+            <div class="card-header chat-main-header d-flex justify-content-between align-items-center">
               <div>
                 <h5 class="mb-0">{{ currentSession?.title || (currentSession?.title_temp || '新会话') }}</h5>
                 <small class="text-muted">{{ currentSession?.messages.length || 0 }} 条消息 · 会话历史最长保存7日</small>
@@ -84,8 +118,7 @@
             </div>
 
             <div
-                class="card-body p-0"
-                style="height: 60vh; overflow-y: auto;"
+                class="card-body p-0 chat-history-body"
                 ref="chatHistory"
                 :class="isDarkMode ? 'bg-gray-900' : ''"
             >
@@ -225,7 +258,7 @@
             </div>
 
             <!-- 输入区域 -->
-            <div class="card-footer" :class="isDarkMode ? 'bg-gray-800 border-gray-700' : ''">
+            <div class="card-footer chat-footer" :class="isDarkMode ? 'bg-gray-800 border-gray-700' : ''">
               <!-- 格式化工具栏 -->
               <div class="toolbar mb-2">
                 <button
@@ -385,7 +418,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   </div>
@@ -481,7 +514,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {toast} from "@/utils/utils";
 import service, {login_state} from "@/axios";
 import router from "@/router";
@@ -587,6 +620,8 @@ const confirmAction = ref<() => void>(() => {});
 const editingMessage = ref<Message | null>(null);
 const editingMessageIndex = ref(-1);
 const editMessageContent = ref("");
+const isMobileLayout = ref(false);
+const isSessionSidebarCollapsed = ref(false);
 
 // 快捷提示语
 const quickPrompts = [
@@ -615,6 +650,22 @@ const currentSessionId = ref<string>(sessions.value[0].id);
 const currentSession = computed(() => {
   return sessions.value.find(session => session.id === currentSessionId.value);
 });
+
+function syncChatLayout(forceReset = false) {
+  const compactLayout = window.innerWidth < 992;
+  const layoutChanged = isMobileLayout.value !== compactLayout;
+
+  isMobileLayout.value = compactLayout;
+
+  // 关键逻辑：只在首次进入页面或跨越断点时重置侧栏状态，避免覆盖用户手动切换结果
+  if (forceReset || layoutChanged) {
+    isSessionSidebarCollapsed.value = compactLayout;
+  }
+}
+
+function toggleSessionSidebar() {
+  isSessionSidebarCollapsed.value = !isSessionSidebarCollapsed.value;
+}
 
 // 生成chatId
 function generateChatId() {
@@ -853,6 +904,9 @@ async function switchSession(sessionId: string) {
 
     currentSessionId.value = sessionId;
     messages.value = [...session.messages];
+    if (isMobileLayout.value) {
+      isSessionSidebarCollapsed.value = true;
+    }
     scrollToBottom();
   }
   thinkingContent.value = '';
@@ -1639,6 +1693,8 @@ function scrollToBottom() {
 
 // 监听深色模式设置
 onMounted(async () => {
+  syncChatLayout(true);
+
   // 从本地存储加载深色模式设置
   const savedDarkMode = localStorage.getItem('chatDarkMode');
   if (savedDarkMode === 'true') {
@@ -1695,6 +1751,7 @@ onMounted(async () => {
 
 // 监听窗口大小变化，自动调整聊天区域高度
 const handleResize = () => {
+  syncChatLayout();
   nextTick(() => {
     scrollToBottom();
   });
@@ -1704,7 +1761,6 @@ const handleResize = () => {
 window.addEventListener('resize', handleResize);
 
 // 组件卸载时移除监听
-import { onBeforeUnmount } from 'vue';
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize);
 });
@@ -1712,10 +1768,24 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /* 聊天容器样式 */
+.chat-page {
+  min-height: 92vh;
+  padding: 1rem 0 1.5rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #f3f6fb 100%);
+  border-radius: 24px;
+}
+
+.dark-mode.chat-page {
+  background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+}
+
 .chat-container {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 /* 聊天头部样式 */
@@ -1724,29 +1794,48 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  margin-bottom: 1rem;
   border-bottom: 1px solid #e9ecef;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
 .header-left {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
   background: rgba(255, 255, 255, 0.95);
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.header-toggle {
+  border: none;
+  text-align: left;
+}
+
+.header-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.12);
+}
+
+.header-toggle:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.25);
+  outline-offset: 2px;
 }
 
 .dark-mode .header-left {
   background: rgba(30, 30, 30, 0.95);
+  border-color: rgba(71, 85, 105, 0.55);
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
 }
 
 .logo-icon {
@@ -1769,37 +1858,81 @@ onBeforeUnmount(() => {
   margin: 0;
   color: #333;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
 }
 
 .subtitle {
   font-size: 1rem;
   font-weight: 600;
   color: #333;
-  margin: 0.25rem 0 0 0;
+  margin: 0;
   opacity: 1;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.header-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.header-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.header-stat-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(148, 163, 184, 0.7);
 }
 
 /* 深色模式下的标题样式 */
 .dark-mode .title {
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  background-color: rgba(30, 30, 30, 0.95);
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
 }
 
 .dark-mode .subtitle {
   color: #b0b0b0;
   opacity: 1;
-  background-color: rgba(30, 30, 30, 0.95);
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
 }
 
 /* 深色模式下的容器样式 */
@@ -1813,8 +1946,133 @@ onBeforeUnmount(() => {
   background-color: rgba(30, 30, 30, 0.95);
 }
 
+.dark-mode .header-hint {
+  background: rgba(96, 165, 250, 0.16);
+  color: #bfdbfe;
+}
+
+.dark-mode .header-stat {
+  background: rgba(30, 41, 59, 0.92);
+  color: #cbd5e1;
+}
+
 .dark-mode .subtitle {
   color: #b0b0b0;
+}
+
+.chat-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  min-height: calc(92vh - 145px);
+}
+
+.chat-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  transition: width 0.25s ease;
+}
+
+.chat-sidebar.is-collapsed {
+  width: 84px;
+}
+
+.chat-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-card,
+.chat-main-card {
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.sidebar-card {
+  height: 100%;
+  position: sticky;
+  top: 1rem;
+}
+
+.sidebar-card-header {
+  padding: 1rem 1rem 0.9rem;
+}
+
+.sidebar-body {
+  max-height: calc(92vh - 240px);
+  overflow-y: auto;
+}
+
+.sidebar-badge {
+  min-width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.sidebar-expand-handle {
+  width: 100%;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0.75rem;
+  border: 1px dashed rgba(37, 99, 235, 0.25);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
+}
+
+.sidebar-expand-handle:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.dark-mode .sidebar-badge {
+  background: rgba(96, 165, 250, 0.2);
+  color: #bfdbfe;
+}
+
+.dark-mode .sidebar-expand-handle {
+  background: rgba(30, 41, 59, 0.92);
+  color: #bfdbfe;
+  border-color: #334155;
+}
+
+.dark-mode .sidebar-expand-handle:hover {
+  background: rgba(51, 65, 85, 0.96);
+}
+
+.chat-main-card {
+  min-height: calc(92vh - 145px);
+}
+
+.chat-main-header {
+  padding: 1rem 1.25rem;
+}
+
+.chat-history-body {
+  height: calc(92vh - 330px);
+  min-height: 420px;
+  overflow-y: auto;
+}
+
+.chat-footer {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
 }
 
 /* 会话列表侧边栏样式 */
@@ -1833,6 +2091,10 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 1px solid #eee;
+}
+
+.session-item:hover {
+  transform: translateX(2px);
 }
 
 .dark-mode .session-item {
@@ -2326,15 +2588,59 @@ button {
 }
 
 /* 响应式样式 */
+@media (max-width: 992px) {
+  .chat-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .chat-sidebar,
+  .chat-sidebar.is-collapsed {
+    width: 100%;
+  }
+
+  .sidebar-card {
+    position: static;
+  }
+
+  .sidebar-body {
+    max-height: 320px;
+  }
+
+  .sidebar-expand-handle {
+    min-height: 58px;
+    flex-direction: row;
+  }
+
+  .chat-main-card {
+    min-height: auto;
+  }
+
+  .chat-history-body {
+    height: 58vh;
+    min-height: 360px;
+  }
+}
+
 @media (max-width: 768px) {
   .chat-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
+  .header-left {
+    width: 100%;
+  }
+
+  .header-meta {
+    width: 100%;
+  }
+
   .header-right {
     margin-top: 0.5rem;
-    align-self: flex-end;
+    align-self: stretch;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .logo-container {
@@ -2343,6 +2649,11 @@ button {
 
   .title {
     font-size: 1.25rem;
+  }
+
+  .header-stat {
+    max-width: 100%;
+    flex-wrap: wrap;
   }
 
   .session-title {
