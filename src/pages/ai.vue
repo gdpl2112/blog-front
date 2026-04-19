@@ -2547,6 +2547,7 @@ button {
   gap: 1rem;
   align-items: stretch;
   min-height: clamp(560px, calc(100vh - 190px), 760px);
+  height: clamp(560px, calc(100vh - 190px), 760px);
   transition: grid-template-columns 0.24s ease;
 }
 
@@ -2610,12 +2611,15 @@ button {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 0;
+  max-height: 100%;
 }
 
 .chat-page .chat-main-card .chat-history-scroll {
   min-height: 0;
   max-height: none;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chat-page .chat-header {
@@ -2944,6 +2948,7 @@ button {
   .chat-page .chat-layout {
     grid-template-columns: 1fr;
     min-height: auto;
+    height: auto;
     gap: 0.75rem;
   }
 
@@ -2967,6 +2972,8 @@ button {
 
   .chat-page .chat-main-card {
     min-height: 62vh;
+    height: 68vh !important;
+    max-height: 68vh !important;
   }
 
   .chat-page {
@@ -3003,6 +3010,8 @@ button {
 
   .chat-page .chat-main-card {
     min-height: 64vh;
+    height: 66vh !important;
+    max-height: 66vh !important;
   }
 
   .chat-page .chat-header {
@@ -3046,6 +3055,12 @@ button {
 }
 
 @media (max-width: 576px) {
+  .chat-page .chat-main-card {
+    min-height: 60vh;
+    height: 62vh !important;
+    max-height: 62vh !important;
+  }
+
   .chat-page .sidebar-toggle-btn {
     padding-inline: 0.5rem;
   }
