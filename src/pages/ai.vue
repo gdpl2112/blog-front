@@ -1294,12 +1294,20 @@ async function appendImageFiles(files: File[]): Promise<void> {
     return;
   }
 
+  const MAX_IMAGE_SIZE = 300 * 1024; // 300KB
   let addedCount = 0;
   let skippedCount = 0;
+  let oversizedCount = 0;
 
   for (const file of files) {
     if (!file.type || !file.type.startsWith('image/')) {
       skippedCount += 1;
+      continue;
+    }
+
+    // 检查图片大小
+    if (file.size > MAX_IMAGE_SIZE) {
+      oversizedCount += 1;
       continue;
     }
 
@@ -1320,6 +1328,9 @@ async function appendImageFiles(files: File[]): Promise<void> {
 
   if (addedCount > 0) {
     toast(`已添加 ${addedCount} 张图片`, 'success');
+  }
+  if (oversizedCount > 0) {
+    toast(`有 ${oversizedCount} 张图片超过 300KB，已跳过`, 'warning');
   }
   if (skippedCount > 0) {
     toast(`已跳过 ${skippedCount} 个无效文件`, 'warning');
