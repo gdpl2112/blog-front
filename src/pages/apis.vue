@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {onMounted, ref, watch} from "vue";
+import axios from "axios";
 import service from "@/axios";
 import {ElMessage} from "element-plus";
 import {copyTextElement} from '@/utils/utils'
@@ -9,6 +10,151 @@ const rawList = ref([])
 const searchText = ref('')
 const isLoading = ref(true)
 const copySuccess = ref<number | null>(null)
+
+// ===== 在线测试 =====
+interface KV {
+  key: string
+  value: string
+}
+
+// 独立的 axios 实例: 不走全局拦截器(避免 403 跳登录), 任何状态码都返回
+const testClient = axios.create({timeout: 30000, validateStatus: () => true})
+
+const testDialogVisible = ref(false)
+const testApiName = ref('')
+const testMethod = ref('GET')
+const testUrl = ref('')
+const testParams = ref<KV[]>([])
+const testHeaders = ref<KV[]>([])
+const testBody = ref('')
+const testLoading = ref(false)
+const showRespHeaders = ref(false)
+const testResponse = ref<{
+  status: number
+  statusText: string
+  time: number
+  headers: Record<string, any>
+  data: string
+  error?: string
+} | null>(null)
+
+const methodOptions = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+
+// 把示例地址拆成 url + 查询参数, 方便编辑
+function parseAddress(address: string): { url: string; params: KV[] } {
+  try {
+    const u = new URL(address)
+    const params: KV[] = []
+    u.searchParams.forEach((v, k) => params.push({key: k, value: v}))
+    return {url: u.origin + u.pathname, params}
+  } catch {
+    return {url: address || '', params: []}
+  }
+}
+
+function openTestDialog(e: any) {
+  testApiName.value = e.name
+  testMethod.value = (e.method || 'GET').toUpperCase()
+  const {url, params} = parseAddress(e.address || '')
+  testUrl.value = url
+  testParams.value = params.length ? params : [{key: '', value: ''}]
+  testHeaders.value = [{key: '', value: ''}]
+  testBody.value = ''
+  testResponse.value = null
+  showRespHeaders.value = false
+  testDialogVisible.value = true
+}
+
+function addParam() {
+  testParams.value.push({key: '', value: ''})
+}
+
+function removeParam(i: number) {
+  testParams.value.splice(i, 1)
+}
+
+function addHeader() {
+  testHeaders.value.push({key: '', value: ''})
+}
+
+function removeHeader(i: number) {
+  testHeaders.value.splice(i, 1)
+}
+
+function kvToObject(arr: KV[]): Record<string, string> {
+  const o: Record<string, string> = {}
+  arr.forEach(({key, value}) => {
+    if (key && key.trim()) o[key.trim()] = value
+  })
+  return o
+}
+
+function statusClass(status: number): string {
+  if (status >= 200 && status < 300) return 'status-2xx'
+  if (status >= 300 && status < 400) return 'status-3xx'
+  if (status >= 400 && status < 500) return 'status-4xx'
+  if (status >= 500) return 'status-5xx'
+  return 'status-err'
+}
+
+async function sendTest() {
+  if (!testUrl.value.trim()) {
+    ElMessage.warning('请填写请求 URL')
+    return
+  }
+  testLoading.value = true
+  testResponse.value = null
+  showRespHeaders.value = false
+  const start = Date.now()
+  const method = testMethod.value.toUpperCase()
+  try {
+    const headers = kvToObject(testHeaders.value)
+    const params = kvToObject(testParams.value)
+    let data: any = undefined
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && testBody.value.trim()) {
+      try {
+        data = JSON.parse(testBody.value)
+      } catch {
+        data = testBody.value
+      }
+    }
+    const resp = await testClient.request({
+      url: testUrl.value.trim(),
+      method: method as any,
+      params,
+      headers,
+      data,
+    })
+    const bodyStr = typeof resp.data === 'object'
+      ? JSON.stringify(resp.data, null, 2)
+      : String(resp.data)
+    testResponse.value = {
+      status: resp.status,
+      statusText: resp.statusText,
+      time: Date.now() - start,
+      headers: resp.headers as any,
+      data: bodyStr,
+    }
+  } catch (err: any) {
+    testResponse.value = {
+      status: 0,
+      statusText: 'Error',
+      time: Date.now() - start,
+      headers: {},
+      data: '',
+      error: err?.message || '请求失败 (可能是跨域或网络错误)',
+    }
+  } finally {
+    testLoading.value = false
+  }
+}
+
+function copyResponse() {
+  if (!testResponse.value) return
+  navigator.clipboard?.writeText(testResponse.value.error || testResponse.value.data)
+    .then(() => ElMessage.success('已复制响应'))
+    .catch(() => ElMessage.error('复制失败'))
+}
 
 // 加载API列表
 async function loadApiList() {
@@ -189,6 +335,15 @@ onMounted(() => {
                     </button>
                   </div>
                 </div>
+
+                <!-- 在线测试按钮 -->
+                <button
+                  @click="openTestDialog(e)"
+                  class="btn btn-test-api"
+                  type="button"
+                >
+                  🚀 在线测试
+                </button>
               </div>
 
               <!-- 卡片装饰 -->
@@ -198,6 +353,87 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- 在线测试弹窗 -->
+    <el-dialog
+      v-model="testDialogVisible"
+      :title="'在线测试 - ' + testApiName"
+      width="720px"
+      top="6vh"
+      class="api-test-dialog"
+      append-to-body
+    >
+      <div class="test-form">
+        <!-- 请求行 -->
+        <div class="test-row test-request-line">
+          <el-select v-model="testMethod" class="test-method-select" placeholder="方法">
+            <el-option v-for="m in methodOptions" :key="m" :label="m" :value="m"/>
+          </el-select>
+          <el-input v-model="testUrl" class="test-url-input" placeholder="请求 URL"/>
+          <el-button type="primary" :loading="testLoading" @click="sendTest">发送</el-button>
+        </div>
+
+        <!-- 查询参数 -->
+        <div class="test-section">
+          <div class="test-section-head">
+            <span class="test-section-title">Query 参数</span>
+            <el-button text size="small" @click="addParam">+ 添加</el-button>
+          </div>
+          <div v-for="(p, i) in testParams" :key="'p' + i" class="test-kv-row">
+            <el-input v-model="p.key" placeholder="key" size="small"/>
+            <el-input v-model="p.value" placeholder="value" size="small"/>
+            <el-button text size="small" class="kv-del" @click="removeParam(i)">✕</el-button>
+          </div>
+        </div>
+
+        <!-- 请求头 -->
+        <div class="test-section">
+          <div class="test-section-head">
+            <span class="test-section-title">请求头 Headers</span>
+            <el-button text size="small" @click="addHeader">+ 添加</el-button>
+          </div>
+          <div v-for="(h, i) in testHeaders" :key="'h' + i" class="test-kv-row">
+            <el-input v-model="h.key" placeholder="key" size="small"/>
+            <el-input v-model="h.value" placeholder="value" size="small"/>
+            <el-button text size="small" class="kv-del" @click="removeHeader(i)">✕</el-button>
+          </div>
+        </div>
+
+        <!-- 请求体 -->
+        <div v-if="testMethod !== 'GET'" class="test-section">
+          <div class="test-section-head">
+            <span class="test-section-title">请求体 Body (JSON/文本)</span>
+          </div>
+          <el-input
+            v-model="testBody"
+            type="textarea"
+            :rows="4"
+            placeholder='{"key": "value"}'
+          />
+        </div>
+
+        <!-- 响应 -->
+        <div v-if="testResponse" class="test-response">
+          <div class="resp-meta">
+            <span :class="['resp-status', statusClass(testResponse.status)]">
+              {{ testResponse.error ? 'Error' : testResponse.status + ' ' + testResponse.statusText }}
+            </span>
+            <span class="resp-time">⏱ {{ testResponse.time }} ms</span>
+            <el-button
+              v-if="!testResponse.error"
+              text
+              size="small"
+              @click="showRespHeaders = !showRespHeaders"
+            >
+              {{ showRespHeaders ? '隐藏响应头' : '查看响应头' }}
+            </el-button>
+            <el-button text size="small" @click="copyResponse">复制响应</el-button>
+          </div>
+          <pre v-if="showRespHeaders && !testResponse.error" class="resp-headers">{{ Object.entries(testResponse.headers).map(([k, v]) => k + ': ' + v).join('\n') }}</pre>
+          <pre class="resp-body">{{ testResponse.error || testResponse.data || '(空响应)' }}</pre>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -713,5 +949,130 @@ onMounted(() => {
     border-bottom-left-radius: 8px;
     margin-top: 0.5rem;
   }
+}
+
+/* ===== 在线测试 ===== */
+.btn-test-api {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-test-api:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.test-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.test-request-line {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.test-method-select {
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.test-url-input {
+  flex: 1;
+}
+
+.test-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.test-section-title {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.test-kv-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.kv-del {
+  color: #e53e3e;
+  flex-shrink: 0;
+}
+
+.test-response {
+  border-top: 1px solid #edf2f7;
+  padding-top: 1rem;
+}
+
+.resp-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.resp-status {
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.status-2xx { background: #38a169; }
+.status-3xx { background: #3182ce; }
+.status-4xx { background: #d69e2e; }
+.status-5xx { background: #e53e3e; }
+.status-err { background: #718096; }
+
+.resp-time {
+  color: #718096;
+  font-size: 0.85rem;
+}
+
+.resp-headers {
+  background: #f7fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  padding: 0.7rem;
+  font-size: 0.8rem;
+  color: #4a5568;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-bottom: 0.6rem;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.resp-body {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 10px;
+  padding: 1rem;
+  font-family: 'Fira Code', Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 360px;
+  overflow-y: auto;
+  margin: 0;
 }
 </style>
