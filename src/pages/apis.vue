@@ -105,37 +105,53 @@ function prettyJson(s: string): string {
   }
 }
 
-// 直连失败(通常是跨域/网络)时, 走后端 /api/test 服务端代理转发
+// 公共 CORS 代理 (allorigins): 服务端转发, 给浏览器补上合法 CORS 头
+const PUBLIC_CORS_PROXY = 'https://api.allorigins.win/get?url='
+
+function buildFullUrl(url: string, params: Record<string, string>): string {
+  const keys = Object.keys(params)
+  if (!keys.length) return url
+  const usp = new URLSearchParams()
+  keys.forEach((k) => usp.append(k, params[k]))
+  return url + (url.includes('?') ? '&' : '?') + usp.toString()
+}
+
+// 直连失败(通常是跨域/网络)时, 经公共 CORS 代理转发 (仅支持 GET)
 async function sendViaProxy(
   method: string,
-  headers: Record<string, string>,
   params: Record<string, string>,
-  data: any,
   start: number,
 ) {
-  const proxied: any = await service.post('/api/test', {
-    url: testUrl.value.trim(),
-    method,
-    headers,
-    params,
-    body: data === undefined ? null : (typeof data === 'object' ? JSON.stringify(data) : String(data)),
-  })
-  if (proxied && proxied.status && !proxied.error) {
-    testResponse.value = {
-      status: proxied.status,
-      statusText: '(经服务端代理)',
-      time: proxied.time ?? (Date.now() - start),
-      headers: proxied.headers || {},
-      data: prettyJson(proxied.body || ''),
-    }
-  } else {
+  if (method !== 'GET') {
     testResponse.value = {
       status: 0,
       statusText: 'Error',
       time: Date.now() - start,
       headers: {},
       data: '',
-      error: (proxied && proxied.error) || '请求失败',
+      error: '该接口跨域且非 GET 请求, 公共代理无法转发。请在浏览器同源环境或自建代理下测试。',
+    }
+    return
+  }
+  const fullUrl = buildFullUrl(testUrl.value.trim(), params)
+  const resp = await testClient.get(PUBLIC_CORS_PROXY + encodeURIComponent(fullUrl))
+  const d: any = resp.data
+  if (d && d.status) {
+    const contents = typeof d.contents === 'string' ? d.contents : JSON.stringify(d.contents)
+    testResponse.value = {
+      status: d.status.http_code || resp.status,
+      statusText: '(经公共代理)',
+      time: d.status.response_time ?? (Date.now() - start),
+      headers: d.status.content_type ? {'content-type': d.status.content_type} : {},
+      data: prettyJson(contents || ''),
+    }
+  } else {
+    testResponse.value = {
+      status: resp.status,
+      statusText: '(经公共代理)',
+      time: Date.now() - start,
+      headers: {},
+      data: prettyJson(typeof d === 'object' ? JSON.stringify(d) : String(d)),
     }
   }
 }
@@ -179,9 +195,9 @@ async function sendTest() {
       data: bodyStr,
     }
   } catch (directErr: any) {
-    // 直连被浏览器拦截(跨域/网络), 自动回退到服务端代理
+    // 直连被浏览器拦截(跨域/网络), 自动回退到公共 CORS 代理
     try {
-      await sendViaProxy(method, headers, params, data, start)
+      await sendViaProxy(method, params, start)
     } catch (proxyErr: any) {
       testResponse.value = {
         status: 0,
@@ -190,7 +206,7 @@ async function sendTest() {
         headers: {},
         data: '',
         error: '直连被拦截 (跨域/网络): ' + (directErr?.message || '未知')
-          + '\n服务端代理也不可用 (需后端 /api/test 接口): ' + (proxyErr?.message || '未知'),
+          + '\n公共代理也失败: ' + (proxyErr?.message || '未知'),
       }
     }
   } finally {
