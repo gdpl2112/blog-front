@@ -6,8 +6,7 @@ on:
     paths:
       - '**/src/App.vue'
 
-  pull_request:
-    branches: [ "master" ]
+  # 移除 pull_request 触发器以避免在 PR 时自动部署
 
 #jobs:
 #  build:
