@@ -97,6 +97,49 @@ function statusClass(status: number): string {
   return 'status-err'
 }
 
+function prettyJson(s: string): string {
+  try {
+    return JSON.stringify(JSON.parse(s), null, 2)
+  } catch {
+    return s
+  }
+}
+
+// 直连失败(通常是跨域/网络)时, 走后端 /api/test 服务端代理转发
+async function sendViaProxy(
+  method: string,
+  headers: Record<string, string>,
+  params: Record<string, string>,
+  data: any,
+  start: number,
+) {
+  const proxied: any = await service.post('/api/test', {
+    url: testUrl.value.trim(),
+    method,
+    headers,
+    params,
+    body: data === undefined ? null : (typeof data === 'object' ? JSON.stringify(data) : String(data)),
+  })
+  if (proxied && proxied.status && !proxied.error) {
+    testResponse.value = {
+      status: proxied.status,
+      statusText: '(经服务端代理)',
+      time: proxied.time ?? (Date.now() - start),
+      headers: proxied.headers || {},
+      data: prettyJson(proxied.body || ''),
+    }
+  } else {
+    testResponse.value = {
+      status: 0,
+      statusText: 'Error',
+      time: Date.now() - start,
+      headers: {},
+      data: '',
+      error: (proxied && proxied.error) || '请求失败',
+    }
+  }
+}
+
 async function sendTest() {
   if (!testUrl.value.trim()) {
     ElMessage.warning('请填写请求 URL')
@@ -107,17 +150,17 @@ async function sendTest() {
   showRespHeaders.value = false
   const start = Date.now()
   const method = testMethod.value.toUpperCase()
-  try {
-    const headers = kvToObject(testHeaders.value)
-    const params = kvToObject(testParams.value)
-    let data: any = undefined
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && testBody.value.trim()) {
-      try {
-        data = JSON.parse(testBody.value)
-      } catch {
-        data = testBody.value
-      }
+  const headers = kvToObject(testHeaders.value)
+  const params = kvToObject(testParams.value)
+  let data: any = undefined
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && testBody.value.trim()) {
+    try {
+      data = JSON.parse(testBody.value)
+    } catch {
+      data = testBody.value
     }
+  }
+  try {
     const resp = await testClient.request({
       url: testUrl.value.trim(),
       method: method as any,
@@ -135,14 +178,20 @@ async function sendTest() {
       headers: resp.headers as any,
       data: bodyStr,
     }
-  } catch (err: any) {
-    testResponse.value = {
-      status: 0,
-      statusText: 'Error',
-      time: Date.now() - start,
-      headers: {},
-      data: '',
-      error: err?.message || '请求失败 (可能是跨域或网络错误)',
+  } catch (directErr: any) {
+    // 直连被浏览器拦截(跨域/网络), 自动回退到服务端代理
+    try {
+      await sendViaProxy(method, headers, params, data, start)
+    } catch (proxyErr: any) {
+      testResponse.value = {
+        status: 0,
+        statusText: 'Error',
+        time: Date.now() - start,
+        headers: {},
+        data: '',
+        error: '直连被拦截 (跨域/网络): ' + (directErr?.message || '未知')
+          + '\n服务端代理也不可用 (需后端 /api/test 接口): ' + (proxyErr?.message || '未知'),
+      }
     }
   } finally {
     testLoading.value = false
