@@ -53,8 +53,9 @@ function parseAddress(address: string): { url: string; params: KV[] } {
 }
 
 function openTestDialog(e: any) {
+  let method = (e.method || e.method == 'ANY') ? 'GET' : e.method
   testApiName.value = e.name
-  testMethod.value = (e.method || 'GET').toUpperCase()
+  testMethod.value =  method.toUpperCase()
   const {url, params} = parseAddress(e.address || '')
   testUrl.value = url
   testParams.value = params.length ? params : [{key: '', value: ''}]
@@ -126,8 +127,8 @@ async function sendTest() {
       data,
     })
     const bodyStr = typeof resp.data === 'object'
-      ? JSON.stringify(resp.data, null, 2)
-      : String(resp.data)
+        ? JSON.stringify(resp.data, null, 2)
+        : String(resp.data)
     testResponse.value = {
       status: resp.status,
       statusText: resp.statusText,
@@ -152,8 +153,8 @@ async function sendTest() {
 function copyResponse() {
   if (!testResponse.value) return
   navigator.clipboard?.writeText(testResponse.value.error || testResponse.value.data)
-    .then(() => ElMessage.success('已复制响应'))
-    .catch(() => ElMessage.error('复制失败'))
+      .then(() => ElMessage.success('已复制响应'))
+      .catch(() => ElMessage.error('复制失败'))
 }
 
 // 加载API列表
@@ -192,8 +193,8 @@ watch(searchText, (newText) => {
     list.value = rawList.value
   } else {
     const lowerText = newText.toLowerCase()
-    list.value = rawList.value.filter((e: any) => 
-      JSON.stringify(e).toLowerCase().includes(lowerText)
+    list.value = rawList.value.filter((e: any) =>
+        JSON.stringify(e).toLowerCase().includes(lowerText)
     )
   }
 })
@@ -247,12 +248,12 @@ onMounted(() => {
         <!-- 搜索区域 -->
         <div class="api-search-section">
           <div class="search-input-container">
-            <input 
-              v-model="searchText"
-              class="api-search-input form-control"
-              type="search" 
-              placeholder="搜索API名称、描述或作者..."
-              aria-label="Search"
+            <input
+                v-model="searchText"
+                class="api-search-input form-control"
+                type="search"
+                placeholder="搜索API名称、描述或作者..."
+                aria-label="Search"
             >
             <div class="search-icon">🔍</div>
           </div>
@@ -271,10 +272,10 @@ onMounted(() => {
         <div v-else-if="list.length === 0" class="api-empty-state">
           <div class="empty-icon">📭</div>
           <div class="empty-text">没有找到匹配的API</div>
-          <button 
-            v-if="searchText" 
-            @click="searchText = ''" 
-            class="clear-search-btn"
+          <button
+              v-if="searchText"
+              @click="searchText = ''"
+              class="clear-search-btn"
           >
             清除搜索
           </button>
@@ -282,16 +283,16 @@ onMounted(() => {
 
         <!-- API列表 -->
         <div v-else class="api-grid">
-          <div 
-            v-for="(e, i) in list" 
-            :key="e.id"
-            class="api-card-container"
+          <div
+              v-for="(e, i) in list"
+              :key="e.id"
+              class="api-card-container"
           >
             <div class="api-card">
               <!-- 标签栏 -->
               <div class="api-tags-container">
-                <div 
-                  :class="['api-tag', 'tag-author', e.author === 'kloping' ? 'author-official' : 'author-contributor']"
+                <div
+                    :class="['api-tag', 'tag-author', e.author === 'kloping' ? 'author-official' : 'author-contributor']"
                 >
                   {{ e.author }}
                 </div>
@@ -314,22 +315,22 @@ onMounted(() => {
                 <p class="api-card-description">
                   {{ e.desc }}
                 </p>
-                
+
                 <!-- API地址 -->
                 <div class="api-address-section">
                   <div class="section-label">接口地址</div>
                   <div class="input-group">
-                    <input 
-                      :id="'input-' + e.id"
-                      type="text" 
-                      class="form-control api-address-input"
-                      :value="e.address"
-                      readonly
+                    <input
+                        :id="'input-' + e.id"
+                        type="text"
+                        class="form-control api-address-input"
+                        :value="e.address"
+                        readonly
                     >
-                    <button 
-                      @click="copyTextToClipboard(e.id, e.address)"
-                      :class="['btn', 'btn-copy', copySuccess === e.id ? 'copied' : '']"
-                      type="button"
+                    <button
+                        @click="copyTextToClipboard(e.id, e.address)"
+                        :class="['btn', 'btn-copy', copySuccess === e.id ? 'copied' : '']"
+                        type="button"
                     >
                       {{ copySuccess === e.id ? '✓ 已复制' : '复制' }}
                     </button>
@@ -338,9 +339,9 @@ onMounted(() => {
 
                 <!-- 在线测试按钮 -->
                 <button
-                  @click="openTestDialog(e)"
-                  class="btn btn-test-api"
-                  type="button"
+                    @click="openTestDialog(e)"
+                    class="btn btn-test-api"
+                    type="button"
                 >
                   🚀 在线测试
                 </button>
@@ -356,12 +357,12 @@ onMounted(() => {
 
     <!-- 在线测试弹窗 -->
     <el-dialog
-      v-model="testDialogVisible"
-      :title="'在线测试 - ' + testApiName"
-      width="720px"
-      top="6vh"
-      class="api-test-dialog"
-      append-to-body
+        v-model="testDialogVisible"
+        :title="'在线测试 - ' + testApiName"
+        width="720px"
+        top="6vh"
+        class="api-test-dialog"
+        append-to-body
     >
       <div class="test-form">
         <!-- 请求行 -->
@@ -405,10 +406,10 @@ onMounted(() => {
             <span class="test-section-title">请求体 Body (JSON/文本)</span>
           </div>
           <el-input
-            v-model="testBody"
-            type="textarea"
-            :rows="4"
-            placeholder='{"key": "value"}'
+              v-model="testBody"
+              type="textarea"
+              :rows="4"
+              placeholder='{"key": "value"}'
           />
         </div>
 
@@ -420,16 +421,18 @@ onMounted(() => {
             </span>
             <span class="resp-time">⏱ {{ testResponse.time }} ms</span>
             <el-button
-              v-if="!testResponse.error"
-              text
-              size="small"
-              @click="showRespHeaders = !showRespHeaders"
+                v-if="!testResponse.error"
+                text
+                size="small"
+                @click="showRespHeaders = !showRespHeaders"
             >
               {{ showRespHeaders ? '隐藏响应头' : '查看响应头' }}
             </el-button>
             <el-button text size="small" @click="copyResponse">复制响应</el-button>
           </div>
-          <pre v-if="showRespHeaders && !testResponse.error" class="resp-headers">{{ Object.entries(testResponse.headers).map(([k, v]) => k + ': ' + v).join('\n') }}</pre>
+          <pre v-if="showRespHeaders && !testResponse.error" class="resp-headers">{{
+              Object.entries(testResponse.headers).map(([k, v]) => k + ': ' + v).join('\n')
+            }}</pre>
           <pre class="resp-body">{{ testResponse.error || testResponse.data || '(空响应)' }}</pre>
         </div>
       </div>
@@ -865,8 +868,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
@@ -883,31 +890,31 @@ onMounted(() => {
   .api-page-container {
     padding: 1rem 0;
   }
-  
+
   .api-title-card {
     padding: 1.5rem;
     margin: 0 1rem;
   }
-  
+
   .api-title-text {
     font-size: 2rem;
   }
-  
+
   .api-content-wrapper {
     padding: 1.5rem;
     margin: 0 1rem 1rem;
     border-radius: 12px;
   }
-  
+
   .api-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
   }
-  
+
   .api-card-container {
     margin-bottom: 0;
   }
-  
+
   .api-search-input {
     font-size: 0.9375rem;
   }
@@ -917,33 +924,33 @@ onMounted(() => {
   .api-title-text {
     font-size: 1.75rem;
   }
-  
+
   .api-subtitle {
     font-size: 1rem;
   }
-  
+
   .api-content-wrapper {
     padding: 1.25rem;
   }
-  
+
   .api-card-content {
     padding: 0.875rem;
   }
-  
+
   .api-card-title {
     font-size: 1.125rem;
   }
-  
+
   .input-group {
     flex-direction: column;
   }
-  
+
   .api-address-input {
     border-right: 2px solid #e2e8f0;
     border-bottom-left-radius: 0;
     border-top-right-radius: 8px;
   }
-  
+
   .btn-copy {
     border-top-right-radius: 0;
     border-bottom-left-radius: 8px;
@@ -1036,11 +1043,25 @@ onMounted(() => {
   font-size: 0.85rem;
 }
 
-.status-2xx { background: #38a169; }
-.status-3xx { background: #3182ce; }
-.status-4xx { background: #d69e2e; }
-.status-5xx { background: #e53e3e; }
-.status-err { background: #718096; }
+.status-2xx {
+  background: #38a169;
+}
+
+.status-3xx {
+  background: #3182ce;
+}
+
+.status-4xx {
+  background: #d69e2e;
+}
+
+.status-5xx {
+  background: #e53e3e;
+}
+
+.status-err {
+  background: #718096;
+}
 
 .resp-time {
   color: #718096;
