@@ -98,6 +98,65 @@ function statusClass(status: number): string {
   return 'status-err'
 }
 
+function prettyJson(s: string): string {
+  try {
+    return JSON.stringify(JSON.parse(s), null, 2)
+  } catch {
+    return s
+  }
+}
+
+// 公共 CORS 代理 (allorigins): 服务端转发, 给浏览器补上合法 CORS 头
+const PUBLIC_CORS_PROXY = 'https://api.allorigins.win/get?url='
+
+function buildFullUrl(url: string, params: Record<string, string>): string {
+  const keys = Object.keys(params)
+  if (!keys.length) return url
+  const usp = new URLSearchParams()
+  keys.forEach((k) => usp.append(k, params[k]))
+  return url + (url.includes('?') ? '&' : '?') + usp.toString()
+}
+
+// 直连失败(通常是跨域/网络)时, 经公共 CORS 代理转发 (仅支持 GET)
+async function sendViaProxy(
+  method: string,
+  params: Record<string, string>,
+  start: number,
+) {
+  if (method !== 'GET') {
+    testResponse.value = {
+      status: 0,
+      statusText: 'Error',
+      time: Date.now() - start,
+      headers: {},
+      data: '',
+      error: '该接口跨域且非 GET 请求, 公共代理无法转发。请在浏览器同源环境或自建代理下测试。',
+    }
+    return
+  }
+  const fullUrl = buildFullUrl(testUrl.value.trim(), params)
+  const resp = await testClient.get(PUBLIC_CORS_PROXY + encodeURIComponent(fullUrl))
+  const d: any = resp.data
+  if (d && d.status) {
+    const contents = typeof d.contents === 'string' ? d.contents : JSON.stringify(d.contents)
+    testResponse.value = {
+      status: d.status.http_code || resp.status,
+      statusText: '(经公共代理)',
+      time: d.status.response_time ?? (Date.now() - start),
+      headers: d.status.content_type ? {'content-type': d.status.content_type} : {},
+      data: prettyJson(contents || ''),
+    }
+  } else {
+    testResponse.value = {
+      status: resp.status,
+      statusText: '(经公共代理)',
+      time: Date.now() - start,
+      headers: {},
+      data: prettyJson(typeof d === 'object' ? JSON.stringify(d) : String(d)),
+    }
+  }
+}
+
 async function sendTest() {
   if (!testUrl.value.trim()) {
     ElMessage.warning('请填写请求 URL')
@@ -108,17 +167,17 @@ async function sendTest() {
   showRespHeaders.value = false
   const start = Date.now()
   const method = testMethod.value.toUpperCase()
-  try {
-    const headers = kvToObject(testHeaders.value)
-    const params = kvToObject(testParams.value)
-    let data: any = undefined
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && testBody.value.trim()) {
-      try {
-        data = JSON.parse(testBody.value)
-      } catch {
-        data = testBody.value
-      }
+  const headers = kvToObject(testHeaders.value)
+  const params = kvToObject(testParams.value)
+  let data: any = undefined
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && testBody.value.trim()) {
+    try {
+      data = JSON.parse(testBody.value)
+    } catch {
+      data = testBody.value
     }
+  }
+  try {
     const resp = await testClient.request({
       url: testUrl.value.trim(),
       method: method as any,
@@ -136,14 +195,20 @@ async function sendTest() {
       headers: resp.headers as any,
       data: bodyStr,
     }
-  } catch (err: any) {
-    testResponse.value = {
-      status: 0,
-      statusText: 'Error',
-      time: Date.now() - start,
-      headers: {},
-      data: '',
-      error: err?.message || '请求失败 (可能是跨域或网络错误)',
+  } catch (directErr: any) {
+    // 直连被浏览器拦截(跨域/网络), 自动回退到公共 CORS 代理
+    try {
+      await sendViaProxy(method, params, start)
+    } catch (proxyErr: any) {
+      testResponse.value = {
+        status: 0,
+        statusText: 'Error',
+        time: Date.now() - start,
+        headers: {},
+        data: '',
+        error: '直连被拦截 (跨域/网络): ' + (directErr?.message || '未知')
+          + '\n公共代理也失败: ' + (proxyErr?.message || '未知'),
+      }
     }
   } finally {
     testLoading.value = false
