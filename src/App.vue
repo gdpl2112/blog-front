@@ -675,10 +675,16 @@ html[data-theme="dark"] body {
   max-height: 480px;
   border-radius: var(--radius-md);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--color-border);
   background: var(--color-bg-card);
   transition: all var(--transition-base);
+}
+
+#player .aplayer-list {
+  overflow-y: auto !important;
 }
 
 #player.aplayer {
@@ -1206,7 +1212,7 @@ onMounted(async () => {
   ap = new APlayer({
     container: document.getElementById('player'),
     autoplay: false,
-    listMaxHeight: 60,
+    listMaxHeight: 280,
     audio: [],
     preload: "none"
   });

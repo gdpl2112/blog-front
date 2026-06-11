@@ -581,8 +581,8 @@
                 <MdPreview v-if="message.role === 'assistant'" :modelValue="message.content" />
                 <div v-else style="white-space:pre-wrap;">{{ message.content }}</div>
                 <div v-if="message.images && message.images.length > 0" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-                  <a v-for="(img, ii) in message.images" :key="ii" :href="img.src" target="_blank">
-                    <img :src="img.src" style="max-width:120px;border-radius:6px;" />
+                  <a v-for="(img, ii) in message.images" :key="ii" :href="imageDisplaySrc(img)" target="_blank">
+                    <img :src="imageDisplaySrc(img)" style="max-width:120px;border-radius:6px;" />
                   </a>
                 </div>
               </div>
@@ -682,8 +682,8 @@
         <MdPreview :modelValue="fullScreenMessage?.content || ''" />
         <div v-if="fullScreenMessage?.images && fullScreenMessage.images.length > 0" style="margin-top:16px;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <a v-for="(img, ii) in fullScreenMessage.images" :key="ii" :href="img.src" target="_blank">
-              <img :src="img.src" style="max-width:200px;border-radius:8px;" />
+            <a v-for="(img, ii) in fullScreenMessage.images" :key="ii" :href="imageDisplaySrc(img)" target="_blank">
+              <img :src="imageDisplaySrc(img)" style="max-width:200px;border-radius:8px;" />
             </a>
           </div>
         </div>
@@ -764,6 +764,17 @@ const currentSession = computed(() => sessions.value.find(s => s.id === currentS
 const canSendMessage = computed(() => userInput.value.trim().length > 0 || imageAttachments.value.length > 0);
 
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function getAuthHeaders() {
+  return {
+    'Token': Cookie.get('token') || '',
+    'Authorization': Cookie.get('authorization') || ''
+  };
+}
+
+function imageDisplaySrc(img: MessageImage): string {
+  return (img as any).base64 || img.src;
+}
 function formatText(wrapper: string) { userInput.value += wrapper; textareaRef.value?.focus(); }
 function formatMessageTime(msg: Message) { if (!msg.timestamp) return ''; const d = new Date(msg.timestamp); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
 function canEditOrDeleteMessage(msg: Message) { return msg.timestamp && (Date.now() - msg.timestamp) < 180000; }
@@ -773,22 +784,63 @@ function toggleSessionSidebar() { isSessionSidebarCollapsed.value = !isSessionSi
 
 function addSession() {
   const id = generateId();
-  sessions.value.push({ id, title: '', title_temp: '新会话', messages: [] });
+  sessions.value.unshift({ id, title: '', title_temp: '新会话', messages: [], lastUpdated: Date.now() });
   currentSessionId.value = id;
   messages.value = [];
   saveSessions();
 }
 
-function switchSession(id: string) {
+async function switchSession(id: string) {
   currentSessionId.value = id;
-  messages.value = currentSession.value?.messages || [];
   if (isSessionSidebarCollapsed.value) isSessionSidebarCollapsed.value = false;
+  // 先从本地缓存加载（如果有），同时从服务端加载最新历史
+  const local = currentSession.value?.messages || [];
+  messages.value = local.length > 0 ? local : [];
+  fetchServerHistory(id);
 }
 
-function confirmDeleteSession(id: string) {
+async function fetchServerHistory(chatId: string) {
+  try {
+    const res = await fetch(`/api/chat/list?chatId=${chatId}`, { headers: getAuthHeaders() });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const msgs: Message[] = data.map((m: any) => ({
+        role: m.role,
+        content: m.content || '',
+        timestamp: m.timestamp || Date.now(),
+        images: m.images ? m.images.map((img: any) => ({
+          src: img.base64 || img.url || '',
+          mimeType: img.mimeType || ''
+        })) : undefined
+      }));
+      // 只在当前会话仍是这个 chatId 时更新
+      if (currentSessionId.value === chatId) {
+        messages.value = msgs;
+        // 同步到本地会话
+        if (currentSession.value) {
+          currentSession.value.messages = msgs;
+          // 尝试用第一条用户消息作为标题
+          if (!currentSession.value.title) {
+            const firstUser = msgs.find(m => m.role === 'user');
+            if (firstUser && firstUser.content) {
+              currentSession.value.title_temp = firstUser.content.slice(0, 20);
+              currentSession.value.title = firstUser.content.slice(0, 20);
+            }
+          }
+        }
+        saveSessions();
+      }
+    }
+  } catch {}
+}
+
+async function confirmDeleteSession(id: string) {
   confirmTitle.value = '删除会话';
   confirmMessage.value = '确定删除此会话？所有消息将丢失。';
-  confirmAction.value = () => {
+  confirmAction.value = async () => {
+    // 调用服务端删除
+    try { await fetch(`/api/chat/delete?chatId=${id}`, { headers: getAuthHeaders() }); } catch {}
     const idx = sessions.value.findIndex(s => s.id === id);
     if (idx > -1) sessions.value.splice(idx, 1);
     if (currentSessionId.value === id) {
@@ -811,37 +863,74 @@ function confirmClearSession() {
 async function sendMessage() {
   if (!canSendMessage.value || isLoading.value || !login_state.value) return;
   const text = userInput.value.trim();
-  const images = imageAttachments.value.map(a => ({ src: a.dataUrl, mimeType: a.file.type }));
+  // API 要求图片格式: { base64, mimeType }
+  const apiImages = imageAttachments.value.map(a => ({ base64: a.dataUrl, mimeType: a.file.type }));
+  // 本地显示用图片
+  const localImages: MessageImage[] = imageAttachments.value.map(a => ({ src: a.dataUrl, mimeType: a.file.type }));
   userInput.value = '';
   imageAttachments.value = [];
 
-  const userMsg: Message = { role: 'user', content: text, timestamp: Date.now(), images: images.length > 0 ? images : undefined };
+  const userMsg: Message = { role: 'user', content: text, timestamp: Date.now(), images: localImages.length > 0 ? localImages : undefined };
   messages.value.push(userMsg);
-  if (currentSession.value) currentSession.value.messages.push(userMsg);
   scrollToBottom();
   isLoading.value = true;
   thinkingContent.value = 'AI正在思考...';
 
   try {
-    const payload: any = { text, history: messages.value.slice(0, -1).map(m => ({ role: m.role, content: m.content })) };
-    if (images.length > 0) payload.images = images;
-    const res = await fetch('/api/ai/chat', {
+    const payload: any = {
+      chatId: currentSessionId.value,
+      q: text
+    };
+    if (apiImages.length > 0) payload.images = apiImages;
+    const res = await fetch('/api/chat/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Token': Cookie.get('token') || '', 'Authorization': Cookie.get('authorization') || '' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(payload)
     });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(errText || `HTTP ${res.status}`);
+    }
     const reader = res.body?.getReader();
     if (!reader) throw new Error('No reader');
     const decoder = new TextDecoder();
     let content = '';
+    let buffer = '';
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      content += decoder.decode(value, { stream: true });
-      if (messages.value[messages.value.length - 1]?.role === 'assistant') messages.value[messages.value.length - 1].content = content;
-      else messages.value.push({ role: 'assistant', content, timestamp: Date.now() });
-      thinkingContent.value = '';
-      scrollToBottom();
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        if (line.startsWith('data:')) {
+          try {
+            const json = JSON.parse(line.slice(5).trim());
+            if (json.type === 'error') {
+              toast(json.content || '未知错误');
+              throw new Error(json.content || '服务端错误');
+            }
+            if (json.type === 'done') continue;
+            if (json.type === 'thinking') {
+              thinkingContent.value = json.content || '思考中...';
+              continue;
+            }
+            // type === 'content' 或其他带 content 的事件
+            if (json.content) {
+              content += json.content;
+              if (messages.value[messages.value.length - 1]?.role === 'assistant')
+                messages.value[messages.value.length - 1].content = content;
+              else
+                messages.value.push({ role: 'assistant', content, timestamp: Date.now() });
+              thinkingContent.value = '';
+              scrollToBottom();
+            }
+          } catch {
+            // 非 JSON 行，跳过
+          }
+        }
+      }
     }
     if (currentSession.value && !currentSession.value.title && text.length > 0) {
       currentSession.value.title_temp = text.slice(0, 20);
@@ -849,7 +938,9 @@ async function sendMessage() {
     }
     saveSessions();
   } catch (e: any) {
-    toast('发送失败: ' + (e.message || '未知错误'));
+    if (e.message !== '服务端错误') {
+      toast('发送失败: ' + (e.message || '未知错误'));
+    }
   } finally {
     isLoading.value = false;
     thinkingContent.value = '';
@@ -920,13 +1011,35 @@ function saveSessions() {
 function loadSessions() {
   try {
     const data = localStorage.getItem('ai-chat-sessions');
-    if (data) { sessions.value = JSON.parse(data); if (sessions.value.length > 0) switchSession(sessions.value[0].id); }
+    if (data) { sessions.value = JSON.parse(data); }
+  } catch {}
+}
+
+async function fetchServerChatIds() {
+  try {
+    const res = await fetch('/api/chat/chatIds', { headers: getAuthHeaders() });
+    if (!res.ok) return;
+    const ids: string[] = await res.json();
+    if (!Array.isArray(ids) || ids.length === 0) return;
+    // 合并服务端 ID 到本地会话列表
+    const existingIds = new Set(sessions.value.map(s => s.id));
+    for (const id of ids) {
+      if (!existingIds.has(id)) {
+        sessions.value.unshift({ id, title: '', title_temp: '会话 ' + id.slice(-6), messages: [], lastUpdated: Date.now() });
+      }
+    }
+    saveSessions();
+    // 如果没有当前会话，切换到第一个
+    if (!currentSessionId.value || !existingIds.has(currentSessionId.value)) {
+      switchSession(sessions.value[0]?.id || ids[0]);
+    }
   } catch {}
 }
 
 onMounted(() => {
   loadSessions();
   if (sessions.value.length === 0) addSession();
+  if (login_state.value) fetchServerChatIds();
 });
 
 function loadMoreMessages() { hasMoreMessages.value = false; }
