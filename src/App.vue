@@ -829,13 +829,27 @@ html[data-theme="dark"] body {
     position: static;
     box-shadow: none;
     border: none;
-    opacity: 1;
-    visibility: visible;
-    transform: none;
     margin-top: 2px;
     padding: 0 0 0 var(--space-4);
     background: transparent;
     min-width: unset;
+    /* Keep show-driven visibility so ABOUT is collapsible */
+  }
+
+  /* Mobile: hide dropdown unless .show is present */
+  .nav-mobile-links .nav-dropdown-menu:not(.show) {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+  }
+
+  .nav-mobile-links .nav-dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    max-height: 600px;
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .nav-mobile-actions {
@@ -849,6 +863,34 @@ html[data-theme="dark"] body {
 
   .nav-mobile-actions .nav-icon-btn {
     display: none;
+  }
+
+  .nav-mobile-toggles {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .nav-mobile-toggle-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-soft);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .nav-mobile-toggle-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
   }
 
   .nav-mobile-actions .nav-cta {
@@ -1079,6 +1121,18 @@ html[data-theme="dark"] body {
         </div>
 
         <div class="nav-mobile-actions">
+          <!-- Theme & Music toggles -->
+          <div class="nav-mobile-toggles">
+            <button class="nav-mobile-toggle-btn" @click="toggleTheme(); mobileOpen = false">
+              <i :class="theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon'"></i>
+              <span>{{ theme === 'dark' ? '亮色模式' : '暗色模式' }}</span>
+            </button>
+            <button class="nav-mobile-toggle-btn" @click="ttplayer(); mobileOpen = false">
+              <i class="bi bi-music-note-beamed"></i>
+              <span>显隐歌单</span>
+            </button>
+          </div>
+
           <template v-if="login_state">
             <RouterLink to="/v0" class="nav-login-btn" @click="mobileOpen = false">个人中心</RouterLink>
             <div class="nav-user-badge" @click="goToProfile(); mobileOpen = false">
