@@ -1,126 +1,294 @@
+<style scoped>
+.article-page {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.article-header {
+  margin-bottom: var(--space-8);
+}
+
+.article-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--color-text-tertiary);
+}
+
+.article-meta .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-text-tertiary);
+}
+
+.article-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.action-btn.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.article-body {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  margin-bottom: var(--space-8);
+  line-height: 1.8;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.article-body :deep(img) {
+  border-radius: var(--radius-sm);
+  margin: var(--space-4) 0;
+}
+
+.article-body :deep(pre) {
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  overflow-x: auto;
+  font-size: 0.9rem;
+}
+
+.article-body :deep(blockquote) {
+  border-left: 3px solid var(--color-accent);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-accent-soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Comment section */
+.comments-section {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.comment-input-wrap {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.comment-input-wrap input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.comment-input-wrap input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.comment-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.comment-time {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+
+.comment-content {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0;
+  line-height: 1.6;
+}
+
+.comment-delete {
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.comment-delete:hover {
+  opacity: 1;
+}
+
+.comment-tip {
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--color-text-tertiary);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .article-title {
+    font-size: 1.5rem;
+  }
+  .article-body {
+    padding: var(--space-4);
+  }
+}
+</style>
+
 <template>
-  <div class="container" style="background-color: rgba(255,255,255,0.78)">
-    <br>
-    <button type="button" class="btn btn-danger bi bi-x-square" v-show="deletable"
-            data-toggle="modal" @click="remove"><span>删除</span></button>
-
-    <button type="button" :class="'bi bi-file-earmark-lock btn '+pClassEnd"
-            v-show="deletable" data-toggle="modal" @click="_private" style="margin: 5px;">
-      <span>私有</span>
-    </button>
-    <button type="button" :class="'bi bi-pen btn '+pClassEnd"
-            v-show="deletable" data-toggle="modal" @click="_update" style="margin: 5px;">
-      <span>修改</span>
-    </button>
-
-    <button type="button" :class="'bi bi-bookmark-heart btn '+fClassEnd"
-            v-show="login_state" v-on:click="favorite()" style="margin-left: 5px"><span>收藏</span></button>
-
-    <h5 v-show="!login_state">tips:登录可收藏/删除评论</h5>
-    <hr/>
-    <center><h3 v-text="data.title"></h3></center>
-    <hr/>
-    <br>
-    <div class="row">
-      <div class="col-3">
-        <p class="text-secondary" v-text="getMsgTime(data.time)"></p>
+  <div class="article-page">
+    <!-- Header -->
+    <div class="article-header">
+      <h1 class="article-title">{{ data.title }}</h1>
+      <div class="article-meta">
+        <span>{{ data.authorName }}</span>
+        <span class="dot"></span>
+        <span>{{ getMsgTime(data.time) }}</span>
+        <span class="dot"></span>
+        <span><i class="bi bi-eye"></i> {{ data.views }}</span>
       </div>
-      <div class="col-4">
-      </div>
-      <div class="col-3">
-        <p class="text-secondary" v-text="data.authorName"></p>
-      </div>
-      <span class="text-success col-2 bi-eye" v-text="data.views"> </span>
-    </div>
-
-    <br>
-    <br>
-
-    <div class="row">
-      <div id="content0" class="col-12">
-        <MdPreview v-show="data.type==='md'" :modelValue="data.html"/>
-        <div v-show="data.type==='html'" v-html="data.html"></div>
-        <hr>
-        <br>
+      <div class="article-actions">
+        <button v-if="deletable" class="action-btn" @click="remove">
+          <i class="bi bi-trash"></i> 删除
+        </button>
+        <button v-if="deletable" :class="['action-btn', pClassEnd === 'btn-secondary' ? 'active' : '']" @click="_private">
+          <i class="bi bi-file-earmark-lock"></i> 私有
+        </button>
+        <button v-if="deletable" class="action-btn" @click="_update">
+          <i class="bi bi-pen"></i> 修改
+        </button>
+        <button v-if="login_state" :class="['action-btn', fClassEnd === 'btn-primary' ? 'active' : '']" @click="favorite">
+          <i class="bi bi-bookmark-heart"></i> 收藏
+        </button>
+        <span v-if="!login_state" style="font-size:0.8rem;color:var(--color-text-tertiary);">登录后可收藏/评论</span>
       </div>
     </div>
-  </div>
-  <br>
 
-  <div class="container">
-    <div class="row">
+    <!-- Content body -->
+    <div class="article-body">
+      <MdPreview v-if="data.type==='md'" :modelValue="data.html" />
+      <div v-if="data.type==='html'" v-html="data.html"></div>
     </div>
-    <div class="input-group">
-      <input type="text" placeholder="评论." id="comment_input" class="form-control" aria-label="Dollar amount ">
-      <div class="input-group-append">
-        <button class="btn btn-outline-info" type="button" @click="commentDo">评论</button>
+
+    <!-- Comments -->
+    <div class="comments-section">
+      <div class="comment-input-wrap">
+        <input
+          id="comment_input"
+          type="text"
+          placeholder="写下你的评论..."
+          @keyup.enter="commentDo"
+        />
+        <button class="btn-modern btn-modern-primary" @click="commentDo">评论</button>
       </div>
-    </div>
-    <br>
-    <div style="margin-top: 2px" class="d-flex row" v-for="d in cs">
-      <div class="col-1"></div>
-      <div style="background-color: rgba(220,220,220,0.8);border-radius: 10px;vertical-align: middle;padding-top: 7px"
-           class="media col-10">
-        <img style="float:left; max-width: 40px; border-radius: 10px" :src="d.icon"
-             class="mr-3 align-self-center mx-auto">
-        <div>
-          <h5 style="color: rgb(0,0,0)" class="mt-0" v-text="d.nickName"></h5>
-          <p style="color: rgb(30,30,30)" v-text="d.content"></p>
+
+      <div v-if="cs.length === 0" class="comment-tip">暂无评论，来说点什么吧</div>
+
+      <div v-for="d in cs" :key="d.commentId" class="comment-item">
+        <img :src="d.icon" class="comment-avatar" alt="" />
+        <div class="comment-body">
+          <div class="comment-name">
+            {{ d.nickName }}
+            <span class="comment-time">{{ formatMsgTime(d.time) }}</span>
+            <button v-if="d.c0" class="comment-delete" @click="del(d.commentId)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+          <p class="comment-content">{{ d.content }}</p>
         </div>
-        <a style="float:right;color: rgba(232,41,76,0.91)" v-show="d.c0" class="ml-3 bi bi-trash"
-           v-on:click="del(d.commentId)">删除</a>
-        <span style="margin-top: 3px; color: rgba(76,76,76,0.95)" class="ml-3 " v-text="formatMsgTime(d.time)"></span>
       </div>
-      <div class="col-1"></div>
     </div>
-  </div>
 
-
-  <el-dialog v-model="deleteDialogV" title="提示!" width="500" center>
-    <span>
-      确定删除此文章吗!?
-    </span>
-    <template #footer>
-      <div class="dialog-footer">
+    <!-- Dialogs -->
+    <el-dialog v-model="deleteDialogV" title="确认删除" width="400" center>
+      <p>确定删除此文章吗？此操作不可撤销。</p>
+      <template #footer>
         <el-button @click="deleteDialogV = false">取消</el-button>
-        <el-button type="primary" @click="deleteNow">
-          确定
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
+        <el-button type="danger" @click="deleteNow">确定删除</el-button>
+      </template>
+    </el-dialog>
 
-  <div class="modal fade" id="dtips0" tabindex="-1" aria-labelledby="dtips0Label" aria-hidden="true"
-       data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="dtips0Label">提示</h5>
-        </div>
-        <div class="modal-body">
-          <h3 style="color:#dc0551;">确认删除吗</h3>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="deleteNow()">确定</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <el-dialog v-model="privateDialogV" title="提示!" width="500" center>
-    <span>
-      确定将此文章 取消/设置 为私有吗!?
-    </span>
-    <template #footer>
-      <div class="dialog-footer">
+    <el-dialog v-model="privateDialogV" title="提示" width="400" center>
+      <p>确定将此文章取消/设置为私有吗？</p>
+      <template #footer>
         <el-button @click="privateDialogV = false">取消</el-button>
-        <el-button type="primary" @click="privateNow">
-          确定
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
-
+        <el-button type="primary" @click="privateNow">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -128,7 +296,6 @@ import {useRoute} from "vue-router";
 import {formatMsgTime, toast} from "@/utils/utils";
 import {onMounted, ref} from "vue";
 import service, {login_state} from "@/axios";
-
 import {MdPreview} from 'md-editor-v3';
 import 'md-editor-v3/lib/preview.css';
 import router from "@/router";
@@ -141,11 +308,11 @@ function getMsgTime(time: string) {
 const route = useRoute()
 const id = route.query.id
 
-let data = ref({})
+let data = ref({} as any)
 let fClassEnd = ref("btn-outline-secondary")
 let pClassEnd = ref("btn-outline-secondary")
 
-service.get("/notice/get-notice-id?id=" + id).then(function (response) {
+service.get("/notice/get-notice-id?id=" + id).then(function (response: any) {
   data.value = response
   document.getElementsByTagName("title")[0].innerText = data.value.title
 }).catch(function (err) {
@@ -153,29 +320,28 @@ service.get("/notice/get-notice-id?id=" + id).then(function (response) {
 })
 
 function favorite() {
-  service.get("/notice/favorite?id=" + id).then(function (response) {
+  service.get("/notice/favorite?id=" + id).then(function (response: any) {
     fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
   }).catch(function (err) {
     console.log(err);
   })
 }
 
-const cs = ref([])
+const cs = ref([] as any[])
 
-service.get("/comments/get-comment?nid=" + id).then(function (response) {
+service.get("/comments/get-comment?nid=" + id).then(function (response: any) {
   cs.value = response as any
 }).catch(function (err) {
   alert(err);
 })
 
 function del(id: number) {
-  service.get("/comments/del-comment?id=" + id).then(function (response) {
+  service.get("/comments/del-comment?id=" + id).then(function (response: any) {
     if (response) {
-      cs.value = cs.value.filter((d) => d.commentId !== id);
+      cs.value = cs.value.filter((d: any) => d.commentId !== id);
       toast("删除完成!", "success")
     }
   }).catch(function (err) {
-    console.log(err)
     toast("删除异常")
   })
 }
@@ -183,50 +349,35 @@ function del(id: number) {
 let deleteDialogV = ref(false)
 let privateDialogV = ref(false)
 
-function remove() {
-  deleteDialogV.value = true
-}
+function remove() { deleteDialogV.value = true }
 
 function deleteNow() {
-  service.get("/notice/delete?id=" + id).then(function (response) {
+  service.get("/notice/delete?id=" + id).then(function (response: any) {
     if (response.toString() === "OK") {
       toast("删除成功", "success")
       router.push("/")
     }
   }).catch(function (err) {
-    console.log(err)
     toast("删除异常")
   }).finally(function () {
     deleteDialogV.value = false
   })
 }
 
-function _private() {
-  privateDialogV.value = true
-}
+function _private() { privateDialogV.value = true }
 
 function _update() {
-  router.push({
-    path: '/update',
-    query: {
-      id: id
-    }
-  })
+  router.push({path: '/update', query: {id: id}})
 }
 
 function privateNow() {
-  service.get("/notice/private?id=" + id).then(function (response) {
+  service.get("/notice/private?id=" + id).then(function (response: any) {
     if (response.toString() === "OK") {
       toast("设置成功", "success")
     }
     privated.value = Boolean(response)
-    if (privated.value) {
-      pClassEnd.value = "btn-secondary"
-    } else {
-      pClassEnd.value = "btn-outline-secondary"
-    }
+    pClassEnd.value = privated.value ? "btn-secondary" : "btn-outline-secondary"
   }).catch(function (err) {
-    console.log(err)
     toast("设置异常")
   }).finally(function () {
     privateDialogV.value = false
@@ -234,33 +385,20 @@ function privateNow() {
 }
 
 let deletable = ref(false)
-
 let privated = ref(false)
 
 onMounted(() => {
   if (login_state.value) {
-    service.get("/notice/favorited?id=" + id).then(function (response) {
+    service.get("/notice/favorited?id=" + id).then(function (response: any) {
       fClassEnd.value = response ? "btn-primary" : "btn-outline-secondary"
-    }).catch(function (err) {
-      console.log(err);
-    })
-
-    service.get("/notice/deletable?id=" + id).then(function (response) {
+    }).catch(function (err) { console.log(err); })
+    service.get("/notice/deletable?id=" + id).then(function (response: any) {
       deletable.value = Boolean(response)
-    }).catch(function (err) {
-      console.log(err);
-    })
-
-    service.get("/notice/privated?id=" + id).then(function (response) {
+    }).catch(function (err) { console.log(err); })
+    service.get("/notice/privated?id=" + id).then(function (response: any) {
       privated.value = Boolean(response)
-      if (privated.value) {
-        pClassEnd.value = "btn-secondary"
-      } else {
-        pClassEnd.value = "btn-outline-secondary"
-      }
-    }).catch(function (err) {
-      console.log(err);
-    })
+      pClassEnd.value = privated.value ? "btn-secondary" : "btn-outline-secondary"
+    }).catch(function (err) { console.log(err); })
   }
 })
 
@@ -269,16 +407,13 @@ function commentDo() {
     toast("请先登录")
     router.push("/login");
   } else {
-    const content = $("#comment_input").val();
+    const content = $("#comment_input").val() as string;
     const formData = new FormData();
-    formData.append('nid', id);
+    formData.append('nid', id as string);
     formData.append('body', content);
-    service.post("/comments/pcm", formData).then(response => {
+    service.post("/comments/pcm", formData).then((response: any) => {
       cs.value.push(response)
-    }).catch(err => {
-    })
+    }).catch(err => {})
   }
 }
-
-
 </script>

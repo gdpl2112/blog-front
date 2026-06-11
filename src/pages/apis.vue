@@ -1,25 +1,984 @@
+<style scoped>
+/* =============================================
+   APIs Page - Redesigned Developer API Catalog
+   ============================================= */
+
+/* ---- Page Shell ---- */
+.apis-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* ---- Header Section ---- */
+.apis-header {
+  margin-bottom: var(--space-10);
+}
+
+.apis-header .section-header {
+  margin-bottom: var(--space-6);
+}
+
+.apis-header .section-header h2 {
+  font-size: 2rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.apis-header .section-header p {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  max-width: 52ch;
+}
+
+/* ---- Search Bar ---- */
+.search-bar {
+  display: flex;
+  gap: var(--space-2);
+  max-width: 440px;
+  position: relative;
+}
+
+.search-bar input {
+  flex: 1;
+  height: 44px;
+  padding: 0 16px 0 42px;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.search-bar input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.search-bar input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* Search icon inside input */
+.search-icon-wrapper {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+/* ---- API Grid ---- */
+.api-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--space-5);
+}
+
+/* ---- API Card ---- */
+.api-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  overflow: hidden;
+  /* Left accent line - colored per method */
+}
+
+/* Method-based left accent */
+.api-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-accent);
+  transition: all var(--transition-base);
+  opacity: 0;
+}
+
+.api-card:hover::before {
+  opacity: 1;
+}
+
+/* Method accent colors via data attribute */
+.api-card.method-get::before { background: #10b981; }
+.api-card.method-post::before { background: #6366f1; }
+.api-card.method-put::before { background: #f59e0b; }
+.api-card.method-delete::before { background: #ef4444; }
+.api-card.method-patch::before { background: #8b5cf6; }
+
+.api-card:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  background: var(--color-bg-card);
+}
+
+.api-card.method-get:hover { border-color: rgba(16, 185, 129, 0.25); box-shadow: 0 8px 30px rgba(16, 185, 129, 0.08); }
+.api-card.method-post:hover { border-color: rgba(99, 102, 241, 0.25); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.08); }
+.api-card.method-put:hover { border-color: rgba(245, 158, 11, 0.25); box-shadow: 0 8px 30px rgba(245, 158, 11, 0.08); }
+.api-card.method-delete:hover { border-color: rgba(239, 68, 68, 0.25); box-shadow: 0 8px 30px rgba(239, 68, 68, 0.08); }
+.api-card.method-patch:hover { border-color: rgba(139, 92, 246, 0.25); box-shadow: 0 8px 30px rgba(139, 92, 246, 0.08); }
+
+/* Subtle top-right glow blob on hover */
+.api-card::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  pointer-events: none;
+}
+
+.api-card:hover::after {
+  opacity: 0.5;
+}
+
+/* ---- Card Content ---- */
+.api-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.api-method-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.api-method-badge.get {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.api-method-badge.post {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+.api-method-badge.put {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.api-method-badge.delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.api-method-badge.patch {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="dark"] .api-method-badge.get { color: #34d399; }
+[data-theme="dark"] .api-method-badge.post { color: #818cf8; }
+[data-theme="dark"] .api-method-badge.put { color: #fbbf24; }
+[data-theme="dark"] .api-method-badge.delete { color: #f87171; }
+[data-theme="dark"] .api-method-badge.patch { color: #a78bfa; }
+
+.api-state-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.api-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.api-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.api-address-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 12px;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.api-address-bar:hover {
+  border-color: var(--color-accent-soft);
+  background: var(--color-bg-card);
+}
+
+.api-address-bar .url-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-address-bar .copy-hint {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.api-address-bar:hover .copy-hint {
+  opacity: 1;
+}
+
+/* ---- Empty State ---- */
+.empty-state {
+  text-align: center;
+  padding: var(--space-20) var(--space-6);
+}
+
+.empty-state h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.empty-state p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* =============================================
+   Test Dialog - Postman-style Redesign
+   ============================================= */
+
+/* Override Element Plus dialog styles via deep selector */
+:deep(.el-dialog) {
+  border-radius: var(--radius-lg) !important;
+  background: var(--color-bg-elevated) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-xl) !important;
+  overflow: hidden !important;
+}
+
+:deep(.el-dialog__header) {
+  padding: var(--space-5) var(--space-6) !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--color-border);
+}
+
+:deep(.el-dialog__title) {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: var(--color-text-primary) !important;
+  letter-spacing: -0.01em !important;
+}
+
+:deep(.el-dialog__headerbtn) {
+  top: 16px !important;
+  right: 16px !important;
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 1rem !important;
+}
+
+:deep(.el-dialog__body) {
+  padding: 0 !important;
+}
+
+/* Dialog inner container */
+.test-dialog-body {
+  display: flex;
+  flex-direction: column;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+/* ---- Request Builder Section ---- */
+.request-builder {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* URL Bar (Postman-style inline method + URL) */
+.url-bar {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.url-bar:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.url-bar .method-select {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.url-bar .method-select :deep(.el-input__wrapper) {
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid var(--color-border) !important;
+  box-shadow: none !important;
+  background: var(--color-bg-soft) !important;
+}
+
+.url-bar .url-input {
+  flex: 1;
+}
+
+.url-bar .url-input :deep(.el-input__wrapper) {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: var(--color-bg-card) !important;
+}
+
+.url-bar .url-input :deep(.el-input__inner) {
+  font-family: var(--font-mono) !important;
+  font-size: 0.85rem !important;
+}
+
+.url-bar .send-btn-wrapper {
+  flex-shrink: 0;
+}
+
+.send-request-btn {
+  height: 100%;
+  padding: 0 24px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: 0;
+  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.send-request-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-accent-hover), #8b5cf6);
+  box-shadow: 0 4px 16px var(--color-accent-glow);
+}
+
+.send-request-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.send-request-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Collapsible Sections ---- */
+.params-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: var(--color-bg-soft);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.section-toggle:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-card);
+}
+
+.section-toggle i {
+  font-size: 0.6rem;
+  transition: transform var(--transition-fast);
+}
+
+.section-toggle.open i {
+  transform: rotate(90deg);
+}
+
+.section-body {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--color-bg-card);
+}
+
+.kv-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.kv-row :deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  background: var(--color-bg-soft) !important;
+  border: 1px solid var(--color-border) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.kv-row :deep(.el-input__wrapper:hover) {
+  border-color: var(--color-accent-soft) !important;
+}
+
+.kv-row :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 2px var(--color-accent-soft) !important;
+}
+
+.kv-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  font-size: 0.85rem;
+}
+
+.kv-remove-btn:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: fit-content;
+}
+
+.add-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+/* Body textarea */
+.body-section {
+  margin-top: var(--space-2);
+}
+
+.body-section :deep(.el-textarea__inner) {
+  background: var(--color-bg-soft) !important;
+  border: 1px solid var(--color-border) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.82rem !important;
+  border-radius: var(--radius-md) !important;
+  resize: vertical;
+  transition: all var(--transition-fast);
+}
+
+.body-section :deep(.el-textarea__inner:focus) {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 2px var(--color-accent-soft) !important;
+}
+
+/* ---- Response Panel ---- */
+.response-panel {
+  border-top: 1px solid var(--color-border);
+}
+
+.response-status-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 16px;
+  background: var(--color-bg-soft);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.success { background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.4); }
+.status-dot.error { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+.status-dot.info { background: var(--color-accent); box-shadow: 0 0 6px var(--color-accent-glow); }
+
+.status-code {
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+
+.status-text {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.response-time {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.response-time .time-value {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.response-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.response-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.response-action-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.response-headers-panel {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-soft);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.response-headers-panel pre {
+  margin: 0;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.response-body {
+  padding: var(--space-4);
+  background: var(--color-bg-soft);
+  max-height: 320px;
+  overflow: auto;
+}
+
+.response-body pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+}
+
+.response-body pre.error-text {
+  color: var(--color-danger);
+}
+
+/* ---- Dialog transition ---- */
+.test-dialog-fade-enter-active {
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.test-dialog-fade-leave-active {
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.test-dialog-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.test-dialog-fade-leave-to {
+  opacity: 0;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .api-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .apis-header .section-header h2 {
+    font-size: 1.55rem;
+  }
+
+  .url-bar {
+    flex-wrap: wrap;
+  }
+
+  .url-bar .method-select {
+    width: 100px;
+  }
+
+  .send-request-btn {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .api-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .api-card {
+    padding: var(--space-4);
+  }
+
+  .url-bar {
+    flex-direction: column;
+  }
+
+  .url-bar .method-select {
+    width: 100%;
+  }
+
+  .url-bar .method-select :deep(.el-input__wrapper) {
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+  }
+
+  .send-request-btn {
+    width: 100%;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+}
+</style>
+
+<template>
+  <div class="apis-page">
+    <!-- Header -->
+    <div class="apis-header">
+      <div class="section-header">
+        <h2>公共 API</h2>
+        <p>探索和使用开放的 API 接口，点击卡片即可在线测试</p>
+      </div>
+      <div class="search-bar">
+        <span class="search-icon-wrapper"><i class="bi bi-search"></i></span>
+        <input v-model="searchText" placeholder="搜索 API 名称或描述..." @input="filterList" />
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="isLoading" class="empty-state">
+      <div class="loading-ring" style="margin: 0 auto 12px"></div>
+      <p>加载中...</p>
+    </div>
+
+    <!-- API Grid -->
+    <div v-else class="api-grid">
+      <div
+        v-for="item in list"
+        :key="item.id"
+        class="api-card"
+        :class="'method-' + (item.method || 'get').toLowerCase()"
+        @click="openTest(item)"
+      >
+        <!-- Header: badges -->
+        <div class="api-card-header">
+          <span
+            v-if="item.method"
+            class="api-method-badge"
+            :class="item.method.toLowerCase()"
+          >{{ item.method }}</span>
+          <span v-if="item.state" class="api-state-badge">{{ item.state }}</span>
+        </div>
+
+        <!-- Name -->
+        <h3 class="api-name">{{ item.name }}</h3>
+
+        <!-- Description -->
+        <p class="api-desc">{{ item.desc }}</p>
+
+        <!-- Address bar -->
+        <div class="api-address-bar" @click.stop="copyApi(item.address)">
+          <i class="bi bi-link-45deg" style="font-size:0.8rem;flex-shrink:0;color:var(--color-text-tertiary);"></i>
+          <span class="url-text">{{ item.address }}</span>
+          <span class="copy-hint">点击复制</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div v-if="!isLoading && list.length === 0" class="empty-state">
+      <h3>没有找到 API</h3>
+      <p>尝试其他关键词搜索</p>
+    </div>
+
+    <!-- Test Dialog -->
+    <el-dialog
+      v-model="testDialogVisible"
+      :title="'API 测试 - ' + testApiName"
+      width="780"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <div class="test-dialog-body">
+        <!-- Request Builder -->
+        <div class="request-builder">
+          <!-- URL Bar: Method + URL + Send -->
+          <div class="url-bar">
+            <div class="method-select">
+              <el-select v-model="testMethod" style="width:100%">
+                <el-option v-for="m in methodOptions" :key="m" :value="m" :label="m" />
+              </el-select>
+            </div>
+            <div class="url-input">
+              <el-input v-model="testUrl" placeholder="https://api.example.com/endpoint" />
+            </div>
+            <div class="send-btn-wrapper">
+              <button class="send-request-btn" :disabled="testLoading" @click="sendTestRequest">
+                <span v-if="testLoading">
+                  <i class="bi bi-arrow-repeat" style="display:inline-block;animation:loading-spin 0.8s linear infinite;"></i>
+                  发送中...
+                </span>
+                <span v-else>
+                  <i class="bi bi-send-fill"></i> 发送
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Query Parameters -->
+          <div class="params-section">
+            <button
+              class="section-toggle"
+              :class="{ open: showParams }"
+              @click="showParams = !showParams"
+            >
+              <i class="bi bi-chevron-right"></i>
+              Query 参数
+              <span style="font-weight:400;font-size:0.72rem;margin-left:auto;color:var(--color-text-tertiary);">
+                {{ testParams.filter(p => p.key).length }} 个
+              </span>
+            </button>
+            <div v-if="showParams" class="section-body">
+              <div v-for="(p, i) in testParams" :key="'p'+i" class="kv-row">
+                <el-input v-model="p.key" placeholder="参数名" style="flex:1" size="small" />
+                <el-input v-model="p.value" placeholder="参数值" style="flex:1" size="small" />
+                <button class="kv-remove-btn" @click="testParams.splice(i, 1)" title="移除">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+              <button class="add-btn" @click="testParams.push({ key: '', value: '' })">
+                <i class="bi bi-plus"></i> 添加参数
+              </button>
+            </div>
+          </div>
+
+          <!-- Headers -->
+          <div class="params-section">
+            <button
+              class="section-toggle"
+              :class="{ open: showHeaders }"
+              @click="showHeaders = !showHeaders"
+            >
+              <i class="bi bi-chevron-right"></i>
+              Headers
+              <span style="font-weight:400;font-size:0.72rem;margin-left:auto;color:var(--color-text-tertiary);">
+                {{ testHeaders.filter(h => h.key).length }} 个
+              </span>
+            </button>
+            <div v-if="showHeaders" class="section-body">
+              <div v-for="(h, i) in testHeaders" :key="'h'+i" class="kv-row">
+                <el-input v-model="h.key" placeholder="Header 名" style="flex:1" size="small" />
+                <el-input v-model="h.value" placeholder="Header 值" style="flex:1" size="small" />
+                <button class="kv-remove-btn" @click="testHeaders.splice(i, 1)" title="移除">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+              <button class="add-btn" @click="testHeaders.push({ key: '', value: '' })">
+                <i class="bi bi-plus"></i> 添加 Header
+              </button>
+            </div>
+          </div>
+
+          <!-- Request Body (only for methods that support body) -->
+          <div v-if="['POST', 'PUT', 'PATCH'].includes(testMethod)" class="body-section">
+            <el-input
+              v-model="testBody"
+              type="textarea"
+              :rows="5"
+              placeholder='{"key": "value"}'
+            />
+          </div>
+        </div>
+
+        <!-- Response Panel -->
+        <div v-if="testResponse" class="response-panel">
+          <!-- Status bar -->
+          <div class="response-status-bar">
+            <div class="status-indicator">
+              <span
+                class="status-dot"
+                :class="testResponse.status < 400 ? 'success' : 'error'"
+              ></span>
+              <span class="status-code">{{ testResponse.status }}</span>
+              <span class="status-text">{{ testResponse.statusText }}</span>
+            </div>
+            <div class="response-time">
+              <i class="bi bi-clock" style="font-size:0.7rem;"></i>
+              <span class="time-value">{{ testResponse.time }}</span> ms
+            </div>
+            <div class="response-actions">
+              <button class="response-action-btn" @click="showRespHeaders = !showRespHeaders">
+                <i :class="showRespHeaders ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                {{ showRespHeaders ? '隐藏头' : '头信息' }}
+              </button>
+              <button class="response-action-btn" @click="copyResponseText()">
+                <i class="bi bi-clipboard"></i> 复制
+              </button>
+            </div>
+          </div>
+
+          <!-- Response headers (collapsible) -->
+          <div v-if="showRespHeaders" class="response-headers-panel">
+            <pre>{{ JSON.stringify(testResponse.headers, null, 2) }}</pre>
+          </div>
+
+          <!-- Response body -->
+          <div class="response-body">
+            <pre :class="{ 'error-text': testResponse.error }">{{ testResponse.error || testResponse.data }}</pre>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
 <script lang="ts" setup>
-import {onMounted, ref, watch} from "vue";
+import { onMounted, ref } from "vue";
 import axios from "axios";
-import service from "@/axios";
-import {ElMessage} from "element-plus";
-import {copyTextElement} from '@/utils/utils'
+import { ElMessage } from "element-plus";
+import { copyTextElement } from '@/utils/utils'
+
+// 公共API页面使用独立的axios实例，不带auth拦截器，避免未登录时403被全局拦截重定向
+const publicClient = axios.create({ baseURL: '/', timeout: 30000 })
+publicClient.interceptors.response.use(
+  r => r.data,
+  err => Promise.reject(err)
+)
 
 const list = ref([])
 const rawList = ref([])
 const searchText = ref('')
 const isLoading = ref(true)
-const copySuccess = ref<number | null>(null)
 
-// ===== 在线测试 =====
-interface KV {
-  key: string
-  value: string
-}
-
-// 独立的 axios 实例: 不走全局拦截器(避免 403 跳登录), 任何状态码都返回
-const testClient = axios.create({timeout: 30000, validateStatus: () => true})
-
+interface KV { key: string; value: string }
+const testClient = axios.create({ timeout: 30000, validateStatus: () => true })
 const testDialogVisible = ref(false)
 const testApiName = ref('')
 const testMethod = ref('GET')
@@ -29,6 +988,8 @@ const testHeaders = ref<KV[]>([])
 const testBody = ref('')
 const testLoading = ref(false)
 const showRespHeaders = ref(false)
+const showParams = ref(true)
+const showHeaders = ref(false)
 const testResponse = ref<{
   status: number
   statusText: string
@@ -37,1063 +998,91 @@ const testResponse = ref<{
   data: string
   error?: string
 } | null>(null)
-
 const methodOptions = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
 
-// 把示例地址拆成 url + 查询参数, 方便编辑
 function parseAddress(address: string): { url: string; params: KV[] } {
   try {
     const u = new URL(address)
     const params: KV[] = []
-    u.searchParams.forEach((v, k) => params.push({key: k, value: v}))
-    return {url: u.origin + u.pathname, params}
-  } catch {
-    return {url: address || '', params: []}
-  }
+    u.searchParams.forEach((v, k) => params.push({ key: k, value: v }))
+    return { url: u.origin + u.pathname, params }
+  } catch { return { url: address, params: [] } }
 }
 
-function openTestDialog(e: any) {
-  let method = (e.method || e.method == 'ANY') ? 'GET' : e.method
-  testApiName.value = e.name
-  testMethod.value =  method.toUpperCase()
-  const {url, params} = parseAddress(e.address || '')
-  testUrl.value = url
-  testParams.value = params.length ? params : [{key: '', value: ''}]
-  testHeaders.value = [{key: '', value: ''}]
+function copyApi(addr: string) { copyTextElement(addr) }
+
+function copyResponseText() {
+  if (!testResponse.value) return
+  const text = testResponse.value.error || testResponse.value.data
+  copyTextElement(text)
+}
+
+function filterList() {
+  const t = searchText.value.toLowerCase()
+  if (!t) { list.value = [...rawList.value]; return }
+  list.value = rawList.value.filter((item: any) =>
+    (item.name && item.name.toLowerCase().includes(t)) ||
+    (item.desc && item.desc.toLowerCase().includes(t))
+  )
+}
+
+function openTest(item: any) {
+  testApiName.value = item.name
+  testMethod.value = item.method || 'GET'
+  const parsed = parseAddress(item.address)
+  testUrl.value = parsed.url
+  testParams.value = parsed.params.length ? parsed.params : [{ key: '', value: '' }]
+  testHeaders.value = [{ key: '', value: '' }]
   testBody.value = ''
   testResponse.value = null
   showRespHeaders.value = false
+  showParams.value = true
+  showHeaders.value = false
   testDialogVisible.value = true
 }
 
-function addParam() {
-  testParams.value.push({key: '', value: ''})
-}
-
-function removeParam(i: number) {
-  testParams.value.splice(i, 1)
-}
-
-function addHeader() {
-  testHeaders.value.push({key: '', value: ''})
-}
-
-function removeHeader(i: number) {
-  testHeaders.value.splice(i, 1)
-}
-
-function kvToObject(arr: KV[]): Record<string, string> {
-  const o: Record<string, string> = {}
-  arr.forEach(({key, value}) => {
-    if (key && key.trim()) o[key.trim()] = value
-  })
-  return o
-}
-
-function statusClass(status: number): string {
-  if (status >= 200 && status < 300) return 'status-2xx'
-  if (status >= 300 && status < 400) return 'status-3xx'
-  if (status >= 400 && status < 500) return 'status-4xx'
-  if (status >= 500) return 'status-5xx'
-  return 'status-err'
-}
-
-async function sendTest() {
-  if (!testUrl.value.trim()) {
-    ElMessage.warning('请填写请求 URL')
-    return
-  }
+async function sendTestRequest() {
   testLoading.value = true
   testResponse.value = null
-  showRespHeaders.value = false
-  const start = Date.now()
-  const method = testMethod.value.toUpperCase()
+  const start = performance.now()
   try {
-    const headers = kvToObject(testHeaders.value)
-    const params = kvToObject(testParams.value)
-    let data: any = undefined
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && testBody.value.trim()) {
-      try {
-        data = JSON.parse(testBody.value)
-      } catch {
-        data = testBody.value
-      }
-    }
-    const resp = await testClient.request({
-      url: testUrl.value.trim(),
-      method: method as any,
-      params,
-      headers,
-      data,
+    const paramsObj: Record<string, string> = {}
+    testParams.value.filter(p => p.key).forEach(p => { paramsObj[p.key] = p.value })
+    const headersObj: Record<string, string> = {}
+    testHeaders.value.filter(h => h.key).forEach(h => { headersObj[h.key] = h.value })
+
+    const res = await testClient({
+      method: testMethod.value.toLowerCase() as any,
+      url: testUrl.value,
+      params: paramsObj,
+      headers: headersObj,
+      data: testBody.value || undefined,
     })
-    const bodyStr = typeof resp.data === 'object'
-        ? JSON.stringify(resp.data, null, 2)
-        : String(resp.data)
     testResponse.value = {
-      status: resp.status,
-      statusText: resp.statusText,
-      time: Date.now() - start,
-      headers: resp.headers as any,
-      data: bodyStr,
+      status: res.status,
+      statusText: res.statusText,
+      time: Math.round(performance.now() - start),
+      headers: res.headers,
+      data: typeof res.data === 'string' ? res.data : JSON.stringify(res.data, null, 2),
     }
-  } catch (err: any) {
+  } catch (e: any) {
     testResponse.value = {
       status: 0,
       statusText: 'Error',
-      time: Date.now() - start,
+      time: Math.round(performance.now() - start),
       headers: {},
       data: '',
-      error: err?.message || '请求失败 (可能是跨域或网络错误)',
+      error: e.message || String(e),
     }
-  } finally {
-    testLoading.value = false
-  }
+  } finally { testLoading.value = false }
 }
 
-function copyResponse() {
-  if (!testResponse.value) return
-  navigator.clipboard?.writeText(testResponse.value.error || testResponse.value.data)
-      .then(() => ElMessage.success('已复制响应'))
-      .catch(() => ElMessage.error('复制失败'))
-}
-
-// 加载API列表
-async function loadApiList() {
-  isLoading.value = true
+onMounted(async () => {
   try {
-    const response = await service.get("/api/list")
-    list.value = response
-    rawList.value = response
-  } catch (err) {
-    ElMessage.error('获取API列表失败')
-    console.error('API加载错误:', err)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// 复制文本到剪贴板
-function copyTextToClipboard(id: number, address: string) {
-  const eid = "#input-" + id
-  const success = copyTextElement(eid)
-  if (success) {
-    ElMessage.success('复制成功')
-    copySuccess.value = id
-    setTimeout(() => {
-      copySuccess.value = null
-    }, 2000)
-  } else {
-    ElMessage.error('复制失败')
-  }
-}
-
-// 过滤API列表
-watch(searchText, (newText) => {
-  if (!newText) {
-    list.value = rawList.value
-  } else {
-    const lowerText = newText.toLowerCase()
-    list.value = rawList.value.filter((e: any) =>
-        JSON.stringify(e).toLowerCase().includes(lowerText)
-    )
-  }
-})
-
-// 获取卡片渐变颜色
-function getCardGradient(state: string, method: string): string {
-  if (state === 'success') {
-    switch (method.toLowerCase()) {
-      case 'get':
-        return 'linear-gradient(90deg, #38a169, #48bb78)'
-      case 'post':
-        return 'linear-gradient(90deg, #3182ce, #4299e1)'
-      case 'put':
-        return 'linear-gradient(90deg, #d69e2e, #ecc94b)'
-      case 'delete':
-        return 'linear-gradient(90deg, #e53e3e, #f56565)'
-      default:
-        return 'linear-gradient(90deg, #805ad5, #9f7aea)'
-    }
-  } else if (state === 'warning') {
-    return 'linear-gradient(90deg, #d69e2e, #ed8936)'
-  } else {
-    return 'linear-gradient(90deg, #e53e3e, #dd6b20)'
-  }
-}
-
-// 初始化
-onMounted(() => {
-  loadApiList()
+    const res = await publicClient.get("/api/list")
+    rawList.value = res
+    list.value = [...rawList.value]
+  } catch { ElMessage.error('加载API列表失败') }
+  finally { isLoading.value = false }
 })
 </script>
-<template>
-  <div class="api-page-container">
-    <!-- 页面标题 -->
-    <div class="api-page-header">
-      <div class="api-title-card">
-        <h2 class="api-title-text">API列表</h2>
-        <div class="api-subtitle">开放接口文档</div>
-      </div>
-    </div>
-
-    <!-- 容器 -->
-    <div class="container">
-      <div class="api-content-wrapper">
-        <!-- 警告信息 -->
-        <div class="api-warning-banner">
-          <div class="warning-icon">⚠️</div>
-          <div class="warning-text">接口仅用于娱乐 禁止用于非法用途</div>
-        </div>
-
-        <!-- 搜索区域 -->
-        <div class="api-search-section">
-          <div class="search-input-container">
-            <input
-                v-model="searchText"
-                class="api-search-input form-control"
-                type="search"
-                placeholder="搜索API名称、描述或作者..."
-                aria-label="Search"
-            >
-            <div class="search-icon">🔍</div>
-          </div>
-          <div class="search-stats">
-            找到 <span class="stats-highlight">{{ list.length }}</span> 个API
-          </div>
-        </div>
-
-        <!-- 加载状态 -->
-        <div v-if="isLoading" class="api-loading-container">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">加载中...</div>
-        </div>
-
-        <!-- 空状态 -->
-        <div v-else-if="list.length === 0" class="api-empty-state">
-          <div class="empty-icon">📭</div>
-          <div class="empty-text">没有找到匹配的API</div>
-          <button
-              v-if="searchText"
-              @click="searchText = ''"
-              class="clear-search-btn"
-          >
-            清除搜索
-          </button>
-        </div>
-
-        <!-- API列表 -->
-        <div v-else class="api-grid">
-          <div
-              v-for="(e, i) in list"
-              :key="e.id"
-              class="api-card-container"
-          >
-            <div class="api-card">
-              <!-- 标签栏 -->
-              <div class="api-tags-container">
-                <div
-                    :class="['api-tag', 'tag-author', e.author === 'kloping' ? 'author-official' : 'author-contributor']"
-                >
-                  {{ e.author }}
-                </div>
-                <div :class="['api-tag', 'tag-method', 'method-' + e.method.toLowerCase()]">
-                  {{ e.method }}
-                </div>
-                <div :class="['api-tag', 'tag-state', 'state-' + e.state]">
-                  {{ e.state === 'success' ? '可用' : e.state }}
-                </div>
-              </div>
-
-              <!-- 卡片内容 -->
-              <div class="api-card-content">
-                <h5 class="api-card-title">
-                  {{ e.name }}
-                  <span v-if="e.state !== 'success'" class="status-badge status-{{ e.state }}">
-                    {{ e.state }}
-                  </span>
-                </h5>
-                <p class="api-card-description">
-                  {{ e.desc }}
-                </p>
-
-                <!-- API地址 -->
-                <div class="api-address-section">
-                  <div class="section-label">接口地址</div>
-                  <div class="input-group">
-                    <input
-                        :id="'input-' + e.id"
-                        type="text"
-                        class="form-control api-address-input"
-                        :value="e.address"
-                        readonly
-                    >
-                    <button
-                        @click="copyTextToClipboard(e.id, e.address)"
-                        :class="['btn', 'btn-copy', copySuccess === e.id ? 'copied' : '']"
-                        type="button"
-                    >
-                      {{ copySuccess === e.id ? '✓ 已复制' : '复制' }}
-                    </button>
-                  </div>
-                </div>
-
-                <!-- 在线测试按钮 -->
-                <button
-                    @click="openTestDialog(e)"
-                    class="btn btn-test-api"
-                    type="button"
-                >
-                  🚀 在线测试
-                </button>
-              </div>
-
-              <!-- 卡片装饰 -->
-              <div class="api-card-decoration" :style="{background: getCardGradient(e.state, e.method)}"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 在线测试弹窗 -->
-    <el-dialog
-        v-model="testDialogVisible"
-        :title="'在线测试 - ' + testApiName"
-        width="720px"
-        top="6vh"
-        class="api-test-dialog"
-        append-to-body
-    >
-      <div class="test-form">
-        <!-- 请求行 -->
-        <div class="test-row test-request-line">
-          <el-select v-model="testMethod" class="test-method-select" placeholder="方法">
-            <el-option v-for="m in methodOptions" :key="m" :label="m" :value="m"/>
-          </el-select>
-          <el-input v-model="testUrl" class="test-url-input" placeholder="请求 URL"/>
-          <el-button type="primary" :loading="testLoading" @click="sendTest">发送</el-button>
-        </div>
-
-        <!-- 查询参数 -->
-        <div class="test-section">
-          <div class="test-section-head">
-            <span class="test-section-title">Query 参数</span>
-            <el-button text size="small" @click="addParam">+ 添加</el-button>
-          </div>
-          <div v-for="(p, i) in testParams" :key="'p' + i" class="test-kv-row">
-            <el-input v-model="p.key" placeholder="key" size="small"/>
-            <el-input v-model="p.value" placeholder="value" size="small"/>
-            <el-button text size="small" class="kv-del" @click="removeParam(i)">✕</el-button>
-          </div>
-        </div>
-
-        <!-- 请求头 -->
-        <div class="test-section">
-          <div class="test-section-head">
-            <span class="test-section-title">请求头 Headers</span>
-            <el-button text size="small" @click="addHeader">+ 添加</el-button>
-          </div>
-          <div v-for="(h, i) in testHeaders" :key="'h' + i" class="test-kv-row">
-            <el-input v-model="h.key" placeholder="key" size="small"/>
-            <el-input v-model="h.value" placeholder="value" size="small"/>
-            <el-button text size="small" class="kv-del" @click="removeHeader(i)">✕</el-button>
-          </div>
-        </div>
-
-        <!-- 请求体 -->
-        <div v-if="testMethod !== 'GET'" class="test-section">
-          <div class="test-section-head">
-            <span class="test-section-title">请求体 Body (JSON/文本)</span>
-          </div>
-          <el-input
-              v-model="testBody"
-              type="textarea"
-              :rows="4"
-              placeholder='{"key": "value"}'
-          />
-        </div>
-
-        <!-- 响应 -->
-        <div v-if="testResponse" class="test-response">
-          <div class="resp-meta">
-            <span :class="['resp-status', statusClass(testResponse.status)]">
-              {{ testResponse.error ? 'Error' : testResponse.status + ' ' + testResponse.statusText }}
-            </span>
-            <span class="resp-time">⏱ {{ testResponse.time }} ms</span>
-            <el-button
-                v-if="!testResponse.error"
-                text
-                size="small"
-                @click="showRespHeaders = !showRespHeaders"
-            >
-              {{ showRespHeaders ? '隐藏响应头' : '查看响应头' }}
-            </el-button>
-            <el-button text size="small" @click="copyResponse">复制响应</el-button>
-          </div>
-          <pre v-if="showRespHeaders && !testResponse.error" class="resp-headers">{{
-              Object.entries(testResponse.headers).map(([k, v]) => k + ': ' + v).join('\n')
-            }}</pre>
-          <pre class="resp-body">{{ testResponse.error || testResponse.data || '(空响应)' }}</pre>
-        </div>
-      </div>
-    </el-dialog>
-  </div>
-</template>
-
-<style scoped>
-/* 全局样式重置 */
-* {
-  box-sizing: border-box;
-}
-
-/* 页面容器 */
-.api-page-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 2rem 0;
-}
-
-/* 页面标题 */
-.api-page-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.api-title-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
-}
-
-.api-title-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
-
-.api-title-text {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0 0 0.5rem 0;
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.api-subtitle {
-  font-size: 1.1rem;
-  color: #718096;
-  font-weight: 500;
-}
-
-/* 内容包装器 */
-.api-content-wrapper {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  margin-bottom: 2rem;
-}
-
-/* 警告横幅 */
-.api-warning-banner {
-  display: flex;
-  align-items: center;
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  animation: pulse 2s infinite;
-}
-
-.warning-icon {
-  font-size: 1.5rem;
-  margin-right: 1rem;
-}
-
-.warning-text {
-  font-weight: 500;
-  color: #856404;
-}
-
-/* 搜索区域 */
-.api-search-section {
-  margin-bottom: 2rem;
-  position: relative;
-}
-
-.search-input-container {
-  position: relative;
-  margin-bottom: 0.5rem;
-}
-
-.api-search-input {
-  width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.api-search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.search-icon {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #a0aec0;
-  pointer-events: none;
-}
-
-.search-stats {
-  text-align: right;
-  font-size: 0.875rem;
-  color: #718096;
-}
-
-.stats-highlight {
-  font-weight: 700;
-  color: #667eea;
-}
-
-/* 加载状态 */
-.api-loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 0;
-  color: #718096;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e2e8f0;
-  border-top: 4px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-.loading-text {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-/* 空状态 */
-.api-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 0;
-  color: #718096;
-  text-align: center;
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.empty-text {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
-}
-
-.clear-search-btn {
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.clear-search-btn:hover {
-  background: #5a67d8;
-  transform: translateY(-1px);
-}
-
-/* API网格布局 */
-.api-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-}
-
-/* API卡片 */
-.api-card-container {
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  will-change: transform, box-shadow;
-}
-
-.api-card-container:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-.api-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 标签容器 */
-.api-tags-container {
-  display: flex;
-  gap: 0.5rem;
-  padding: 1rem 1rem 0;
-  flex-wrap: wrap;
-}
-
-.api-tag {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-}
-
-/* 作者标签 */
-.tag-author {
-  background: #edf2f7;
-  color: #4a5568;
-}
-
-.author-official {
-  background: #e6fffa;
-  color: #2b6cb0;
-}
-
-.author-contributor {
-  background: #fffaf0;
-  color: #c05621;
-}
-
-/* 方法标签 */
-.tag-method {
-  font-weight: 700;
-}
-
-.method-get {
-  background: #c6f6d5;
-  color: #22543d;
-}
-
-.method-post {
-  background: #bee3f8;
-  color: #2c5282;
-}
-
-.method-put {
-  background: #feebc8;
-  color: #c05621;
-}
-
-.method-delete {
-  background: #fed7d7;
-  color: #c53030;
-}
-
-/* 状态标签 */
-.tag-state {
-  font-weight: 700;
-}
-
-.state-success {
-  background: #c6f6d5;
-  color: #22543d;
-}
-
-.state-warning {
-  background: #feebc8;
-  color: #c05621;
-}
-
-.state-error {
-  background: #fed7d7;
-  color: #c53030;
-}
-
-/* 卡片内容 */
-.api-card-content {
-  padding: 1rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.api-card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0.5rem 0 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.status-badge {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.status-warning {
-  background: #feebc8;
-  color: #c05621;
-}
-
-.status-error {
-  background: #fed7d7;
-  color: #c53030;
-}
-
-.api-card-description {
-  color: #4a5568;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  flex: 1;
-  min-height: 60px;
-}
-
-/* API地址部分 */
-.api-address-section {
-  margin-top: auto;
-}
-
-.section-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #718096;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.input-group {
-  display: flex;
-  margin-bottom: 0;
-}
-
-.api-address-input {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-right: none;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.875rem;
-  background: #f7fafc;
-  transition: border-color 0.3s ease;
-}
-
-.api-address-input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.btn-copy {
-  background: #667eea;
-  color: white;
-  border: none;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.btn-copy:hover {
-  background: #5a67d8;
-}
-
-.btn-copy.copied {
-  background: #38a169;
-}
-
-/* 卡片装饰条 */
-.api-card-decoration {
-  height: 4px;
-  width: 100%;
-  transition: background 0.3s ease;
-}
-
-/* 动画 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .api-page-container {
-    padding: 1rem 0;
-  }
-
-  .api-title-card {
-    padding: 1.5rem;
-    margin: 0 1rem;
-  }
-
-  .api-title-text {
-    font-size: 2rem;
-  }
-
-  .api-content-wrapper {
-    padding: 1.5rem;
-    margin: 0 1rem 1rem;
-    border-radius: 12px;
-  }
-
-  .api-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  .api-card-container {
-    margin-bottom: 0;
-  }
-
-  .api-search-input {
-    font-size: 0.9375rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .api-title-text {
-    font-size: 1.75rem;
-  }
-
-  .api-subtitle {
-    font-size: 1rem;
-  }
-
-  .api-content-wrapper {
-    padding: 1.25rem;
-  }
-
-  .api-card-content {
-    padding: 0.875rem;
-  }
-
-  .api-card-title {
-    font-size: 1.125rem;
-  }
-
-  .input-group {
-    flex-direction: column;
-  }
-
-  .api-address-input {
-    border-right: 2px solid #e2e8f0;
-    border-bottom-left-radius: 0;
-    border-top-right-radius: 8px;
-  }
-
-  .btn-copy {
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 8px;
-    margin-top: 0.5rem;
-  }
-}
-
-/* ===== 在线测试 ===== */
-.btn-test-api {
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.6rem 1rem;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  transition: opacity 0.2s, transform 0.15s;
-}
-
-.btn-test-api:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.test-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-}
-
-.test-request-line {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-}
-
-.test-method-select {
-  width: 110px;
-  flex-shrink: 0;
-}
-
-.test-url-input {
-  flex: 1;
-}
-
-.test-section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.test-section-title {
-  font-weight: 600;
-  color: #2d3748;
-  font-size: 0.95rem;
-}
-
-.test-kv-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.kv-del {
-  color: #e53e3e;
-  flex-shrink: 0;
-}
-
-.test-response {
-  border-top: 1px solid #edf2f7;
-  padding-top: 1rem;
-}
-
-.resp-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.6rem;
-}
-
-.resp-status {
-  font-weight: 700;
-  padding: 0.2rem 0.7rem;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.85rem;
-}
-
-.status-2xx {
-  background: #38a169;
-}
-
-.status-3xx {
-  background: #3182ce;
-}
-
-.status-4xx {
-  background: #d69e2e;
-}
-
-.status-5xx {
-  background: #e53e3e;
-}
-
-.status-err {
-  background: #718096;
-}
-
-.resp-time {
-  color: #718096;
-  font-size: 0.85rem;
-}
-
-.resp-headers {
-  background: #f7fafc;
-  border: 1px solid #edf2f7;
-  border-radius: 8px;
-  padding: 0.7rem;
-  font-size: 0.8rem;
-  color: #4a5568;
-  white-space: pre-wrap;
-  word-break: break-all;
-  margin-bottom: 0.6rem;
-  max-height: 160px;
-  overflow-y: auto;
-}
-
-.resp-body {
-  background: #1e1e2e;
-  color: #cdd6f4;
-  border-radius: 10px;
-  padding: 1rem;
-  font-family: 'Fira Code', Consolas, monospace;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-all;
-  max-height: 360px;
-  overflow-y: auto;
-  margin: 0;
-}
-</style>

@@ -1,357 +1,371 @@
-<style>
-/* 每日一言样式优化 */
-.dayyan-section {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(240, 240, 240, 0.8) 100%);
-  border-radius: 16px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+<style scoped>
+.home-page {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Daily quote section */
+.quote-card {
   position: relative;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  margin-bottom: var(--space-8);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.dayyan-section:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-.dayyan-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
-
-/* 帖子卡片样式优化 */
-.post-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  margin: 20px 0;
-  padding: 20px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(229, 231, 235, 0.8);
-  position: relative;
-  overflow: hidden;
+  transition: all var(--transition-base);
   cursor: pointer;
 }
 
-.post-card::after {
-  content: '';
+.quote-card:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-md);
+}
+
+.quote-card::before {
+  content: '"';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  top: -10px;
+  left: var(--space-4);
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--color-accent-soft);
+  font-family: var(--font-serif, Georgia, serif);
+  pointer-events: none;
+}
+
+.quote-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.quote-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.7;
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-4);
+}
+
+.quote-source {
+  font-size: 0.85rem;
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+/* Post list */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.post-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--space-5);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
 }
 
 .post-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-  border-color: rgba(102, 126, 234, 0.3);
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-.post-card:hover::after {
-  opacity: 1;
+.post-card:active {
+  transform: translateY(0);
 }
 
-/* 置顶标签样式 */
-.sticky-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  z-index: 10;
-}
-
-/* 图片容器样式 */
-.post-image-container {
+.post-image-wrap {
   position: relative;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  border-radius: 12px;
-  aspect-ratio: 4/3;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.post-card:hover .post-image-container {
-  transform: scale(1.03);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  aspect-ratio: 16 / 10;
+  background: var(--color-bg-soft);
 }
 
 .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform var(--transition-slow);
 }
 
 .post-card:hover .post-image {
   transform: scale(1.05);
 }
 
-/* 内容样式 */
-.post-title {
-  font-size: 1.25rem;
+.sticky-badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+  color: white;
+  padding: 2px 10px;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 12px;
+  border-radius: var(--radius-full);
+}
+
+.post-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.post-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
   line-height: 1.4;
-  transition: color 0.3s ease;
+  letter-spacing: -0.01em;
+  transition: color var(--transition-fast);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-card:hover .post-title {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .post-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: #6b7280;
-  font-size: 0.9rem;
+  gap: var(--space-3);
+  font-size: 0.85rem;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-3);
+}
+
+.post-meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-text-tertiary);
 }
 
 .post-author {
   font-weight: 600;
-  color: #4b5563;
+  color: var(--color-text-secondary);
+}
+
+.post-summary {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 var(--space-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .post-stats {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 12px;
-  font-size: 0.85rem;
-  color: #9ca3af;
+  gap: var(--space-5);
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: color 0.3s ease;
+  gap: var(--space-1);
 }
 
-.post-card:hover .stat-item {
-  color: #667eea;
+.stat-item i {
+  font-size: 0.9rem;
 }
 
-/* 分页样式优化 */
-.pagination-container {
-  margin: 40px 0 20px;
+/* Pagination */
+.pagination-wrap {
   display: flex;
   justify-content: center;
+  margin-top: var(--space-10);
 }
 
-.pagination {
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 12px;
-  padding: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(229, 231, 235, 0.5);
+.pagination-modern {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.pagination .page-item .page-link {
-  border-radius: 8px;
-  margin: 0 2px;
-  padding: 10px 16px;
-  color: #4b5563;
-  border: none;
-  background: transparent;
-  transition: all 0.3s ease;
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 0.85rem;
   font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-.pagination .page-item.active .page-link {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.page-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.page-btn.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.pagination .page-item:hover:not(.disabled) .page-link {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
-  transform: translateY(-1px);
-}
-
-.pagination .page-item.disabled .page-link {
-  color: #d1d5db;
+.page-btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* 加载动画 */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  width: 100%;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(102, 126, 234, 0.2);
-  border-top: 3px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 空状态样式 */
+/* Empty & loading */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  color: #6b7280;
+  padding: var(--space-16) var(--space-6);
+  color: var(--color-text-tertiary);
 }
 
 .empty-state h3 {
-  color: #4b5563;
-  margin-bottom: 12px;
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
+.empty-state p {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
   .post-card {
-    padding: 16px;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
-  
-  .post-title {
-    font-size: 1.1rem;
+
+  .post-image-wrap {
+    aspect-ratio: 16 / 9;
   }
-  
-  .post-meta, .post-stats {
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: 0.8rem;
+
+  .quote-text {
+    font-size: 1rem;
   }
 }
 </style>
+
 <template>
-  <div class="container" style="width: 90%; max-width: 1200px; margin: 0 auto;">
-    <!-- 每日一言区域 -->
-    <div class="dayyan-section">
-      <div class="text-center">
-        <div class="text-sm font-medium text-gray-600 mb-2">每日一言</div>
-        <div id="dayyan_div" class="text-lg font-bold text-gray-800 mb-2 cursor-pointer"
-             @click="copyTextElement('#dayyan_div')" title="点击复制">
-          “ {{ dayyan.line }} ”
-          <el-icon class="ml-2 inline-block transition-transform hover:scale-110">
-            <CopyDocument/>
-          </el-icon>
-        </div>
-        <div class="text-md text-gray-700">—— {{ dayyan.from }} ——</div>
-      </div>
+  <div class="home-page">
+    <!-- Daily quote -->
+    <div class="quote-card" @click="copyTextElement('#dayyan_div')" title="点击复制">
+      <div class="quote-label">每日一言</div>
+      <p id="dayyan_div" class="quote-text">“ {{ dayyan.line }} ”</p>
+      <p class="quote-source">— {{ dayyan.from }} —</p>
     </div>
 
-    <!-- 帖子列表 -->
-    <div v-if="isLoading" class="loading-container">
-      <div class="loading-spinner"></div>
+    <!-- Loading -->
+    <div v-if="isLoading" class="empty-state">
+      <div class="loading-ring" style="margin:0 auto 12px;"></div>
+      <p>加载中...</p>
     </div>
-    
+
+    <!-- Empty -->
     <div v-else-if="data.length === 0" class="empty-state">
       <h3>暂无帖子</h3>
       <p>当前没有可用的帖子内容</p>
     </div>
-    
-    <div v-else class="posts-container">
-      <div v-for="d in data" :key="d.id" class="post-card" @click="routerTo(d.id)">
-        <!-- 置顶标签 -->
-        <div v-if="d.sort > 0" class="sticky-badge">置顶</div>
-        
-        <div class="row">
-          <!-- 帖子图片 -->
-          <div class="col-md-4 col-sm-12 mb-4 mb-md-0">
-            <div class="post-image-container">
-              <img 
-                referrer="no-referrer" 
-                class="post-image" 
-                :src="d.icon" 
-                :alt="d.title"
-                :title="d.title"
-              >
-            </div>
+
+    <!-- Post list -->
+    <div v-else class="posts-list">
+      <article
+        v-for="d in data"
+        :key="d.id"
+        class="post-card"
+        @click="routerTo(d.id)"
+      >
+        <div class="post-image-wrap">
+          <img
+            v-if="d.icon"
+            class="post-image"
+            :src="d.icon"
+            :alt="d.title"
+          />
+          <div v-else class="post-image" style="display:flex;align-items:center;justify-content:center;background:var(--color-accent-soft);color:var(--color-accent);font-size:2rem;">
+            <i class="bi bi-file-text"></i>
           </div>
-          
-          <!-- 帖子内容 -->
-          <div class="col-md-8 col-sm-12">
-            <h3 class="post-title">{{ d.title }}</h3>
-            
-            <div class="post-meta">
-              <span class="post-author">{{ d.authorName }}</span>
-              <span>•</span>
-              <span>{{ getF(d.time) }}</span>
+          <div v-if="d.sort > 0" class="sticky-badge">置顶</div>
+        </div>
+        <div class="post-body">
+          <h3 class="post-title">{{ d.title }}</h3>
+          <div class="post-meta">
+            <span class="post-author">{{ d.authorName }}</span>
+            <span class="post-meta-dot"></span>
+            <span>{{ getF(d.time) }}</span>
+          </div>
+          <p v-if="d.summary" class="post-summary">{{ d.summary }}</p>
+          <div class="post-stats">
+            <div class="stat-item">
+              <i class="bi bi-eye"></i>
+              <span>{{ d.views }}</span>
             </div>
-            
-            <!-- 可以添加帖子摘要，如果API提供的话 -->
-            <div v-if="d.summary" class="post-summary text-gray-600 mb-3 line-clamp-2">
-              {{ d.summary }}
+            <div class="stat-item">
+              <i class="bi bi-chat-dots"></i>
+              <span>{{ d.comments || 0 }}</span>
             </div>
-            
-            <div class="post-stats">
-              <div class="stat-item">
-                <i class="bi bi-eye"></i>
-                <span>{{ d.views }}</span>
-              </div>
-              <div class="stat-item">
-                <i class="bi bi-chat-dots"></i>
-                <span>{{ d.comments || 0 }}</span>
-              </div>
-              <div class="stat-item">
-                <i class="bi bi-heart"></i>
-                <span>{{ d.likes || 0 }}</span>
-              </div>
+            <div class="stat-item">
+              <i class="bi bi-heart"></i>
+              <span>{{ d.likes || 0 }}</span>
             </div>
           </div>
         </div>
-      </div>
+      </article>
     </div>
 
-    <!-- 分页 -->
-    <div v-if="!isLoading && rawdata.pages > 1" class="pagination-container">
-      <nav aria-label="分页导航">
-        <ul class="pagination">
-          <li :class="['page-item', { disabled: pup <= 0 }]">
-            <a class="page-link" @click="showPageDatas(pn - 1)" aria-label="上一页">
-              <span aria-hidden="true">«</span>
-            </a>
-          </li>
-          <li v-if="pup > 0" class="page-item">
-            <a class="page-link" @click="showPageDatas(pn - 1)">{{ pn - 1 }}</a>
-          </li>
-          <li class="page-item active" aria-current="page">
-            <a class="page-link">{{ pn }}</a>
-          </li>
-          <li v-if="pdown > 0" class="page-item">
-            <a class="page-link" @click="showPageDatas(pn + 1)">{{ pn + 1 }}</a>
-          </li>
-          <li :class="['page-item', { disabled: pdown <= 0 }]">
-            <a class="page-link" @click="showPageDatas(pn + 1)" aria-label="下一页">
-              <span aria-hidden="true">»</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+    <!-- Pagination -->
+    <div v-if="!isLoading && rawdata.pages > 1" class="pagination-wrap">
+      <ul class="pagination-modern">
+        <li>
+          <button class="page-btn" :disabled="pup <= 0" @click="showPageDatas(pn - 1)">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+        </li>
+        <li v-if="pup > 0">
+          <button class="page-btn" @click="showPageDatas(pn - 1)">{{ pn - 1 }}</button>
+        </li>
+        <li>
+          <button class="page-btn active">{{ pn }}</button>
+        </li>
+        <li v-if="pdown > 0">
+          <button class="page-btn" @click="showPageDatas(pn + 1)">{{ pn + 1 }}</button>
+        </li>
+        <li>
+          <button class="page-btn" :disabled="pdown <= 0" @click="showPageDatas(pn + 1)">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -361,10 +375,8 @@ import service from "@/axios";
 import {onMounted, ref} from "vue";
 import {copyTextElement, formatMsgTime} from "@/utils/utils";
 import router from "@/router";
-import {CopyDocument} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
 
-// 数据状态
 let rawdata = ref({current: 1, pages: 1, records: []})
 let data = ref([])
 let pup = ref(null)
@@ -372,16 +384,11 @@ let pdown = ref(null)
 let pn = ref(1)
 let isLoading = ref(false)
 
-// 每日一言数据
 let dayyan = ref({line: "每日一言内容", from: "来源"})
 
-// 加载页面数据
 async function showPageDatas(p: number) {
-  // 避免无效页码请求
   if (p < 1 || (rawdata.value.pages && p > rawdata.value.pages)) return;
-  
   isLoading.value = true;
-  
   try {
     const response = await service.get(`/notice/gets?pageNum=${p}`);
     rawdata.value = response;
@@ -391,54 +398,32 @@ async function showPageDatas(p: number) {
     pdown.value = pdown.value > rawdata.value.pages ? -1 : pdown.value;
     data.value = rawdata.value.records || [];
   } catch (err) {
-    console.error('加载页面数据失败:', err);
-    // 使用更好的错误提示方式，而不是alert
     ElMessage.error('加载失败，请稍后重试');
   } finally {
     isLoading.value = false;
   }
 }
 
-// 格式化时间
 function getF(t: number): string {
   return formatMsgTime(t);
 }
 
-// 跳转到文章详情
 function routerTo(id: number) {
   if (!id) return;
-  
-  router.push({
-    path: '/article',
-    query: {
-      id: id
-    }
-  });
+  router.push({path: '/article', query: {id: id}});
 }
 
-// 页面加载时初始化
 onMounted(async () => {
-  // 并行加载每日一言和帖子数据
-  const promises = [
-    loadDayyan(),
-    showPageDatas(1)
-  ];
-  
+  const promises = [loadDayyan(), showPageDatas(1)];
   await Promise.allSettled(promises);
 });
 
-// 加载每日一言
 async function loadDayyan() {
   try {
     const response = await service.get("/api/get/dayYan");
     dayyan.value = response;
   } catch (err) {
-    console.error('加载每日一言失败:', err);
-    // 设置默认值，避免页面显示空白
-    dayyan.value = {
-      line: "生活不止眼前的苟且，还有诗和远方",
-      from: "未知"
-    };
+    dayyan.value = {line: "生活不止眼前的苟且，还有诗和远方", from: "未知"};
   }
 }
 </script>

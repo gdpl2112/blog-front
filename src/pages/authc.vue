@@ -1,50 +1,82 @@
+<style scoped>
+.authc-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.authc-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.authc-card h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.authc-card p {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: var(--space-2) 0 var(--space-6);
+}
+
+.authc-perms {
+  text-align: left;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.authc-perms li {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+  line-height: 1.6;
+}
+
+.authc-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
+</style>
+
 <template>
-  <div class="auth-page min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div v-if="!isLoggedIn">
-        <div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            需要登录以授权应用
-          </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
-            应用 "{{ appName }}" 请求访问您的账户
-          </p>
-        </div>
+  <div class="authc-page">
+    <div v-if="!isLoggedIn" class="authc-card">
+      <h2>需要登录</h2>
+      <p>请先登录后再进行应用授权</p>
+    </div>
+
+    <div v-else class="authc-card">
+      <h2>授权确认</h2>
+      <p>应用 "{{ appName }}" 请求访问您的账户</p>
+
+      <div class="authc-perms">
+        <p style="font-weight:600;margin:0 0 8px;font-size:0.85rem;color:var(--color-text-primary);">请求权限：</p>
+        <ul style="margin:0;padding-left:20px;">
+          <li>访问您的基本资料</li>
+          <li>读取您的文章信息</li>
+        </ul>
+        <p v-if="appDesc" style="margin:8px 0 0;font-size:0.8rem;color:var(--color-text-tertiary);">{{ appDesc }}</p>
       </div>
 
-      <div v-else>
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <div class="text-center">
-            <svg class="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <h3 class="mt-2 text-lg font-medium text-gray-900">授权确认</h3>
-            <div class="mt-2 text-sm text-gray-500">
-              <p>应用 "{{ appName }}" 请求以下权限：</p>
-              <ul class="mt-2 list-disc list-inside text-left">
-                <li>访问您的基本资料</li>
-                <li>读取您的文章信息</li>
-              </ul>
-              <p>{{ appDesc }}</p>
-            </div>
-            <div class="mt-6">
-              <button
-                  :disabled="authorizing"
-                  @click="handleAuthorize"
-                  class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 mr-3"
-              >
-                {{ authorizing ? '授权中...' : '同意授权' }}
-              </button>
-              <button
-                  @click="handleCancel"
-                  class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
+      <div class="authc-actions">
+        <button class="btn-modern btn-modern-primary" :disabled="authorizing" @click="handleAuthorize">
+          {{ authorizing ? '授权中...' : '同意授权' }}
+        </button>
+        <button class="btn-modern" @click="handleCancel">取消</button>
       </div>
     </div>
   </div>
@@ -56,93 +88,45 @@ import {useRoute, useRouter} from 'vue-router'
 import {toast} from '@/utils/utils'
 import service, {login_state} from '@/axios'
 
-// 状态管理
 const authorizing = ref(false)
 const isLoggedIn = ref(false)
 const appName = ref('第三方应用')
-const appDesc = ref('第三方应用')
-
-// 路由和参数
+const appDesc = ref('')
 const router = useRouter()
 const route = useRoute()
-
-// 授权参数
 const appId = ref('')
 const redirectUri = ref('')
 
-// 检查URL参数
 onMounted(() => {
-  // 获取URL参数
   const query = route.query
   appId.value = query.app_id as string || ''
   redirectUri.value = query.redirect_uri as string || ''
-
-  // 设置应用名称（可以从后端获取）
   if (appId.value) {
-    appName.value = `应用${appId.value}`
-    service.get("/auth/app/info/app?app_id=" + appId.value)
-        .then(res => {
-          let r0 = res as any
-          appName.value = r0.app_name
-          appDesc.value = r0.app_desc
-        })
+    service.get("/auth/app/info/app?app_id=" + appId.value).then((res: any) => {
+      appName.value = res.app_name; appDesc.value = res.app_desc
+    })
   }
-
-  // 检查用户登录状态
   isLoggedIn.value = login_state.value
-
-  // 如果没有必要的参数，显示错误
   if (!appId.value || !redirectUri.value) {
     toast('缺少必要的授权参数', 'error')
     router.push('/')
   }
-
   if (!login_state.value) {
     toast('请先登录', 'error')
     router.push('/login?redirect_uri=' + redirectUri.value + '&app_id=' + appId.value)
   }
 })
 
-// 处理授权
 const handleAuthorize = () => {
-  if (!appId.value || !redirectUri.value) {
-    toast('缺少必要的授权参数', 'error')
-    return
-  }
-
+  if (!appId.value || !redirectUri.value) { toast('缺少必要的授权参数', 'error'); return }
   authorizing.value = true
-
-  // 向后端请求授权
   service.post('/auth/app/authorize?type=u&app_id=' + appId.value + '&redirect_uri=' + redirectUri.value)
-      .then(res => {
-        if (res.code === 200) {
-          // 授权成功，重定向到指定地址
-          toast('授权成功..', 'success')
-          // 将授权码作为查询参数添加到重定向URL
-          setTimeout(() => {
-            window.location.href = res.data
-          }, 1000)
-        } else {
-          toast(res.msg || '授权失败', 'error')
-        }
-      })
-      .catch(err => {
-        toast(err.msg || '授权过程中发生错误', 'error')
-      })
-      .finally(() => {
-        authorizing.value = false
-      })
+    .then((res: any) => {
+      if (res.code === 200) { toast('授权成功', 'success'); setTimeout(() => { window.location.href = res.data }, 1000) }
+      else { toast(res.msg || '授权失败', 'error') }
+    }).catch((err: any) => { toast(err.msg || '授权失败', 'error') })
+    .finally(() => { authorizing.value = false })
 }
 
-// 取消授权
-const handleCancel = () => {
-  toast('授权已取消', 'info')
-  router.push('/')
-}
+const handleCancel = () => { toast('授权已取消', 'info'); router.push('/') }
 </script>
-
-<style scoped>
-.auth-page {
-  background-color: #f9fafb;
-}
-</style>

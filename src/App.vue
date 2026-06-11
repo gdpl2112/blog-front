@@ -1,497 +1,1144 @@
 <style>
-/* 基础样式 */
+/* =============================================
+   App Layout - Redesigned v2
+   ============================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #333; /* 添加默认背景色防止加载延迟闪现 */
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
-/* 大屏幕（桌面端） */
-@media (min-width: 769px) {
-  body {
-    background-image: url("/f/a12333dddff.png");
-    background-size: cover; /* 保持比例填满屏幕 */
-  }
-}
-
-/* 小屏幕（移动端） */
-@media (max-width: 768px) {
-  body {
-    background-image: url("/f/26-0112-640.png") ;
-    background-size: cover; /* 保持比例适应屏幕 铺满屏幕 */
-    background-position: top center; /* 根据图片内容调整对齐方式 */
-  }
-}
-
-/* 加载动画样式 - 更复杂的双环脉冲效果 */
-.loading-container {
+/* 背景壁纸 + 半透明遮罩层 */
+body::before {
+  content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(5px);
-}
-
-.loading-spinner {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.loading-spinner::before,
-.loading-spinner::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.loading-spinner::before {
-  width: 100%;
-  height: 100%;
-  border: 4px solid transparent;
-  border-top-color: #ff4dc3;
-  border-right-color: #ff4dc3;
-  animation: spin 2s linear infinite;
-}
-
-.loading-spinner::after {
-  width: 80px;
-  height: 80px;
-  border: 4px solid transparent;
-  border-bottom-color: #00bf3c;
-  border-left-color: #00bf3c;
-  animation: spin 1.5s linear infinite reverse;
-}
-
-.loading-text {
-  position: absolute;
-  font-size: 16px;
-  color: #fff;
-  font-weight: bold;
-  animation: text-fade 2s ease-in-out infinite;
-  text-shadow: 0 0 10px rgba(255, 77, 195, 0.8);
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes text-fade {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-}
-
-/* 导航栏样式优化 */
-#main-nav {
-  transition: all 0.5s ease !important;
-  border: 3px solid transparent;
-  background-color: rgba(183, 229, 223, 0.2);
-  border-radius: 7px;
-  animation: nav-unhover .3s linear forwards;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-#main-nav:hover {
-  animation: nav-hover .3s linear forwards;
-  background-color: rgba(255, 255, 255, .9);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-@keyframes nav-unhover {
-  0% {
-    transform: scale(1);
-  }
-
-  100% {
-    transform: scale(0.98);
-  }
-}
-
-@keyframes nav-hover {
-  0% {
-    transform: scale(0.98);
-  }
-
-  100% {
-    transform: scale(1.00);
-  }
-}
-
-/* 导航项按钮样式 - 增强版 */
-.nav-button {
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  padding: 10px 20px;
-  margin: 0 6px;
-  border-radius: 25px;
-  color: #333;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.nav-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 77, 195, 0.4), transparent);
-  transition: all 0.6s ease;
-}
-
-.nav-button:hover::before {
-  left: 100%;
-}
-
-.nav-button:hover {
-  color: #ff4dc3;
-  font-weight: bold;
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(255, 77, 195, 0.3);
-  border-color: rgba(255, 77, 195, 0.5);
-}
-
-.nav-button:active {
-  transform: translateY(-1px) scale(0.98);
-}
-
-/* 音乐厅特殊样式 - 增强版 */
-.music-room {
-  border: 2px dashed #00bf3c !important;
-  background: linear-gradient(135deg, rgba(0, 191, 60, 0.1), rgba(0, 191, 60, 0.2)) !important;
-  position: relative;
-}
-
-.music-room::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border: 2px dashed transparent;
-  border-radius: 27px;
-  background: linear-gradient(60deg, #00bf3c, #00e047, #00bf3c) border-box;
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  animation: border-rotate 4s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes border-rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.music-room:hover {
-  background: linear-gradient(135deg, rgba(0, 191, 60, 0.2), rgba(0, 191, 60, 0.3)) !important;
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(0, 191, 60, 0.3);
-}
-
-/* 赞助按钮特殊样式 - 增强版 */
-.sponsor-button {
-  color: #ff8d3c !important;
-  font-weight: bold;
-  background: linear-gradient(135deg, rgba(255, 141, 60, 0.1), rgba(255, 141, 60, 0.2)) !important;
-  border: 1px solid rgba(255, 141, 60, 0.3) !important;
-}
-
-.sponsor-button:hover {
-  background: linear-gradient(135deg, rgba(255, 141, 60, 0.2), rgba(255, 141, 60, 0.3)) !important;
-  color: #ff6a00 !important;
-  box-shadow: 0 8px 25px rgba(255, 141, 60, 0.3);
-  border-color: rgba(255, 141, 60, 0.5) !important;
-}
-
-/* 下拉菜单样式优化 */
-.dropdown-menu {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(255, 77, 195, 0.2) !important;
-  border-radius: 15px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-  animation: dropdown-fade 0.3s ease-out;
-  backdrop-filter: blur(10px);
-}
-
-@keyframes dropdown-fade {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dropdown-item {
-  transition: all 0.3s ease;
-  border-radius: 10px !important;
-  margin: 4px;
-}
-
-.dropdown-item:hover {
-  background-color: rgba(255, 77, 195, 0.1) !important;
-  transform: translateX(5px);
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .nav-button {
-    padding: 8px 16px;
-    margin: 4px 0;
-    width: 100%;
-    text-align: center;
-  }
-  
-  /* 确保品牌名称在移动端正确居中 */
-  .navbar-brand {
-    margin: 0 auto !important;
-    position: relative;
-    left: 0 !important;
-    transform: none !important;
-    justify-content: center !important;
-  }
-  
-  /* 修复移动端导航栏布局 */
-  #main-nav {
-    position: relative;
-  }
-  
-  /* 调整移动端菜单按钮位置 */
-  .navbar-toggler {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    z-index: 1000;
-    margin: 0;
-  }
-  
-  /* 确保容器正常工作 */
-  .container-fluid {
-    padding-right: 70px !important;
-    padding-left: 15px !important;
-  }
-}
-
-audio {
-  display: none;
-}
-
-.yl-img {
-  max-width: 25px;
-  transition: all 0.8s ease !important;
-  border-radius: 999px;
-  rotate: 0turn;
-}
-
-.yl-img:hover {
-  rotate: 1turn;
-  max-width: 30px;
-}
-
-#bgVideo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  min-width: 100%;
-  min-height: 100%;
+  inset: 0;
   z-index: -1;
+  background:
+    linear-gradient(
+      rgba(248, 249, 252, 0.42),
+      rgba(248, 249, 252, 0.42)
+    ),
+    url('/f/a12333dddff.png') center / cover no-repeat fixed;
+}
+
+@media (max-width: 768px) {
+  body::before {
+    background:
+      linear-gradient(
+        rgba(248, 249, 252, 0.42),
+        rgba(248, 249, 252, 0.42)
+      ),
+      url('/f/26-0112-640.png') top center / cover no-repeat fixed;
+  }
+}
+
+html[data-theme="dark"] body::before {
+  background:
+    linear-gradient(
+      rgba(15, 17, 23, 0.55),
+      rgba(15, 17, 23, 0.55)
+    ),
+    url('/f/a12333dddff.png') center / cover no-repeat fixed;
+}
+
+html[data-theme="dark"] body {
+  background-color: #0f1117;
+}
+
+@media (max-width: 768px) {
+  html[data-theme="dark"] body::before {
+    background:
+      linear-gradient(
+        rgba(15, 17, 23, 0.55),
+        rgba(15, 17, 23, 0.55)
+      ),
+      url('/f/26-0112-640.png') top center / cover no-repeat fixed;
+  }
+}
+
+/* Loading */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 17, 23, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.loading-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   Navigation v3 - Layered glass, pill nav, active indicator
+   ============================================= */
+
+.site-header {
+  position: sticky;
+  top: var(--space-4);
+  z-index: 1000;
+  max-width: calc(var(--max-width) + var(--space-12));
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+/* Outer glow layer */
+.nav-outer-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    rgba(79, 110, 247, 0.08),
+    rgba(139, 92, 246, 0.06),
+    rgba(79, 110, 247, 0.04)
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+[data-theme="dark"] .nav-outer-glow {
+  background: linear-gradient(
+    135deg,
+    rgba(107, 138, 255, 0.10),
+    rgba(141, 164, 255, 0.06),
+    rgba(107, 138, 255, 0.04)
+  );
+}
+
+/* Main nav shell */
+.nav-glass {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  padding: 0 var(--space-5);
+  /* Deeper glass: more opacity + stronger blur */
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(190%) brightness(1.02);
+  -webkit-backdrop-filter: blur(20px) saturate(190%) brightness(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 8px 32px rgba(79, 110, 247, 0.04);
+  transition: all var(--transition-base);
+}
+
+.nav-glass:hover {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+[data-theme="dark"] .nav-glass {
+  background: rgba(20, 23, 35, 0.82);
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .nav-glass:hover {
+  background: rgba(20, 23, 35, 0.9);
+}
+
+/* ======== BRAND ======== */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-right: var(--space-6);
+  transition: transform var(--transition-fast);
+}
+
+.nav-brand:hover {
+  transform: scale(1.03);
+}
+
+.nav-brand img {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(79, 110, 247, 0.18);
+}
+
+.nav-brand-text {
+  font-weight: 750;
+  font-size: 1.1rem;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ======== NAV LINKS ======== */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link-item {
+  position: relative;
+}
+
+.nav-link-item a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+}
+
+.nav-link-item a::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 20px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transition: transform var(--transition-base);
+}
+
+.nav-link-item a:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.nav-link-item a:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.nav-link-item a.router-link-active {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  font-weight: 600;
+}
+
+.nav-link-item a.router-link-active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Highlight variant (sponsor) */
+.nav-link-highlight {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(234, 179, 8, 0.08)) !important;
+  color: #d97706 !important;
+  font-weight: 600 !important;
+}
+
+.nav-link-highlight:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 179, 8, 0.14)) !important;
+  color: #b45309 !important;
+  transform: translateY(-1px);
+}
+
+.nav-link-highlight::after {
+  background: #d97706 !important;
+}
+
+/* ======== DROPDOWN (icon-btn trigger) ======== */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.nav-dropdown-trigger:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.nav-dropdown-trigger .chevron {
+  font-size: 0.6rem;
+  transition: transform var(--transition-fast);
+}
+
+.nav-dropdown-trigger.open .chevron {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.97);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+  transform-origin: top right;
+}
+
+.nav-dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-bottom: 1px;
+}
+
+.nav-dropdown-item:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  transform: translateX(3px);
+}
+
+.nav-dropdown-item img {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.nav-dropdown-version {
+  padding: 8px 14px;
+  font-size: 0.7rem;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--space-1);
+  padding-top: 10px;
+}
+
+/* ======== RIGHT-SIDE ACTIONS ======== */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-6);
+  flex-shrink: 0;
+}
+
+.nav-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-soft);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 1.05rem;
+  position: relative;
+}
+
+.nav-icon-btn:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent-soft);
+  background: var(--color-accent-soft);
+}
+
+.nav-icon-btn:active {
+  transform: scale(0.94);
+}
+
+/* Divider between icon actions and user area */
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+  margin: 0 var(--space-1);
+}
+
+/* User badge */
+.nav-user-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px 12px 5px 5px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.nav-user-badge:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-soft);
+}
+
+.nav-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.nav-username {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* CTA button in nav */
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
+  color: white;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 2px 10px rgba(79, 110, 247, 0.25);
+}
+
+.nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(79, 110, 247, 0.35);
+  color: white;
+}
+
+.nav-cta:active {
+  transform: scale(0.96);
+}
+
+.nav-cta-ghost {
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+  padding: 7px 16px;
+}
+
+.nav-cta-ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Login button */
+.nav-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.nav-login-btn:hover {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 110, 247, 0.3);
+}
+
+/* ======== MOBILE ======== */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  transition: all var(--transition-fast);
+  margin-left: auto;
+}
+
+.nav-toggle:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* =============================================
+   Main content area
+   ============================================= */
+
+.main-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-6);
+  min-height: calc(100vh - var(--nav-height) - 200px);
+}
+
+/* Global glass: any card or section gets frosted */
+.main-content *[style*="var(--color-bg-card)"],
+.main-content .v0-content,
+.main-content .post-card,
+.main-content .quote-card,
+.main-content .api-card,
+.main-content .comments-section,
+.main-content .article-body,
+.main-content .sponsor-table-wrap,
+.main-content .qr-card,
+.main-content .info-section,
+.main-content .form-section,
+.main-content .article-group,
+.main-content .form-card,
+.main-content .admin-section,
+.main-content .upload-form,
+.main-content .update-form {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* =============================================
+   Footer
+   ============================================= */
+
+.site-footer {
+  margin-top: var(--space-16);
+  padding: var(--space-12) var(--space-6);
+  background: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
+}
+
+.footer-brand h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.footer-brand p {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.footer-links h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.footer-links-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.friend-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.friend-link:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.friend-link img {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
   object-fit: cover;
 }
 
-.about-avatar {
-  display: inline-block;
-  opacity: 0.86;
-  max-width: 35px;
-  border-radius: 25px;
+.footer-bottom {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
+.footer-bottom p {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 0.8rem;
+}
+
+.footer-bottom a {
+  color: var(--color-text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.footer-bottom a:hover {
+  color: var(--color-accent);
+}
+
+/* =============================================
+   APlayer styling
+   ============================================= */
+
+#player {
+  position: fixed;
+  top: calc(var(--nav-height) + var(--space-4) + var(--space-4));
+  right: var(--space-4);
+  z-index: 999;
+  width: 340px;
+  max-height: 480px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  transition: all var(--transition-base);
+}
+
+#player.aplayer {
+  font-family: var(--font-sans);
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+/* ======== MOBILE DRAWER (slide-over) ======== */
+@media (max-width: 768px) {
+  .site-header {
+    top: 0;
+    padding: 0 var(--space-3);
+    max-width: 100%;
+  }
+
+  .nav-glass {
+    border-radius: var(--radius-lg);
+    padding: 0 var(--space-4);
+  }
+
+  .nav-outer-glow {
+    border-radius: var(--radius-lg);
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  /* Hide desktop links on mobile */
+  .nav-links-desktop {
+    display: none !important;
+  }
+
+  .nav-actions-desktop {
+    display: none !important;
+  }
+
+  /* Mobile overlay backdrop */
+  .nav-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 250ms ease;
+  }
+
+  .nav-mobile-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Mobile slide-over drawer */
+  .nav-mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(320px, 85vw);
+    height: 100vh;
+    height: 100dvh;
+    z-index: 999;
+    background: var(--color-bg-elevated);
+    border-left: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xl);
+    padding: var(--space-6);
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-mobile-drawer.open {
+    transform: translateX(0);
+  }
+
+  [data-theme="dark"] .nav-mobile-backdrop {
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .nav-mobile-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-mobile-drawer-header .nav-brand {
+    margin-right: 0;
+  }
+
+  .nav-mobile-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-soft);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .nav-mobile-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+  }
+
+  .nav-mobile-links .nav-link-item a {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md);
+  }
+
+  .nav-mobile-links .nav-link-item a::after {
+    display: none;
+  }
+
+  .nav-mobile-links .nav-dropdown-trigger {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md);
+  }
+
+  .nav-mobile-links .nav-dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    margin-top: 2px;
+    padding: 0 0 0 var(--space-4);
+    background: transparent;
+    min-width: unset;
+  }
+
+  .nav-mobile-actions {
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .nav-mobile-actions .nav-icon-btn {
+    display: none;
+  }
+
+  .nav-mobile-actions .nav-cta {
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .nav-mobile-actions .nav-login-btn {
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .nav-mobile-actions .nav-user-badge {
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .footer-links-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  #player {
+    width: 280px;
+    right: var(--space-2);
+    max-height: 400px;
+  }
+}
+
+@media (min-width: 769px) {
+  .nav-mobile-drawer,
+  .nav-mobile-backdrop {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-links-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 </style>
 
 <template>
-  <div class="app">
-    <!-- 加载动画组件 - 增强版 -->
-    <div v-if="isLoading" class="loading-container">
-      <div class="loading-spinner">
-        <span class="loading-text">加载中...</span>
+  <div class="app-root" :data-theme="theme">
+    <!-- Loading overlay -->
+    <Transition name="fade">
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-ring"></div>
       </div>
-    </div>
-    
-    <nav id="main-nav" class="z-999 navbar navbar-expand-lg navbar-light">
-      <div class="container-fluid d-flex justify-content-between align-items-center w-100 px-3">
-        <RouterLink class="navbar-brand nav-button flex-shrink-0"
-                    style="display: flex; align-items: center; justify-content: center; color: #ff4dc3; text-decoration: none;"
-                    to="/">
-          <img class="d-inline-block align-text-top me-2"
-               src="/favicon.ico"
-               alt="kloping`s blog"
-               style="opacity: 0.86; border-radius: 999px; max-width: 40px;">
-          kloping`s blog
+    </Transition>
+
+    <!-- Header / Navigation -->
+    <header class="site-header">
+      <nav class="nav-glass">
+        <div class="nav-outer-glow"></div>
+
+        <RouterLink class="nav-brand" to="/">
+          <img src="/favicon.ico" alt="kloping's blog" />
+          <span class="nav-brand-text">kloping's blog</span>
         </RouterLink>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent"
-              aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <RouterLink to="/apis" class="nav-link nav-button" aria-current="page">公共API</RouterLink>
+
+        <!-- Desktop Nav Links -->
+        <ul class="nav-links nav-links-desktop">
+          <li class="nav-link-item">
+            <RouterLink to="/">首页</RouterLink>
           </li>
-          <li class="nav-item">
-            <RouterLink to="/room" class="nav-link nav-button music-room" aria-current="page">音乐厅
-            </RouterLink>
+          <li class="nav-link-item">
+            <RouterLink to="/apis">公共API</RouterLink>
           </li>
-          <li class="nav-item dropdown">
-            <div id="navbarDropdown" class="nav-link nav-button dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                 data-toggle="dropdown"
-                 aria-expanded="false">
+          <li class="nav-link-item">
+            <RouterLink to="/room">音乐厅</RouterLink>
+          </li>
+          <li class="nav-link-item nav-dropdown">
+            <button
+              class="nav-dropdown-trigger"
+              :class="{ open: aboutOpen }"
+              @click="aboutOpen = !aboutOpen"
+            >
               ABOUT
-            </div>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <hr>
-              <a class="dropdown-item" target="_blank"
-                 href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes">
-                <img class="about-avatar" alt="qq" loading="lazy"
-                     src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640">
+              <i class="bi bi-chevron-down chevron"></i>
+            </button>
+            <div class="nav-dropdown-menu" :class="{ show: aboutOpen }">
+              <a class="nav-dropdown-item" target="_blank" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes">
+                <img alt="qq" loading="lazy" src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640" />
                 QQ (owner)
               </a>
-              <a class="dropdown-item" target="_blank"
-                 href="https://qun.qq.com/universal-share/share?ac=1&authKey=vdy2VbaBqujykAveW9LSf1NkHJnEdluyADdeASabqXmW0UMRl7U9DoG38VkxywDx&busi_data=eyJncm91cENvZGUiOiIyNzg2ODE1NTMiLCJ0b2tlbiI6IjAraFJPM2c3SS84cGVmMzFoY3dOL1lsekN4bUtWMi9sNGNtZVo5UEZQdk1HTVZYaVNCZDlNZzdhbWxFZmlKTHIiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=tytVVzt4Xk59uWCGdQ76HnXvp9pVmUYYu-0hwrupw2FX1nUuBtl8cEGYHMMBeEkG9ui_sK4mYWin_8dpNHhkLg&svctype=4&tempid=h5_group_info">
-                <img class="about-avatar" loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640">
+              <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=vdy2VbaBqujykAveW9LSf1NkHJnEdluyADdeASabqXmW0UMRl7U9DoG38VkxywDx&busi_data=eyJncm91cENvZGUiOiIyNzg2ODE1NTMiLCJ0b2tlbiI6IjAraFJPM2c3SS84cGVmMzFoY3dOL1lsekN4bUtWMi9sNGNtZVo5UEZQdk1HTVZYaVNCZDlNZzdhbWxFZmlKTHIiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=tytVVzt4Xk59uWCGdQ76HnXvp9pVmUYYu-0hwrupw2FX1nUuBtl8cEGYHMMBeEkG9ui_sK4mYWin_8dpNHhkLg&svctype=4&tempid=h5_group_info">
+                <img loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640" />
                 QQ GROUP (闲聊)
               </a>
-              <a class="dropdown-item" target="_blank"
-                 href="https://qun.qq.com/universal-share/share?ac=1&authKey=48SHxrAnIPg%2FSB9tcp3yAVFNY0%2BLD9Un4jrDckReN%2F9q2MmxF0PYmsXjd7fVcN%2Fh&busi_data=eyJncm91cENvZGUiOiI3OTQyMzg1NzIiLCJ0b2tlbiI6IklOTlhMNE00b1hsVWxIS1F5cWsyQy93RFVIaXRTRG50SitPbWZTSTJxWTMrM2JkaXVTZXROblVhRDhQMy91RmQiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=O39jKGFDN6F7w0E9OVEcAm6UWBQN9S1kVqiWPAArsh_-m3E7eYYGOP1Ysz7NOzmF8a1mhrKqXgAo2XggFtUWfg&svctype=4&tempid=h5_group_info">
-                <img class="about-avatar" alt="qq" loading="lazy"
-                     src="http://p.qlogo.cn/gh/794238572/794238572/640">
+              <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=48SHxrAnIPg%2FSB9tcp3yAVFNY0%2BLD9Un4jrDckReN%2F9q2MmxF0PYmsXjd7fVcN%2Fh&busi_data=eyJncm91cENvZGUiOiI3OTQyMzg1NzIiLCJ0b2tlbiI6IklOTlhMNE00b1hsVWxIS1F5cWsyQy93RFVIaXRTRG50SitPbWZTSTJxWTMrM2JkaXVTZXROblVhRDhQMy91RmQiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=O39jKGFDN6F7w0E9OVEcAm6UWBQN9S1kVqiWPAArsh_-m3E7eYYGOP1Ysz7NOzmF8a1mhrKqXgAo2XggFtUWfg&svctype=4&tempid=h5_group_info">
+                <img alt="qq" loading="lazy" src="http://p.qlogo.cn/gh/794238572/794238572/640" />
                 QQ GROUP (技术)
               </a>
-              <a class="dropdown-item" target="_blank" href="https://github.com/kloping">
-                <img class="about-avatar" alt="github" loading="lazy"
-                     src="https://avatars.githubusercontent.com/u/87743020?v=4">
+              <a class="nav-dropdown-item" target="_blank" href="https://github.com/kloping">
+                <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/87743020?v=4" />
                 github
               </a>
-              <a class="dropdown-item" target="_blank" href="https://github.com/gdpl2112">
-                <img class="about-avatar" alt="github" loading="lazy"
-                     src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4">
+              <a class="nav-dropdown-item" target="_blank" href="https://github.com/gdpl2112">
+                <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
                 github organization
               </a>
-              <hr>
-              <p class="dropdown-item" style="font-size: small">
-                front-vue3 update 26.06.09
-              </p>
-              <p class="dropdown-item" style="font-size: small">
-                问题修复
-              </p>
+              <div class="nav-dropdown-version">front-vue3 update 26.06.11</div>
             </div>
           </li>
-          <li class="nav-item">
-            <RouterLink to="/sponsors" class="nav-link nav-button sponsor-button" aria-current="page"><b>赞助</b>
-            </RouterLink>
+          <li class="nav-link-item">
+            <RouterLink to="/sponsors" class="nav-link-highlight">赞助</RouterLink>
           </li>
-          <li class="nav-item">
-            <RouterLink to="/ai" class="nav-link nav-button" aria-current="page">AI对话</RouterLink>
+          <li class="nav-link-item">
+            <RouterLink to="/ai">AI对话</RouterLink>
           </li>
         </ul>
-        <div v-show="login_state" class="d-flex flex-column"> {{ userInfo.nickname }}</div>
-        <img v-show="login_state" class="mr-2" style="opacity: 0.86;max-height: 50px; border-radius: 999px"
-             :src="userInfo.icon" alt="icon">
-        <div class="form-inline mr-sm-2 my-2">
-          <button v-show="login_state" class="mr-2 btn btn-outline-danger font-weight-light nav-button" @click="logout">点击登出
+
+        <!-- Desktop Actions -->
+        <div class="nav-actions nav-actions-desktop">
+          <button class="nav-icon-btn" @click="toggleTheme" :title="theme === 'dark' ? '切换亮色' : '切换暗色'">
+            <i :class="theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon'"></i>
           </button>
-          <button class="mr-2 btn btn-outline-warning nav-button" type="button" @click="ttplayer">显/隐歌单</button>
-          <RouterLink to="/v0" class="mr-2 btn btn-outline-success nav-button" type="button">个人中心</RouterLink>
-          <RouterLink to="/upload" class="mr-2 btn btn-outline-success nav-button" type="button">发帖</RouterLink>
+          <button class="nav-icon-btn" @click="ttplayer" title="显隐歌单">
+            <i class="bi bi-music-note-beamed"></i>
+          </button>
+
+          <span class="nav-divider"></span>
+
+          <!-- Logged in -->
+          <template v-if="login_state">
+            <RouterLink to="/v0" class="nav-login-btn">个人中心</RouterLink>
+            <div class="nav-user-badge" @click="goToProfile">
+              <img :src="userInfo.icon" alt="" class="nav-avatar" />
+              <span class="nav-username">{{ userInfo.nickname }}</span>
+            </div>
+            <RouterLink to="/upload" class="nav-cta">
+              <i class="bi bi-pencil-square"></i> 发帖
+            </RouterLink>
+            <button class="nav-icon-btn" @click="logout" title="退出登录">
+              <i class="bi bi-box-arrow-right"></i>
+            </button>
+          </template>
+
+          <!-- Not logged in -->
+          <template v-else>
+            <RouterLink to="/login" class="nav-login-btn">登录</RouterLink>
+          </template>
+        </div>
+
+        <!-- Mobile toggle -->
+        <button class="nav-toggle" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
+          <i :class="mobileOpen ? 'bi bi-x-lg' : 'bi bi-list'"></i>
+        </button>
+      </nav>
+
+      <!-- Mobile Backdrop -->
+      <div class="nav-mobile-backdrop" :class="{ open: mobileOpen }" @click="mobileOpen = false"></div>
+
+      <!-- Mobile Drawer -->
+      <div class="nav-mobile-drawer" :class="{ open: mobileOpen }">
+        <div class="nav-mobile-drawer-header">
+          <RouterLink class="nav-brand" to="/" @click="mobileOpen = false">
+            <img src="/favicon.ico" alt="kloping's blog" />
+            <span class="nav-brand-text">kloping's blog</span>
+          </RouterLink>
+          <button class="nav-mobile-close" @click="mobileOpen = false">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="nav-mobile-links">
+          <div class="nav-link-item">
+            <RouterLink to="/" @click="mobileOpen = false">首页</RouterLink>
+          </div>
+          <div class="nav-link-item">
+            <RouterLink to="/apis" @click="mobileOpen = false">公共API</RouterLink>
+          </div>
+          <div class="nav-link-item">
+            <RouterLink to="/room" @click="mobileOpen = false">音乐厅</RouterLink>
+          </div>
+          <div class="nav-link-item nav-dropdown">
+            <button
+              class="nav-dropdown-trigger"
+              :class="{ open: aboutOpen }"
+              @click="aboutOpen = !aboutOpen"
+            >
+              ABOUT
+              <i class="bi bi-chevron-down chevron"></i>
+            </button>
+            <div class="nav-dropdown-menu" :class="{ show: aboutOpen }">
+              <a class="nav-dropdown-item" target="_blank" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes" @click="mobileOpen = false">
+                <img alt="qq" loading="lazy" src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640" />
+                QQ (owner)
+              </a>
+              <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=vdy2VbaBqujykAveW9LSf1NkHJnEdluyADdeASabqXmW0UMRl7U9DoG38VkxywDx&busi_data=eyJncm91cENvZGUiOiIyNzg2ODE1NTMiLCJ0b2tlbiI6IjAraFJPM2c3SS84cGVmMzFoY3dOL1lsekN4bUtWMi9sNGNtZVo5UEZQdk1HTVZYaVNCZDlNZzdhbWxFZmlKTHIiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=tytVVzt4Xk59uWCGdQ76HnXvp9pVmUYYu-0hwrupw2FX1nUuBtl8cEGYHMMBeEkG9ui_sK4mYWin_8dpNHhkLg&svctype=4&tempid=h5_group_info" @click="mobileOpen = false">
+                <img loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640" />
+                QQ GROUP (闲聊)
+              </a>
+              <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=48SHxrAnIPg%2FSB9tcp3yAVFNY0%2BLD9Un4jrDckReN%2F9q2MmxF0PYmsXjd7fVcN%2Fh&busi_data=eyJncm91cENvZGUiOiI3OTQyMzg1NzIiLCJ0b2tlbiI6IklOTlhMNE00b1hsVWxIS1F5cWsyQy93RFVIaXRTRG50SitPbWZTSTJxWTMrM2JkaXVTZXROblVhRDhQMy91RmQiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=O39jKGFDN6F7w0E9OVEcAm6UWBQN9S1kVqiWPAArsh_-m3E7eYYGOP1Ysz7NOzmF8a1mhrKqXgAo2XggFtUWfg&svctype=4&tempid=h5_group_info" @click="mobileOpen = false">
+                <img alt="qq" loading="lazy" src="http://p.qlogo.cn/gh/794238572/794238572/640" />
+                QQ GROUP (技术)
+              </a>
+              <a class="nav-dropdown-item" target="_blank" href="https://github.com/kloping" @click="mobileOpen = false">
+                <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/87743020?v=4" />
+                github
+              </a>
+              <a class="nav-dropdown-item" target="_blank" href="https://github.com/gdpl2112" @click="mobileOpen = false">
+                <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
+                github organization
+              </a>
+              <div class="nav-dropdown-version">front-vue3 update 26.06.09</div>
+            </div>
+          </div>
+          <div class="nav-link-item">
+            <RouterLink to="/sponsors" class="nav-link-highlight" @click="mobileOpen = false">赞助</RouterLink>
+          </div>
+          <div class="nav-link-item">
+            <RouterLink to="/ai" @click="mobileOpen = false">AI对话</RouterLink>
+          </div>
+        </div>
+
+        <div class="nav-mobile-actions">
+          <template v-if="login_state">
+            <RouterLink to="/v0" class="nav-login-btn" @click="mobileOpen = false">个人中心</RouterLink>
+            <div class="nav-user-badge" @click="goToProfile(); mobileOpen = false">
+              <img :src="userInfo.icon" alt="" class="nav-avatar" />
+              <span class="nav-username">{{ userInfo.nickname }}</span>
+            </div>
+            <RouterLink to="/upload" class="nav-cta" @click="mobileOpen = false">
+              <i class="bi bi-pencil-square"></i> 发帖
+            </RouterLink>
+            <button class="nav-cta nav-cta-ghost" @click="logout(); mobileOpen = false">
+              <i class="bi bi-box-arrow-right"></i> 退出登录
+            </button>
+          </template>
+          <template v-else>
+            <RouterLink to="/login" class="nav-login-btn" @click="mobileOpen = false">登录</RouterLink>
+          </template>
         </div>
       </div>
-      </div>
-    </nav>
+    </header>
 
-    <div class="container" style="margin-top: 10px">
-      <RouterView v-if="isDataLoaded" :apl="ap"></RouterView>
-    </div>
+    <!-- Main content -->
+    <main class="main-content">
+      <RouterView :apl="ap" />
+    </main>
 
-    <footer>
-      <div style="margin-right: 10px;margin-left: 10px; margin-top: 35px;background-color: rgba(0,6,33,0.4)"
-           role="alert" class="opacity-95 alert alert-dark">
-        <center style="opacity: 100%;color: white">
-          欢迎您的访问 <br>
-          <a style="color: #dcf3f2" :href="'//'+host0"> {{ host0 }} </a>
-          版权所有 Power by <br>
-          <a style="color: #09a0ff" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes"
-             class="alert-link">若生</a>&nbsp;
-          <a style="color: rgba(195,195,195,0.99)" href="//github.com/kloping" class="alert-link">kloping</a>
-          <br>
-          <!--公安备案信息-->
-          <a target="_blank" style="color: #f81144;font-size: small" href="https://beian.miit.gov.cn/"
-             class="alert-link">皖ICP备2025088299号-1</a>
-        </center>
-        <br>
-        <center>
-          <h5 style='color: white' data-toggle="tooltip" data-placement="top" title="添加友链,请联系作者">
-            友情链接
-          </h5>
-          <div id="f-link-d0" class="container justify-content-center">
-            <div class="row justify-content-center">
-              <a v-for="e in arr"
-                 :style="'color:'+e.color" :href="e.url" target="_blank" class="alert-link col-3">
-                <img class="yl-img" :src="e.icon" alt=""/>
-                {{ e.name }}
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <h3>kloping's blog</h3>
+            <p>欢迎访问kloping的博客。本站提供API以及用户上传API、发帖等丰富功能。由若生(kloping)维护。</p>
+          </div>
+          <div class="footer-links">
+            <h4>友情链接</h4>
+            <div class="footer-links-grid">
+              <a v-for="e in arr" :key="e.name" :href="e.url" target="_blank" class="friend-link">
+                <img :src="e.icon" alt="" />
+                <span>{{ e.name }}</span>
               </a>
             </div>
           </div>
-        </center>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; 2026&nbsp;
+            <a href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes" target="_blank">若生</a>
+            &nbsp;/&nbsp;
+            <a href="//github.com/kloping" target="_blank">kloping</a>
+            &nbsp;·&nbsp;
+            <a :href="'//'+host0" target="_blank">{{ host0 }}</a>
+          </p>
+          <p>
+            <a target="_blank" href="https://beian.miit.gov.cn/">皖ICP备2025088299号-1</a>
+          </p>
+        </div>
       </div>
     </footer>
 
+    <!-- Music player -->
     <div id="player"></div>
   </div>
 </template>
 
 <script lang="ts" setup>
-
 import {RouterLink, RouterView, useRouter} from 'vue-router'
 import $ from 'jquery';
 import {onMounted, ref} from "vue";
@@ -500,13 +1147,31 @@ import {toast} from "@/utils/utils";
 import APlayer from 'aplayer/dist/APlayer.min';
 
 let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"}])
-
 let host0 = ref("")
-
 let isDataLoaded = ref(false)
-
-// 加载状态
 let isLoading = ref(true)
+
+// Theme
+const theme = ref(localStorage.getItem('blog-theme') || 'light')
+
+function applyTheme(t: string) {
+  document.documentElement.setAttribute('data-theme', t)
+}
+
+function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+  localStorage.setItem('blog-theme', theme.value)
+  applyTheme(theme.value)
+}
+
+// Mobile
+const mobileOpen = ref(false)
+const aboutOpen = ref(false)
+
+function goToProfile() {
+  const router = useRouter()
+  router.push('/v0')
+}
 
 service.get("/get-host?url=" + document.location).then(res => {
   host0.value = res.toString()
@@ -518,26 +1183,26 @@ service.get("/user/flinks").then(res => {
   arr.value = res
 }).catch(err => {
   toast("获取友链失败" + err)
-});
+})
 
 let ap: APlayer;
-//挂载完成加载player.
+
 onMounted(async () => {
-  // 获取路由实例
+  // Apply initial theme
+  applyTheme(theme.value);
+
   const router = useRouter();
-  
-  // 监听路由切换，显示加载动画
+
   router.beforeEach((to, from, next) => {
     isLoading.value = true;
+    mobileOpen.value = false;
     next();
   });
-  
-  // 监听路由切换完成，隐藏加载动画
+
   router.afterEach(() => {
-    // 延迟隐藏以确保动画可见
-    isLoading.value = false;
+    setTimeout(() => { isLoading.value = false }, 200)
   });
-  
+
   ap = new APlayer({
     container: document.getElementById('player'),
     autoplay: false,
@@ -545,17 +1210,15 @@ onMounted(async () => {
     audio: [],
     preload: "none"
   });
-  
+
   try {
     await loadUser();
-    
+
     function loadDefaultList() {
       service.get("/api/music/get-music-list").then(function (response) {
         ap.list.add(response)
         ap.list.show()
-        setTimeout(function () {
-          ap.list.hide()
-        }, 1500)
+        setTimeout(function () { ap.list.hide() }, 1500)
       }).catch(function (err) {
         toast("获取音乐失败" + err)
       });
@@ -564,11 +1227,8 @@ onMounted(async () => {
     if (login_state.value) {
       service.get("/api/music/list").then(function (response) {
         let data = response.data
-        if (data.length > 0) {
-          ap.list.add(data);
-        } else {
-          loadDefaultList();
-        }
+        if (data.length > 0) { ap.list.add(data) }
+        else { loadDefaultList() }
       })
     } else {
       loadDefaultList();
@@ -578,10 +1238,7 @@ onMounted(async () => {
   } finally {
     window.ap = ap;
     isDataLoaded.value = true;
-    // 首次加载完成后隐藏加载动画
-    setTimeout(() => {
-      isLoading.value = false;
-    }, 800);
+    setTimeout(() => { isLoading.value = false }, 600);
   }
 })
 
@@ -592,67 +1249,4 @@ function ttplayer() {
 function logout() {
   userLogout()
 }
-
 </script>
-<style>
-
-@media (max-width: 1080px) {
-  #player {
-    width: 250px;
-  }
-}
-
-
-@media (min-width: 1080px) {
-  #player {
-    width: 350px;
-  }
-}
-
-#player {
-  border: 5px solid transparent;
-  background-color: rgba(128, 112, 131, 0.34);
-  border-radius: 7px;
-  animation: normalp .3s linear forwards;
-  position: fixed;
-  top: 12%;
-  right: 1%;
-  max-height: 600px;
-  overflow-y: scroll;
-  z-index: 1031;
-}
-
-#player:hover {
-  animation: hoverp .3s linear forwards;
-  background-color: rgba(255, 255, 255, .9)
-}
-
-@keyframes normalp {
-  0% {
-    transform: scale(1);
-    right: 1%;
-  }
-
-  100% {
-    transform: scale(0.98);
-    right: -180px;
-  }
-}
-
-@keyframes hoverp {
-  0% {
-    transform: scale(0.98);
-    right: -12%;
-  }
-
-  100% {
-    transform: scale(1.00);
-    right: 1%;
-  }
-}
-
-.app {
-  position: relative;
-  z-index: 1; /* 确保应用容器在视频之上 */
-}
-</style>
