@@ -2,7 +2,7 @@
 .ai-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  height: calc(100vh - var(--nav-height) - 120px);
+  height: calc(100vh - var(--nav-height) - var(--space-8));
   min-height: 600px;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .sidebar-header h3 {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 700;
   margin: 0;
   color: var(--color-text-primary);
@@ -80,7 +80,7 @@
 }
 
 .session-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,7 +147,7 @@
 }
 
 .chat-header h4 {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 600;
   margin: 0;
   color: var(--color-text-primary);
@@ -161,16 +161,16 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-2);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .message-row {
   display: flex;
-  gap: var(--space-3);
-  max-width: 85%;
+  gap: var(--space-2);
+  max-width: 92%;
 }
 
 .message-row.user {
@@ -179,13 +179,13 @@
 }
 
 .message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   flex-shrink: 0;
   color: white;
 }
@@ -199,10 +199,10 @@
 }
 
 .message-bubble {
-  padding: 12px 16px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  line-height: 1.7;
+  font-size: 0.8rem;
+  line-height: 1.55;
   min-width: 60px;
 }
 
@@ -256,12 +256,12 @@
 }
 
 .empty-chat-icon {
-  font-size: 3rem;
+  font-size: 2.5rem;
   margin-bottom: var(--space-4);
 }
 
 .empty-chat h5 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0 0 var(--space-2);
   color: var(--color-text-primary);
@@ -269,7 +269,7 @@
 
 .empty-chat p {
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin: 0 0 var(--space-6);
   max-width: 36ch;
 }
@@ -282,8 +282,8 @@
 }
 
 .quick-prompt-btn {
-  padding: 8px 16px;
-  font-size: 0.85rem;
+  padding: 7px 14px;
+  font-size: 0.8rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   background: var(--color-bg-card);
@@ -346,7 +346,7 @@
 .input-row textarea {
   flex: 1;
   padding: 10px 14px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
@@ -503,7 +503,23 @@
 :deep(.md-editor-preview) {
   background: transparent !important;
   color: inherit;
+  font-size: 0.8rem !important;
+  line-height: 1.55 !important;
 }
+
+/* 缩小 markdown 内部各级字号 */
+:deep(.md-editor-preview h1) { font-size: 1.2rem !important; }
+:deep(.md-editor-preview h2) { font-size: 1.1rem !important; }
+:deep(.md-editor-preview h3) { font-size: 1rem !important; }
+:deep(.md-editor-preview h4) { font-size: 0.95rem !important; }
+:deep(.md-editor-preview h5) { font-size: 0.9rem !important; }
+:deep(.md-editor-preview h6) { font-size: 0.85rem !important; }
+:deep(.md-editor-preview p) { font-size: 0.8rem !important; }
+:deep(.md-editor-preview li) { font-size: 0.8rem !important; }
+:deep(.md-editor-preview code) { font-size: 0.75rem !important; }
+:deep(.md-editor-preview pre) { font-size: 0.75rem !important; }
+:deep(.md-editor-preview blockquote) { font-size: 0.8rem !important; }
+:deep(.md-editor-preview table) { font-size: 0.8rem !important; }
 </style>
 
 <template>
