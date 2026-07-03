@@ -22,6 +22,7 @@ import app from '@/pages/v0/app.vue'
 import pnote from '@/pages/v0/pnote.vue'
 import adminv0 from '@/pages/v0/adminv0.vue'
 import adminv1 from '@/pages/v0/adminv1.vue'
+import adminv2 from '@/pages/v0/adminv2.vue'
 
 
 const routes = [{
@@ -99,6 +100,9 @@ const routes = [{
     },{
         path: 'adminv1',
         component: adminv1
+    },{
+        path: 'adminv2',
+        component: adminv2
     }
     ]
 },{
