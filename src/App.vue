@@ -1109,7 +1109,7 @@ html[data-theme="dark"] body {
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
                 github organization
               </a>
-              <div class="nav-dropdown-version">front-vue3 update 26.06.09</div>
+              <div class="nav-dropdown-version">front-vue3 update 26.07.03</div>
             </div>
           </div>
           <div class="nav-link-item">

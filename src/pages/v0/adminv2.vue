@@ -29,25 +29,27 @@
           <span style="cursor:pointer" @click="copySecret(scope.row.cardSecret)">{{ scope.row.cardSecret }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="78" align="center">
+      <el-table-column label="状态" width="85" align="center">
         <template #default="scope">
           <el-tag :type="scope.row.state == 1 ? 'info' : 'success'">{{ scope.row.state == 1 ? '已兑换' : '未兑换' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" width="110">
+      <el-table-column label="创建时间" width="90">
         <template #default="scope">
           <span>{{ scope.row.createTime ? formatMsgTime(scope.row.createTime) : '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="兑换时间" width="110">
+      <el-table-column label="兑换时间" width="90">
         <template #default="scope">
           <span>{{ scope.row.redeemTime ? formatMsgTime(scope.row.redeemTime) : '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="right" width="150">
+      <el-table-column align="right" width="160">
         <template #default="scope">
-          <el-button size="default" v-if="scope.row.state == 1" :loading="scope.row.svl" @click="reset(scope.row)">重置</el-button>
-          <el-button size="default" type="danger" :loading="scope.row.svl" @click="removed(scope.row)">删除</el-button>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <el-button size="default" v-if="scope.row.state == 1" :loading="scope.row.svl" @click="reset(scope.row)">重置</el-button>
+            <el-button size="default" type="danger" :loading="scope.row.svl" @click="removed(scope.row)">删除</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
