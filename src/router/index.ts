@@ -13,6 +13,7 @@ import musicroom from '@/pages/musicoom.vue'
 import sponsors from '@/pages/sponsors.vue'
 import ai from '@/pages/ai.vue'
 import authc from '@/pages/authc.vue'
+import card from '@/pages/card.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -22,6 +23,7 @@ import app from '@/pages/v0/app.vue'
 import pnote from '@/pages/v0/pnote.vue'
 import adminv0 from '@/pages/v0/adminv0.vue'
 import adminv1 from '@/pages/v0/adminv1.vue'
+import adminv2 from '@/pages/v0/adminv2.vue'
 
 
 const routes = [{
@@ -99,6 +101,9 @@ const routes = [{
     },{
         path: 'adminv1',
         component: adminv1
+    },{
+        path: 'adminv2',
+        component: adminv2
     }
     ]
 },{
@@ -112,6 +117,12 @@ const routes = [{
     component: reg,
     meta: {
         title: 'kloping`s blog注册'
+    }
+}, {
+    path: '/card',
+    component: card,
+    meta: {
+        title: '卡号兑换'
     }
 }, {
     path: '/authc',
