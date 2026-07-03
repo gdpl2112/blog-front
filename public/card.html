@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡号兑换</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; }
+        .box { max-width: 420px; margin: 80px auto; padding: 0 16px; text-align: center; }
+        .bar { display: flex; gap: 8px; margin-top: 16px; }
+        input { flex: 1; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        button { padding: 8px 18px; border: none; border-radius: 4px; background: #409eff; color: #fff; font-size: 14px; cursor: pointer; }
+        button:hover { background: #66b1ff; }
+        #msg { margin-top: 14px; color: #f56c6c; }
+        #secret { margin-top: 14px; font-weight: 700; word-break: break-all; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>卡号兑换</h2>
+    <div class="bar">
+        <input id="no" placeholder="请输入卡号">
+        <button onclick="redeem()">兑换</button>
+    </div>
+    <div id="msg"></div>
+    <div id="secret"></div>
+</div>
+<script>
+    function redeem() {
+        var no = document.getElementById('no').value.trim();
+        var msg = document.getElementById('msg');
+        var secret = document.getElementById('secret');
+        msg.textContent = '';
+        if (!no) { msg.textContent = '请输入卡号'; return; }
+        fetch('/api/card/redeem?no=' + encodeURIComponent(no))
+            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (r.code == 200) { secret.textContent = '卡密：' + r.secret; }
+                else { secret.textContent = ''; msg.textContent = r.msg; }
+            })
+            .catch(function () { msg.textContent = '请求失败,请重试'; });
+    }
+    document.getElementById('no').addEventListener('keyup', function (e) { if (e.key === 'Enter') redeem(); });
+</script>
+</body>
+</html>

@@ -13,7 +13,6 @@ import musicroom from '@/pages/musicoom.vue'
 import sponsors from '@/pages/sponsors.vue'
 import ai from '@/pages/ai.vue'
 import authc from '@/pages/authc.vue'
-import card from '@/pages/card.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -117,12 +116,6 @@ const routes = [{
     component: reg,
     meta: {
         title: 'kloping`s blog注册'
-    }
-}, {
-    path: '/card',
-    component: card,
-    meta: {
-        title: '卡号兑换'
     }
 }, {
     path: '/authc',
