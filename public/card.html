@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡号兑换</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f5f7fa; color: #333; }
+        .box { max-width: 560px; margin: 60px auto; padding: 28px 24px; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+        h2 { margin: 0 0 6px; text-align: center; }
+        .tip { text-align: center; color: #909399; font-size: 13px; margin-bottom: 16px; }
+        textarea { width: 100%; box-sizing: border-box; min-height: 90px; padding: 10px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; resize: vertical; outline: none; }
+        textarea:focus { border-color: #409eff; }
+        button { display: block; width: 100%; margin-top: 12px; padding: 10px 0; border: none; border-radius: 6px; background: #409eff; color: #fff; font-size: 15px; cursor: pointer; }
+        button:hover { background: #66b1ff; }
+        button:disabled { background: #a0cfff; cursor: not-allowed; }
+        #msg { margin-top: 12px; color: #f56c6c; text-align: center; font-size: 14px; }
+        table { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 8px 6px; border-bottom: 1px solid #ebeef5; text-align: left; word-break: break-all; }
+        th { color: #909399; font-weight: 600; }
+        .ok { color: #67c23a; }
+        .err { color: #f56c6c; }
+        .copy { display: inline-block; width: auto; margin: 12px auto 0; padding: 6px 18px; background: #67c23a; }
+        .copy:hover { background: #85ce61; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>卡号兑换</h2>
+    <div class="tip">粘贴文本自动识别卡号，支持多个批量兑换</div>
+    <textarea id="input" placeholder="粘贴或输入卡号，支持一次多个（换行、空格、逗号分隔均可）"></textarea>
+    <button id="btn" onclick="redeemAll()">兑换</button>
+    <div id="msg"></div>
+    <table id="result" style="display:none">
+        <thead><tr><th style="width:40%">卡号</th><th>卡密</th></tr></thead>
+        <tbody id="rows"></tbody>
+    </table>
+    <button class="copy" id="copyBtn" style="display:none" onclick="copyAll()">复制全部卡密</button>
+</div>
+<script>
+    var okList = [];
+
+    function extractNos(text) {
+        var m = text.match(/[A-Za-z0-9][A-Za-z0-9-]{5,}/g) || [];
+        var seen = {}, out = [];
+        m.forEach(function (n) { if (!seen[n]) { seen[n] = 1; out.push(n); } });
+        return out;
+    }
+
+    function redeemOne(no) {
+        return fetch('/api/card/redeem?no=' + encodeURIComponent(no))
+            .then(function (r) { return r.json(); })
+            .then(function (r) { return {no: no, ok: r.code == 200, text: r.code == 200 ? r.secret : r.msg}; })
+            .catch(function () { return {no: no, ok: false, text: '请求失败'}; });
+    }
+
+    function redeemAll() {
+        var msg = document.getElementById('msg');
+        msg.textContent = '';
+        msg.style.color = '#f56c6c';
+        var nos = extractNos(document.getElementById('input').value);
+        if (nos.length === 0) { msg.textContent = '未识别到卡号'; return; }
+        var btn = document.getElementById('btn');
+        btn.disabled = true;
+        Promise.all(nos.map(redeemOne)).then(function (results) {
+            btn.disabled = false;
+            var rows = document.getElementById('rows');
+            rows.innerHTML = '';
+            okList = [];
+            results.forEach(function (r) {
+                var tr = document.createElement('tr');
+                var td1 = document.createElement('td');
+                td1.textContent = r.no;
+                var td2 = document.createElement('td');
+                td2.textContent = r.text;
+                td2.className = r.ok ? 'ok' : 'err';
+                tr.appendChild(td1); tr.appendChild(td2);
+                rows.appendChild(tr);
+                if (r.ok) okList.push(r.text);
+            });
+            document.getElementById('result').style.display = '';
+            document.getElementById('copyBtn').style.display = okList.length ? '' : 'none';
+        });
+    }
+
+    function copyAll() {
+        navigator.clipboard.writeText(okList.join('\n')).then(function () {
+            document.getElementById('msg').textContent = '已复制 ' + okList.length + ' 条卡密';
+            document.getElementById('msg').style.color = '#67c23a';
+        });
+    }
+</script>
+</body>
+</html>

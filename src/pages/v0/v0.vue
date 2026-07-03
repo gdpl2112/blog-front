@@ -92,6 +92,9 @@
       <RouterLink v-if="roles.includes('admin')" to="/v0/adminv1" class="v0-menu-item" active-class="active">
         <i class="bi bi-chat-square-quote"></i> 一言管理
       </RouterLink>
+      <RouterLink v-if="roles.includes('admin')" to="/v0/adminv2" class="v0-menu-item" active-class="active">
+        <i class="bi bi-credit-card-2-front"></i> 卡密管理
+      </RouterLink>
     </aside>
     <main class="v0-content">
       <RouterView />
