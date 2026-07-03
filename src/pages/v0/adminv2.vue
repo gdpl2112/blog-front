@@ -22,24 +22,29 @@
     <h3>卡密管理</h3>
 
     <el-table :data="data" stripe style="width:100%">
-      <el-table-column type="index" width="50" />
-      <el-table-column prop="cardNo" label="卡号" width="180" />
-      <el-table-column prop="cardSecret" label="卡密" show-overflow-tooltip>
+      <el-table-column type="index" width="44" />
+      <el-table-column prop="cardNo" label="卡号" min-width="150" show-overflow-tooltip />
+      <el-table-column prop="cardSecret" label="卡密" min-width="200" show-overflow-tooltip>
         <template #default="scope">
           <span style="cursor:pointer" @click="copySecret(scope.row.cardSecret)">{{ scope.row.cardSecret }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="90">
+      <el-table-column label="状态" width="78" align="center">
         <template #default="scope">
           <el-tag :type="scope.row.state == 1 ? 'info' : 'success'">{{ scope.row.state == 1 ? '已兑换' : '未兑换' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="兑换时间" width="160">
+      <el-table-column label="创建时间" width="110">
+        <template #default="scope">
+          <span>{{ scope.row.createTime ? formatMsgTime(scope.row.createTime) : '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="兑换时间" width="110">
         <template #default="scope">
           <span>{{ scope.row.redeemTime ? formatMsgTime(scope.row.redeemTime) : '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="right" width="160">
+      <el-table-column align="right" width="150">
         <template #default="scope">
           <el-button size="default" v-if="scope.row.state == 1" :loading="scope.row.svl" @click="reset(scope.row)">重置</el-button>
           <el-button size="default" type="danger" :loading="scope.row.svl" @click="removed(scope.row)">删除</el-button>
@@ -47,7 +52,10 @@
       </el-table-column>
     </el-table>
 
-    <el-pagination size="default" background layout="prev, pager, next" :total="ndata.total" :page-size="ndata.size" :current-page="p" @update:current-page="loadData" class="mt-4" />
+    <div style="display:flex;align-items:center;justify-content:space-between;" class="mt-4">
+      <el-pagination size="default" background layout="prev, pager, next" :total="ndata.total" :page-size="ndata.size" :current-page="p" @update:current-page="loadData" />
+      <el-button size="default" type="warning" plain @click="copyUnused">复制未使用卡密</el-button>
+    </div>
 
     <div class="add-bar">
       <el-input v-model="vno" style="width:180px;" placeholder="卡号" />
@@ -79,6 +87,8 @@ onMounted(() => { loadData(1) })
 function removed(e: any) { e.svl = true; service.get("/adm/card/remove?id=" + e.id).then((r: any) => { e.svl = false; if (r.code == 200) { loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
 
 function copySecret(s: string) { navigator.clipboard.writeText(s).then(() => toast("卡密已复制", "success")) }
+
+function copyUnused() { service.get("/adm/card/unused").then((r: any) => { if (r.code == 200) { if (!r.list || r.list.length == 0) { toast("没有未使用的卡密", "warning"); return } navigator.clipboard.writeText(r.list.join("\n")).then(() => toast("已复制 " + r.list.length + " 条未使用卡密", "success")) } else toast(r.msg) }) }
 
 function reset(e: any) { e.svl = true; service.get("/adm/card/reset?id=" + e.id).then((r: any) => { e.svl = false; if (r.code == 200) { loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
 
