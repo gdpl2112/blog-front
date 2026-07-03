@@ -24,7 +24,11 @@
     <el-table :data="data" stripe style="width:100%">
       <el-table-column type="index" width="50" />
       <el-table-column prop="cardNo" label="卡号" width="180" />
-      <el-table-column prop="cardSecret" label="卡密" />
+      <el-table-column prop="cardSecret" label="卡密" show-overflow-tooltip>
+        <template #default="scope">
+          <span style="cursor:pointer" @click="copySecret(scope.row.cardSecret)">{{ scope.row.cardSecret }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="90">
         <template #default="scope">
           <el-tag :type="scope.row.state == 1 ? 'info' : 'success'">{{ scope.row.state == 1 ? '已兑换' : '未兑换' }}</el-tag>
@@ -73,6 +77,8 @@ function loadData(n: number) {
 onMounted(() => { loadData(1) })
 
 function removed(e: any) { e.svl = true; service.get("/adm/card/remove?id=" + e.id).then((r: any) => { e.svl = false; if (r.code == 200) { loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
+
+function copySecret(s: string) { navigator.clipboard.writeText(s).then(() => toast("卡密已复制", "success")) }
 
 function reset(e: any) { e.svl = true; service.get("/adm/card/reset?id=" + e.id).then((r: any) => { e.svl = false; if (r.code == 200) { loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
 
