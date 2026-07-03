@@ -49,8 +49,10 @@
       <el-input v-model="vno" style="width:180px;" placeholder="卡号" />
       <el-input v-model="vsecret" style="width:260px;" placeholder="卡密" />
       <el-button @click="add" type="primary" plain>添加</el-button>
-      <el-input-number v-model="genCount" :min="1" :max="100" style="width:100px;" />
-      <el-button @click="gen" type="success" plain>批量生成</el-button>
+    </div>
+    <div class="add-bar">
+      <el-input v-model="vimport" style="width:400px;" type="textarea" :autosize="{minRows:2,maxRows:6}" placeholder="批量导入卡密，一行一个，自动生成卡号" />
+      <el-button @click="imp" type="success" plain>导入卡密</el-button>
     </div>
   </div>
 </template>
@@ -77,6 +79,6 @@ function reset(e: any) { e.svl = true; service.get("/adm/card/reset?id=" + e.id)
 let vno = ref(""); let vsecret = ref("")
 function add() { service.post("/adm/card/add", {cardNo:vno.value,cardSecret:vsecret.value}).then((r: any) => { if (r.code == 200) { vno.value = ""; vsecret.value = ""; loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
 
-let genCount = ref(5)
-function gen() { service.get("/adm/card/gen?count=" + genCount.value).then((r: any) => { if (r.code == 200) { loadData(1); toast(r.msg, "success") } else toast(r.msg) }) }
+let vimport = ref("")
+function imp() { if (!vimport.value.trim()) { toast("请输入卡密", "warning"); return } service.post("/adm/card/import", vimport.value, {headers: {"Content-Type": "text/plain"}}).then((r: any) => { if (r.code == 200) { vimport.value = ""; loadData(1); toast(r.msg, "success") } else toast(r.msg) }) }
 </script>
