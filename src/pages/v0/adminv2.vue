@@ -82,7 +82,7 @@ let ndata = ref({total:0,size:0,current:0,records:new Array<CardKey>})
 let p = ref(1)
 
 function loadData(n: number) {
-  service.get("/adm/card/list?ps=7&p=" + n).then((r: any) => { ndata.value = r; data.value = r.records; p.value = r.current; data.value.forEach((e: any) => { e.svl = false }) })
+  service.get("/adm/card/list?ps=12&p=" + n).then((r: any) => { ndata.value = r; data.value = r.records; p.value = r.current; data.value.forEach((e: any) => { e.svl = false }) })
 }
 onMounted(() => { loadData(1) })
 
