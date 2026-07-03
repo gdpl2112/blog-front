@@ -54,7 +54,7 @@
 
     <div style="display:flex;align-items:center;justify-content:space-between;" class="mt-4">
       <el-pagination size="default" background layout="prev, pager, next" :total="ndata.total" :page-size="ndata.size" :current-page="p" @update:current-page="loadData" />
-      <el-button size="default" type="warning" plain @click="copyUnused">复制未使用卡密</el-button>
+      <el-button size="default" type="warning" plain @click="copyUnused">复制未使用卡号</el-button>
     </div>
 
     <div class="add-bar">
@@ -88,7 +88,7 @@ function removed(e: any) { e.svl = true; service.get("/adm/card/remove?id=" + e.
 
 function copySecret(s: string) { navigator.clipboard.writeText(s).then(() => toast("卡密已复制", "success")) }
 
-function copyUnused() { service.get("/adm/card/unused").then((r: any) => { if (r.code == 200) { if (!r.list || r.list.length == 0) { toast("没有未使用的卡密", "warning"); return } navigator.clipboard.writeText(r.list.join("\n")).then(() => toast("已复制 " + r.list.length + " 条未使用卡密", "success")) } else toast(r.msg) }) }
+function copyUnused() { service.get("/adm/card/unused").then((r: any) => { if (r.code == 200) { if (!r.list || r.list.length == 0) { toast("没有未使用的卡号", "warning"); return } navigator.clipboard.writeText(r.list.join("\n")).then(() => toast("已复制 " + r.list.length + " 条未使用卡号", "success")) } else toast(r.msg) }) }
 
 function reset(e: any) { e.svl = true; service.get("/adm/card/reset?id=" + e.id).then((r: any) => { e.svl = false; if (r.code == 200) { loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
 
