@@ -93,6 +93,14 @@
       <el-input v-model="vimport" style="width:400px;" type="textarea" :autosize="{minRows:2,maxRows:6}" placeholder="批量导入卡密，一行一个，自动生成卡号" />
       <el-button @click="imp" type="success" plain>导入卡密</el-button>
     </div>
+
+    <el-dialog v-model="impDialog" title="导入成功，生成的卡号" width="520px">
+      <el-input :model-value="impNos.join('\n')" type="textarea" :autosize="{minRows:4,maxRows:12}" readonly />
+      <template #footer>
+        <el-button @click="impDialog = false">关闭</el-button>
+        <el-button type="primary" @click="copyImpNos">一键复制</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -129,5 +137,7 @@ let vno = ref(""); let vsecret = ref("")
 function add() { service.post("/adm/card/add", {cardNo:vno.value,cardSecret:vsecret.value}).then((r: any) => { if (r.code == 200) { vno.value = ""; vsecret.value = ""; loadData(p.value); toast(r.msg, "success") } else toast(r.msg) }) }
 
 let vimport = ref("")
-function imp() { if (!vimport.value.trim()) { toast("请输入卡密", "warning"); return } service.post("/adm/card/import", vimport.value, {headers: {"Content-Type": "text/plain"}}).then((r: any) => { if (r.code == 200) { vimport.value = ""; loadData(1); toast(r.msg, "success") } else toast(r.msg) }) }
+let impDialog = ref(false); let impNos = ref(new Array<string>)
+function imp() { if (!vimport.value.trim()) { toast("请输入卡密", "warning"); return } service.post("/adm/card/import", vimport.value, {headers: {"Content-Type": "text/plain"}}).then((r: any) => { if (r.code == 200) { vimport.value = ""; loadData(1); toast(r.msg, "success"); impNos.value = (r.list || []).map((e: any) => e.cardNo); if (impNos.value.length > 0) impDialog.value = true } else toast(r.msg) }) }
+function copyImpNos() { navigator.clipboard.writeText(impNos.value.join("\n")).then(() => toast("已复制 " + impNos.value.length + " 条卡号", "success")) }
 </script>
