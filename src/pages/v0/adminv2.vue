@@ -94,7 +94,7 @@
       <el-button @click="imp" type="success" plain>导入卡密</el-button>
     </div>
 
-    <el-dialog v-model="impDialog" title="导入成功，生成的卡号" width="520px">
+    <el-dialog v-model="impDialog" title="导入成功，生成的卡号" width="520px" align-center append-to-body>
       <el-input :model-value="impNos.join('\n')" type="textarea" :autosize="{minRows:4,maxRows:12}" readonly />
       <template #footer>
         <el-button @click="impDialog = false">关闭</el-button>
