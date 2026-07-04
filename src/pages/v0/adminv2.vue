@@ -15,11 +15,36 @@
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border);
 }
+
+.filter-bar {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
 </style>
 
 <template>
   <div class="admin-section">
     <h3>卡密管理</h3>
+
+    <div class="filter-bar">
+      <el-input v-model="vkw" style="width:220px;" placeholder="搜索卡号或卡密" clearable @keyup.enter="loadData(1)" @clear="loadData(1)" />
+      <el-select v-model="vstate" style="width:110px;" @change="loadData(1)">
+        <el-option label="全部" value="" />
+        <el-option label="未使用" value="0" />
+        <el-option label="已使用" value="1" />
+      </el-select>
+      <el-select v-model="vsort" style="width:140px;" @change="loadData(1)">
+        <el-option label="默认排序" value="" />
+        <el-option label="创建时间 ↓" value="createTime,desc" />
+        <el-option label="创建时间 ↑" value="createTime,asc" />
+        <el-option label="兑换时间 ↓" value="redeemTime,desc" />
+        <el-option label="兑换时间 ↑" value="redeemTime,asc" />
+      </el-select>
+      <el-button type="primary" plain @click="loadData(1)">搜索</el-button>
+    </div>
 
     <el-table :data="data" stripe style="width:100%">
       <el-table-column type="index" width="44" />
@@ -81,8 +106,14 @@ let data = ref(new Array<CardKey>)
 let ndata = ref({total:0,size:0,current:0,records:new Array<CardKey>})
 let p = ref(1)
 
+let vkw = ref(""); let vstate = ref(""); let vsort = ref("")
+
 function loadData(n: number) {
-  service.get("/adm/card/list?ps=12&p=" + n).then((r: any) => { ndata.value = r; data.value = r.records; p.value = r.current; data.value.forEach((e: any) => { e.svl = false }) })
+  let url = "/adm/card/list?ps=12&p=" + n
+  if (vstate.value !== "") url += "&state=" + vstate.value
+  if (vkw.value.trim()) url += "&kw=" + encodeURIComponent(vkw.value.trim())
+  if (vsort.value) { const [s, o] = vsort.value.split(","); url += "&sort=" + s + "&order=" + o }
+  service.get(url).then((r: any) => { ndata.value = r; data.value = r.records; p.value = r.current; data.value.forEach((e: any) => { e.svl = false }) })
 }
 onMounted(() => { loadData(1) })
 
