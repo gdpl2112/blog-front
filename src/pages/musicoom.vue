@@ -350,7 +350,7 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column v-if="rmop" align="center" width="80">
+        <el-table-column align="center" width="80">
           <template #header><span style="font-size:0.8rem;">{{ rmop ? '移除' : '收藏' }}</span></template>
           <template #default="scope">
             <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)" circle>
@@ -398,7 +398,14 @@ const lyrics = ref([] as any[]);
 const nowLyrics = ref([] as any[]);
 const info = ref({} as any);
 const cover0 = ref("");
-const ap = reactive(window.ap);
+const ap = {
+  get list() { return window.ap?.list },
+  get audio() { return window.ap?.audio },
+  seek: (time: number) => window.ap?.seek(time),
+  skipBack: () => window.ap?.skipBack(),
+  skipForward: () => window.ap?.skipForward(),
+  toggle: () => window.ap?.toggle()
+};
 const currentPn = ref("");
 const percentage = ref(0);
 const isPlaying = ref(false);
@@ -454,6 +461,7 @@ const stopRotation = () => {
 const loadRes = async (et: number = 2000) => {
   try {
     await new Promise(resolve => setTimeout(resolve, et));
+    if (!ap.list || !ap.audio) return;
     const ad0 = ap.list.audios[ap.list.index];
     if (!ad0) return;
     cover0.value = ad0.cover || '/icon.jpg';
@@ -477,7 +485,7 @@ const loadRes = async (et: number = 2000) => {
   }
 };
 
-const onPercentChange = (p: number) => { const t = (p / 100 * ap.audio.duration) as number; ap.seek(t); };
+const onPercentChange = (p: number) => { if (ap.audio) ap.seek(p / 100 * ap.audio.duration); };
 
 const onProgressClick = (e: MouseEvent) => {
   const bar = e.currentTarget as HTMLElement;
@@ -487,12 +495,14 @@ const onProgressClick = (e: MouseEvent) => {
 };
 
 const togglePlay = () => {
+  if (!ap.audio) return;
   ap.toggle();
   isPlaying.value = !ap.audio.paused;
   isPlaying.value ? startRotation() : stopRotation();
 };
 
 const handleTempPlay = (index: number, row: any) => {
+  if (!ap.list) { ElMessage.warning("播放器尚未准备好，请稍后再试"); return; }
   isPri.value = false;
   if (listType != "temp") { listType = "temp"; ap.list.clear(); }
   ap.list.add({ songId: row.id, name: row.name, artist: row.artist, cover: "/api/music/get-cover-by-id?id=" + row.id, url: "/api/music/get-url-by-id?id=" + row.id });
@@ -500,6 +510,7 @@ const handleTempPlay = (index: number, row: any) => {
 };
 
 const addAllToTemp = () => {
+  if (!ap.list) { ElMessage.warning("播放器尚未准备好，请稍后再试"); return; }
   isPri.value = false;
   if (listType != "temp") { listType = "temp"; ap.list.clear(); }
   tableData.value.forEach(row => { ap.list.add({ songId: row.id, name: row.name, artist: row.artist, cover: "/api/music/get-cover-by-id?id=" + row.id, url: "/api/music/get-url-by-id?id=" + row.id }); });
@@ -508,14 +519,14 @@ const addAllToTemp = () => {
 
 const handlePoi = (index: number, row: any) => {
   service.get(`/api/music/point?id=${row.id}&name=${row.name}&arts=${row.artist}`).then((r: any) => {
-    if (r.code == 200) { ElMessage.success("添加成功!"); if (isPri.value) ap.list.add(r.data); }
+    if (r.code == 200) { ElMessage.success("添加成功!"); if (isPri.value && ap.list) ap.list.add(r.data); }
     else ElMessage.warning(r.msg);
   }).catch(e => ElMessage.error('添加失败'));
 };
 
 const handleRmp = (index: number, row: any) => {
   service.get(`/api/music/rmp?id=${row.id}`).then((r: any) => {
-    if (r.code == 200) { ElMessage.success("移除成功!"); tableData.value.splice(index, 1); ap.list.remove(index); }
+    if (r.code == 200) { ElMessage.success("移除成功!"); tableData.value.splice(index, 1); ap.list?.remove(index); }
     else ElMessage.warning(r.msg);
   }).catch(e => ElMessage.error('移除失败'));
 };
@@ -546,6 +557,7 @@ const toggleList = async (type: String = "pri", tips: Boolean = true) => {
   if (listType == type) { toggleListLoading.value = false; dialogVisibleList.value = false; return; }
   toggleListLoading.value = true;
   try {
+    if (!ap.list) throw new Error("播放器尚未准备好");
     let data;
     if (type === "pri") { const r: any = await service.get("/api/music/list"); if (r.code !== 200) throw new Error(r.msg || ''); data = r.data; }
     else { data = await service.get(`/api/music/get-music-list?type=${type}`); }
@@ -564,7 +576,7 @@ onMounted(async () => {
   // const froom = document.getElementById("froom"); if (froom) froom.scrollIntoView({behavior: 'smooth'});
   await loadRes();
   const updateInterval = setInterval(() => {
-    if (!ap) return;
+    if (!ap.audio || !ap.list) return;
     currentPn.value = `${getTimeMs(ap.audio.currentTime.toFixed(0))}/${getTimeMs(ap.audio.duration.toFixed(0))}`;
     if (!isNaN(ap.audio.duration)) { percentage.value = Number(((ap.audio.currentTime / ap.audio.duration) * 100).toFixed(2)); }
     nowLyrics.value = getNearst(ap.audio.currentTime * 1000, 6, lyrics.value);
