@@ -243,7 +243,7 @@ const gotoGithub = () => {
 }
 
 const gotoQq = () => {
-  window.qc.Login.showPopup({appId: "102801348", redirectURI: "https://kloping.top/login?t=qq"});
+  window.qc.Login.showPopup({appId: "102801348", redirectURI: "https://kloping.top/#/login?t=qq"});
 }
 
 const gotoReg = () => { router.push("/reg") }
