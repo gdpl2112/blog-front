@@ -1055,6 +1055,7 @@ async function fetchServerChatIds() {
 onMounted(() => {
   loadSessions();
   if (sessions.value.length === 0) addSession();
+  else switchSession(sessions.value[0].id);
   if (login_state.value) fetchServerChatIds();
 });
 
