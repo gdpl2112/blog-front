@@ -350,7 +350,7 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column align="center" width="80">
+        <el-table-column v-if="rmop" align="center" width="80">
           <template #header><span style="font-size:0.8rem;">{{ rmop ? '移除' : '收藏' }}</span></template>
           <template #default="scope">
             <el-button v-if="!rmop" size="small" type="primary" @click="handlePoi(scope.$index, scope.row)" circle>
@@ -527,7 +527,7 @@ const onSearch = async () => {
     catch (err) { ElMessage.error("获取音乐失败"); }
   } else {
     searchLoading.value = true;
-    try { const r = await service.get(`/api/music/search?keyword=${encodeURIComponent(search.value)}`); tableData.value = r; isSearchData.value = true; }
+    try { const r = await service.get(`/api/music/search?keyword=${encodeURIComponent(search.value)}`); tableData.value = r; rmop.value = false; isSearchData.value = true; }
     catch (e) { ElMessage.error("搜索失败"); }
     finally { searchLoading.value = false; }
   }
