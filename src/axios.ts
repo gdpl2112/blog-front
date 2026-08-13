@@ -53,17 +53,20 @@ export async function loadUser() {
     try {
         const res = await service.get("/auth/state_info");
         let data = res as unknown as StateInfo;
-        if (data.code == 204) {
+        if (data.code !== 200) {
             login_state.value = false;
             Cookie.remove("token");
             Cookie.remove("authorization");
             userInfo.value = {};
+            return false;
         } else {
             login_state.value = true;
             userInfo.value = data.data;
+            return true;
         }
     } catch (err) {
         toast("获取登录信息失败,请尝试重新登录");
+        return false;
     }
 }
 

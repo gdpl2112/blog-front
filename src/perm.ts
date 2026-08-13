@@ -1,6 +1,7 @@
 import router from "@/router";
 import {toast} from "@/utils/utils";
 import Cookie from "js-cookie";
+import {loadUser} from "@/axios";
 
 const urls = ["/index.html",
     "/login", "/index", "/", "/apis",
@@ -9,22 +10,20 @@ const urls = ["/index.html",
     ,"/authc"
 ]
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     document.title = (to.meta.title as string) || "若生er,WebSite"
+    const loggedIn = Cookie.get("token") || Cookie.get("authorization")
+    if (to.path === "/login" && loggedIn && await loadUser()) {
+        return next({path: "/v0"})
+    }
     if (urls.includes(to.path.trim())) {
         next()
     } else {
-        const token = Cookie.get("token")
-        if (token) {
+        if (loggedIn) {
             next()
         } else {
-            const auth = Cookie.get("authorization")
-            if (auth) {
-                next()
-            } else {
-                toast("登录后访问")
-                return next({path: "/login"})
-            }
+            toast("登录后访问")
+            return next({path: "/login"})
         }
     }
 });
