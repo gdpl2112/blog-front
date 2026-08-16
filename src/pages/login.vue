@@ -218,8 +218,10 @@ const submitForm = () => {
         if (res.code === 200) {
           Cookie.set("token", res.token)
           toast("登录成功", "success")
-          loadUser()
-          onLoginSuccess()
+          loadUser().then((loggedIn) => {
+            if (loggedIn) onLoginSuccess()
+            else toast('登录状态验证失败，请重试', 'error')
+          })
         } else toast(res.msg)
       }).catch((err: any) => { toast(err.msg) }).finally(() => { loading.value = false });
     }

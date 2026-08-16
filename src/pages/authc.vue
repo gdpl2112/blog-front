@@ -86,7 +86,7 @@
 import {onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {toast} from '@/utils/utils'
-import service, {login_state} from '@/axios'
+import service, {loadUser} from '@/axios'
 
 const authorizing = ref(false)
 const isLoggedIn = ref(false)
@@ -97,7 +97,7 @@ const route = useRoute()
 const appId = ref('')
 const redirectUri = ref('')
 
-onMounted(() => {
+onMounted(async () => {
   const query = route.query
   appId.value = query.app_id as string || ''
   redirectUri.value = query.redirect_uri as string || ''
@@ -106,12 +106,14 @@ onMounted(() => {
       appName.value = res.app_name; appDesc.value = res.app_desc
     })
   }
-  isLoggedIn.value = login_state.value
   if (!appId.value || !redirectUri.value) {
     toast('缺少必要的授权参数', 'error')
     router.push('/')
+    return
   }
-  if (!login_state.value) {
+
+  isLoggedIn.value = await loadUser()
+  if (!isLoggedIn.value) {
     toast('请先登录', 'error')
     router.push('/login?redirect_uri=' + redirectUri.value + '&app_id=' + appId.value)
   }
