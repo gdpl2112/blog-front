@@ -133,6 +133,11 @@ const rules: FormRules<AiConfig> = {
 
 function authHeaders() {
   const token = adminToken.value.trim()
+  if (token) {
+    sessionStorage.setItem('admin-token', token)
+  } else {
+    sessionStorage.removeItem('admin-token')
+  }
   const headers: Record<string, string> = {}
   if (token) {
     headers.Authorization = `Bearer ${token}`
@@ -163,7 +168,6 @@ async function loadConfig() {
   loading.value = true
   errorMessage.value = ''
   try {
-    if (adminToken.value.trim()) sessionStorage.setItem('admin-token', adminToken.value.trim())
     const response = await service.get(`/adm/ai/config${reveal.value ? '?reveal=true' : ''}`, {headers: authHeaders()})
     applyConfig(unwrapResponse(response))
     configLoaded.value = true
