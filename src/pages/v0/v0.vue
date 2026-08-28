@@ -95,6 +95,9 @@
       <RouterLink v-if="roles.includes('admin')" to="/v0/adminv2" class="v0-menu-item" active-class="active">
         <i class="bi bi-credit-card-2-front"></i> 卡密管理
       </RouterLink>
+      <RouterLink v-if="roles.includes('admin')" to="/v0/adminai" class="v0-menu-item" active-class="active">
+        <i class="bi bi-sliders2"></i> AI配置
+      </RouterLink>
     </aside>
     <main class="v0-content">
       <RouterView />
@@ -106,9 +109,14 @@
 import {RouterLink, RouterView} from 'vue-router'
 import {onMounted, ref} from "vue";
 import service from "@/axios";
+import Cookie from "js-cookie";
 
 const roles = ref(['user'])
 onMounted(() => {
+  if (sessionStorage.getItem('admin-token') && !Cookie.get('token') && !Cookie.get('authorization')) {
+    roles.value = ['admin']
+    return
+  }
   service.get("/auth/role").then((res: any) => { roles.value = res })
 })
 </script>

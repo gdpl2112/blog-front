@@ -12,8 +12,15 @@ export const service = axios.create({
 // 添加请求拦截器
 service.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
-    config.headers['Token'] = Cookie.get("token")
-    config.headers['Authorization'] = Cookie.get("authorization")
+    // 保留调用方显式传入的管理端凭证（例如 /adm/ai 使用的 Bearer token）。
+    // 普通请求仍沿用登录态 Cookie。
+    const headers = config.headers || {}
+    const hasHeader = (name: string) => Boolean(headers[name] || headers[name.toLowerCase()])
+    const token = Cookie.get("token")
+    const authorization = Cookie.get("authorization")
+    if (!hasHeader('Token') && !hasHeader('token') && token) headers['Token'] = token
+    if (!hasHeader('Authorization') && !hasHeader('authorization') && authorization) headers['Authorization'] = authorization
+    config.headers = headers
     return config;
 }, function (error) {
     // 对请求错误做些什么
@@ -27,7 +34,10 @@ service.interceptors.response.use(function (response) {
     return (response.data as any);
 }, function (err) {
     console.log(err.response)
-    if (err.response.status === 403) {
+    const requestUrl = String(err.config?.url || '')
+    const manualAdminToken = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin-token') : ''
+    const isManualAdminRequest = requestUrl.startsWith('/adm/ai') && Boolean(manualAdminToken)
+    if (err.response?.status === 403 && !isManualAdminRequest) {
         Cookie.remove("token")
         Cookie.remove("authorization")
         toast("登录过期! 请尝试重新登录.", "warning")
@@ -35,7 +45,7 @@ service.interceptors.response.use(function (response) {
         login_state.value = false;
         router.push("/login")
     }
-    return Promise.reject(err.response.data as any);
+    return Promise.reject((err.response?.data ?? err) as any);
 });
 
 type StateInfo = {
