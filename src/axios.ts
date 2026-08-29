@@ -7,7 +7,36 @@ import {ref} from "vue";
 export const service = axios.create({
     baseURL: '/',
     timeout: 30000,
+    // 当前 API 与前端共用 kloping.top；显式携带 Cookie 也兼容后续跨域部署。
+    withCredentials: true,
 });
+
+// 后端令牌默认 7 天有效，并会在请求时滑动续期。此前未传 expires，
+// js-cookie 会创建会话 Cookie，浏览器关闭或恢复会话时可能导致登录态丢失。
+const AUTH_COOKIE_DAYS = 7;
+
+function authCookieOptions() {
+    return {
+        expires: AUTH_COOKIE_DAYS,
+        path: '/',
+        sameSite: 'lax' as const,
+        secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
+    };
+}
+
+/** 持久化登录令牌，并兼容已有的 authorization Cookie。 */
+export function setAuthToken(token: unknown) {
+    if (typeof token !== 'string') return;
+    const value = token.trim();
+    if (!value) return;
+    Cookie.set('token', value, authCookieOptions());
+}
+
+export function clearAuthCookies() {
+    // remove 必须使用与 set 相同的 path，否则旧 Cookie 可能继续存在。
+    Cookie.remove('token', {path: '/'});
+    Cookie.remove('authorization', {path: '/'});
+}
 
 // 添加请求拦截器
 service.interceptors.request.use(function (config) {
@@ -18,6 +47,8 @@ service.interceptors.request.use(function (config) {
     const hasHeader = (name: string) => Boolean(headers[name] || headers[name.toLowerCase()])
     const token = Cookie.get("token")
     const authorization = Cookie.get("authorization")
+    // 续期前端 Cookie，并将后端下发的 authorization Cookie 迁移为 token Cookie。
+    setAuthToken(token || authorization)
     if (!hasHeader('Token') && !hasHeader('token') && token) headers['Token'] = token
     if (!hasHeader('Authorization') && !hasHeader('authorization') && authorization) headers['Authorization'] = authorization
     config.headers = headers
@@ -38,8 +69,7 @@ service.interceptors.response.use(function (response) {
     const manualAdminToken = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin-token') : ''
     const isManualAdminRequest = requestUrl.startsWith('/adm/ai') && Boolean(manualAdminToken)
     if (err.response?.status === 403 && !isManualAdminRequest) {
-        Cookie.remove("token")
-        Cookie.remove("authorization")
+        clearAuthCookies()
         toast("登录过期! 请尝试重新登录.", "warning")
         userInfo.value = {}
         login_state.value = false;
@@ -65,8 +95,7 @@ export async function loadUser() {
         let data = res as unknown as StateInfo;
         if (data.code !== 200) {
             login_state.value = false;
-            Cookie.remove("token");
-            Cookie.remove("authorization");
+            clearAuthCookies();
             userInfo.value = {};
             return false;
         } else {
@@ -85,8 +114,7 @@ export function userLogout() {
         let r = r0 as unknown as StateInfo;
         if (r.code == 200) {
             toast("退出登录成功", "success")
-            Cookie.remove("token")
-            Cookie.remove("authorization")
+            clearAuthCookies()
             userInfo.value = {}
             login_state.value = false
         }

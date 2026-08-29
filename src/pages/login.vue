@@ -197,8 +197,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {Lock, User} from '@element-plus/icons-vue'
 import {useRouter} from "vue-router";
 import {toast} from "@/utils/utils";
-import Cookie from "js-cookie"
-import service, {loadUser, userLogin} from "@/axios";
+import service, {loadUser, setAuthToken, userLogin} from "@/axios";
 import {ElLoading} from "element-plus";
 
 const form = reactive({username: '', password: ''})
@@ -216,7 +215,7 @@ const submitForm = () => {
       loading.value = true
       userLogin(form.username, form.password).then((res: any) => {
         if (res.code === 200) {
-          Cookie.set("token", res.token)
+          setAuthToken(res.token)
           toast("登录成功", "success")
           loadUser().then((loggedIn) => {
             if (loggedIn) onLoginSuccess()
@@ -290,19 +289,19 @@ function loginAuth() {
   if (t === "qq") {
     service.get("/auth/qq/login?access_token=" + armap.get("access_token")).then((res: any) => {
       if (res.code === 200) {
-        Cookie.set("token", res.token); loadUser(); onLoginSuccess()
+        setAuthToken(res.token); loadUser(); onLoginSuccess()
       } else { toast(res.msg) }
     }).catch((err: any) => { console.log(err) }).finally(() => { loadingf.close(); loading.value = false })
   } else if (t === "qqb") {
     service.get("/auth/qq/bind?access_token=" + armap.get("access_token")).then((res: any) => {
       if (res.code === 200) {
-        Cookie.set("token", res.token); toast("绑定成功", "success"); router.push("/v0")
+        setAuthToken(res.token); toast("绑定成功", "success"); router.push("/v0")
       } else { toast(res.msg) }
     }).catch((err: any) => { toast("绑定失败:" + err) }).finally(() => { loadingf.close(); loading.value = false })
   } else if (!armap.get("app_id")) {
     service.get("/auth/github/callback?" + pu).then((res: any) => {
       if (res.code === 200) {
-        Cookie.set("token", res.token); toast("登录成功", "success"); loadUser(); onLoginSuccess()
+        setAuthToken(res.token); toast("登录成功", "success"); loadUser(); onLoginSuccess()
       } else { toast(res.msg) }
     }).catch((err: any) => { console.log(err) }).finally(() => { loadingf.close(); loading.value = false })
   } else { loadingf.close(); loading.value = false }
