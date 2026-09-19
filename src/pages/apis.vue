@@ -972,8 +972,18 @@ publicClient.interceptors.response.use(
   err => Promise.reject(err)
 )
 
-const list = ref([])
-const rawList = ref([])
+interface ApiDefinition {
+  id: number | string
+  name: string
+  desc: string
+  state: string
+  address: string
+  method: string
+  requestBody?: string
+}
+
+const list = ref<ApiDefinition[]>([])
+const rawList = ref<ApiDefinition[]>([])
 const searchText = ref('')
 const isLoading = ref(true)
 
@@ -999,6 +1009,7 @@ const testResponse = ref<{
   error?: string
 } | null>(null)
 const methodOptions = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+const bodyMethods = ['POST', 'PUT', 'PATCH']
 
 function parseAddress(address: string): { url: string; params: KV[] } {
   try {
@@ -1020,20 +1031,24 @@ function copyResponseText() {
 function filterList() {
   const t = searchText.value.toLowerCase()
   if (!t) { list.value = [...rawList.value]; return }
-  list.value = rawList.value.filter((item: any) =>
+  list.value = rawList.value.filter(item =>
     (item.name && item.name.toLowerCase().includes(t)) ||
     (item.desc && item.desc.toLowerCase().includes(t))
   )
 }
 
-function openTest(item: any) {
+function openTest(item: ApiDefinition) {
   testApiName.value = item.name
   testMethod.value = item.method || 'GET'
   const parsed = parseAddress(item.address)
   testUrl.value = parsed.url
   testParams.value = parsed.params.length ? parsed.params : [{ key: '', value: '' }]
-  testHeaders.value = [{ key: '', value: '' }]
-  testBody.value = ''
+  // 后端元数据提供 JSON 示例时，同时预设正确的内容类型，打开后即可直接测试。
+  const hasJsonBody = bodyMethods.includes(testMethod.value) && Boolean(item.requestBody)
+  testHeaders.value = hasJsonBody
+    ? [{ key: 'Content-Type', value: 'application/json' }, { key: '', value: '' }]
+    : [{ key: '', value: '' }]
+  testBody.value = item.requestBody || (bodyMethods.includes(testMethod.value) ? '{}' : '')
   testResponse.value = null
   showRespHeaders.value = false
   showParams.value = true
@@ -1079,7 +1094,7 @@ async function sendTestRequest() {
 
 onMounted(async () => {
   try {
-    const res = await publicClient.get("/api/list")
+    const res = await publicClient.get("/api/list") as unknown as ApiDefinition[]
     rawList.value = res
     list.value = [...rawList.value]
   } catch { ElMessage.error('加载API列表失败') }
