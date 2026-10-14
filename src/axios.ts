@@ -11,9 +11,9 @@ export const service = axios.create({
     withCredentials: true,
 });
 
-// 后端令牌默认 7 天有效，并会在请求时滑动续期。此前未传 expires，
+// 后端令牌默认 14 天有效，并会在请求时滑动续期。此前未传 expires，
 // js-cookie 会创建会话 Cookie，浏览器关闭或恢复会话时可能导致登录态丢失。
-const AUTH_COOKIE_DAYS = 7;
+const AUTH_COOKIE_DAYS = 14;
 
 function authCookieOptions() {
     return {
@@ -68,7 +68,7 @@ service.interceptors.response.use(function (response) {
     const requestUrl = String(err.config?.url || '')
     const manualAdminToken = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin-token') : ''
     const isManualAdminRequest = requestUrl.startsWith('/adm/ai') && Boolean(manualAdminToken)
-    if (err.response?.status === 403 && !isManualAdminRequest) {
+    if (err.response?.status === 401 && !isManualAdminRequest) {
         clearAuthCookies()
         toast("登录过期! 请尝试重新登录.", "warning")
         userInfo.value = {}
