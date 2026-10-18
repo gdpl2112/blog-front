@@ -13,6 +13,7 @@ import musicroom from '@/pages/musicoom.vue'
 import sponsors from '@/pages/sponsors.vue'
 import ai from '@/pages/ai.vue'
 import authc from '@/pages/authc.vue'
+import effects from '@/pages/effects.vue'
 
 import v0 from '@/pages/v0/v0.vue'
 import info from '@/pages/v0/info.vue'
@@ -64,6 +65,14 @@ const routes = [{
     component: sponsors,
     meta: {
         title: '友友们的赞助'
+    }
+}, {
+    path: '/effects',
+    component: effects,
+    meta: {
+        title: '背景室',
+        // 背景室自己挂载所选背景，App.vue 需要关掉全站底衬
+        hideBackdrop: true
     }
 }, {
     path: '/ai',

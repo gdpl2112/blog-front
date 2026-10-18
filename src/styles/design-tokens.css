@@ -64,6 +64,29 @@
   /* 聚光收暗：离指针越远略压暗，形成"凸显" */
   --bd-focus: rgba(24, 34, 52, 0.10);
 
+  /* ---- 银河底衬（Galaxy.vue 专用） ----
+     亮色不是白纸：仍是暗色星空，但被一颗近距离的恒星照亮——深蓝底、
+     暖光、亮星；暗色则把光收掉，只留很暗的星光。
+     canvas 读取 --gx-star* / --gx-meteor* 的 rgb 三元组。 */
+  --gx-base-1: #151d2c;
+  --gx-base-2: #070b13;
+  --gx-sky-glow: 255, 206, 156;
+  --gx-sky-glow-a: 0.34;
+  --gx-sun: 255, 224, 176;
+  --gx-sun-ink: 255, 246, 232;
+  --gx-star: 232, 240, 255;
+  --gx-star-cool: 158, 196, 255;
+  --gx-star-warm: 255, 220, 180;
+  --gx-star-a: 0.9;
+  --gx-meteor: 240, 246, 255;
+  --gx-meteor-a: 0.85;
+  --gx-hole-disk: 255, 178, 104;
+  --gx-hole-disk-2: 255, 228, 188;
+  --gx-hole-ring: 255, 238, 214;
+  --gx-hole-glow: 255, 152, 82;
+  --gx-vignette: 0, 0, 0;
+  --gx-vignette-a: 0.5;
+
   /* ---- 反相填充上的文字色（实心按钮、用户气泡等） ---- */
   --on-ink: #ffffff;
 
@@ -223,6 +246,26 @@
   --bd-spot-warm: 255, 196, 150;
   --bd-spot-warm-a: 0.16;
   --bd-focus: rgba(0, 0, 0, 0.42);
+
+  /* ---- 银河底衬：暗色只留很暗的星光 ---- */
+  --gx-base-1: #080d1a;
+  --gx-base-2: #03050b;
+  --gx-sky-glow: 255, 226, 188;
+  --gx-sky-glow-a: 0.06;
+  --gx-sun: 255, 242, 218;
+  --gx-sun-ink: 255, 244, 224;
+  --gx-star: 226, 236, 255;
+  --gx-star-cool: 150, 190, 255;
+  --gx-star-warm: 255, 220, 180;
+  --gx-star-a: 0.82;
+  --gx-meteor: 238, 246, 255;
+  --gx-meteor-a: 0.8;
+  --gx-hole-disk: 255, 178, 104;
+  --gx-hole-disk-2: 255, 228, 188;
+  --gx-hole-ring: 255, 238, 214;
+  --gx-hole-glow: 255, 152, 82;
+  --gx-vignette: 0, 0, 0;
+  --gx-vignette-a: 0.55;
 
   --seal: #e2604b;
   --seal-ink: #f0806c;

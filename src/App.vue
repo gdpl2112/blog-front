@@ -810,8 +810,11 @@
 
 <template>
   <div class="app-shell">
-    <!-- 动态底衬：漂移光斑 + 指针柔光 -->
-    <Backdrop />
+    <!-- 全站背景：琉璃底衬 / 银河，由背景室的「应用到全站」决定。
+         背景室等页面会自己挂载背景；银河只在深色主题下接管全站，
+         亮色主题仍用琉璃底衬，保证正文对比度。 -->
+    <Backdrop v-if="showBackdrop && (globalBackground === 'backdrop' || theme === 'light')" />
+    <Galaxy v-else-if="showBackdrop" :seed="globalBackgroundSeed" />
 
     <!-- 加载：一枚朱印 -->
     <Transition name="fade">
@@ -838,6 +841,9 @@
           </li>
           <li class="nav-link-item">
             <RouterLink to="/room">音乐厅</RouterLink>
+          </li>
+          <li class="nav-link-item">
+            <RouterLink to="/effects">背景室</RouterLink>
           </li>
           <li class="nav-link-item nav-dropdown">
             <button
@@ -869,7 +875,7 @@
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
                 GitHub 组织
               </a>
-              <div class="nav-dropdown-version">front-vue3 · 26.10.14</div>
+              <div class="nav-dropdown-version">front-vue3 · 26.10.18</div>
             </div>
           </li>
           <li class="nav-link-item">
@@ -938,6 +944,9 @@
         </div>
         <div class="nav-link-item">
           <RouterLink to="/room" @click="mobileOpen = false">音乐厅</RouterLink>
+        </div>
+        <div class="nav-link-item">
+          <RouterLink to="/effects" @click="mobileOpen = false">背景室</RouterLink>
         </div>
         <div class="nav-link-item nav-dropdown">
           <button
@@ -1064,33 +1073,30 @@
 </template>
 
 <script lang="ts" setup>
-import {RouterLink, RouterView} from 'vue-router'
+import {RouterLink, RouterView, useRoute} from 'vue-router'
 import $ from 'jquery';
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {loadUser, login_state, service, userInfo, userLogout} from "@/axios";
 import {toast} from "@/utils/utils";
 //@ts-ignore
 import APlayer from 'aplayer/dist/APlayer.min';
 import router from "@/router";
 import Backdrop from "@/components/Backdrop.vue";
+import Galaxy from "@/components/Galaxy.vue";
+import {applyTheme, theme, toggleTheme} from "@/utils/theme";
+import {globalBackground, globalBackgroundSeed} from "@/utils/background";
+
+const route = useRoute()
+// 背景室等页面自己挂载背景，需要在全站壳层里让出位置
+const showBackdrop = computed(() => !route.meta.hideBackdrop)
 
 let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"}])
 let host0 = ref("")
 let isDataLoaded = ref(false)
 let isLoading = ref(true)
 
-// 主题：localStorage 记忆 + html[data-theme] 驱动全部令牌
-const theme = ref(localStorage.getItem('blog-theme') || 'light')
-
-function applyTheme(t: string) {
-  document.documentElement.setAttribute('data-theme', t)
-}
-
-function toggleTheme() {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-  localStorage.setItem('blog-theme', theme.value)
-  applyTheme(theme.value)
-}
+// 主题与全站背景分别放在 utils/theme.ts 与 utils/background.ts 里，
+// 背景室需要用同一个状态来切换全站背景、记忆种子。
 
 // 移动端目录
 const mobileOpen = ref(false)
@@ -1119,7 +1125,8 @@ onMounted(async () => {
   applyTheme(theme.value);
 
   router.beforeEach((to, from, next) => {
-    isLoading.value = true;
+    // 只改查询参数（如背景室切换效果）不触发整页加载遮罩
+    if (to.path !== from.path) isLoading.value = true;
     mobileOpen.value = false;
     next();
   });

@@ -6,8 +6,8 @@ import {loadUser, service} from "@/axios";
 const urls = ["/index.html",
     "/login", "/index", "/", "/apis",
     "/article", "/reg", "/room", "/tem",
-    "/sponsors", "/ai"
-    ,"/authc"
+    "/sponsors", "/ai",
+    "/effects", "/authc"
 ]
 
 router.beforeEach(async (to, from, next) => {
