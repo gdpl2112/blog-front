@@ -53,6 +53,8 @@ import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
  *  - 亮色仍是暗色星空，但被一颗近距离恒星照亮（暖光 + 亮星），不是全白纸面；
  *  - 暗色把光收掉：只留很暗的星光，让黑洞成为视觉中心；
  *  - 切主题时读一次 CSS 令牌重烘焙，并对各层 canvas 做一次淡入淡出，避免闪跳。
+ *  - 被「应用到全站」的那一份会带上 .galaxy--site，亮色下另取一套「纸底墨星」，
+ *    原因见 design-tokens.css。
  *
  * 性能：
  *  - 静态星场只烘焙一次；悬停时只重绘黑洞周围被 mask 挖掉的几百颗星；
@@ -226,7 +228,8 @@ function rgba(color: RGB, alpha: number) {
 }
 
 function readPalette(): Palette {
-    const cs = getComputedStyle(document.documentElement)
+    // 读自己的根元素：全站那一份靠 .galaxy--site 覆盖令牌，documentElement 上读不到
+    const cs = getComputedStyle(rootRef.value ?? document.documentElement)
     return {
         star: parseRGB(cs.getPropertyValue('--gx-star'), [226, 236, 255]),
         cool: parseRGB(cs.getPropertyValue('--gx-star-cool'), [150, 190, 255]),

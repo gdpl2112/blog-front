@@ -199,6 +199,30 @@
   --font-serif: var(--font-display);
 }
 
+/* 银河被「应用到全站」的那一份（App.vue 加 .galaxy--site）在亮色主题下换成
+   「纸底墨星」：亮色的正文是深色字，压在深空上读不清，所以天幕取纸色、星点取墨色；
+   恒星的暖光留着，只把星芒换成暖色，纸上仍看得见它。
+   背景室里那份不带这个类，保持深空原样。 */
+[data-theme="light"] .galaxy--site {
+  --gx-base-1: #eef4fc;
+  --gx-base-2: #dae5f5;
+  --gx-sky-glow-a: 0.22;
+  --gx-sun: 255, 206, 156;
+  --gx-sun-ink: 226, 130, 60;
+  --gx-star: 30, 38, 52;
+  --gx-star-cool: 62, 94, 152;
+  --gx-star-warm: 168, 104, 52;
+  --gx-star-a: 0.62;
+  --gx-meteor: 30, 38, 52;
+  --gx-meteor-a: 0.5;
+  --gx-hole-disk: 226, 118, 62;
+  --gx-hole-disk-2: 240, 168, 108;
+  --gx-hole-ring: 30, 38, 52;
+  --gx-hole-glow: 226, 118, 62;
+  --gx-vignette: 38, 50, 72;
+  --gx-vignette-a: 0.14;
+}
+
 [data-theme="dark"] {
   color-scheme: dark;
 

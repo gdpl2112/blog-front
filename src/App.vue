@@ -811,10 +811,10 @@
 <template>
   <div class="app-shell">
     <!-- 全站背景：琉璃底衬 / 银河，由背景室的「应用到全站」决定。
-         背景室等页面会自己挂载背景；银河只在深色主题下接管全站，
-         亮色主题仍用琉璃底衬，保证正文对比度。 -->
-    <Backdrop v-if="showBackdrop && (globalBackground === 'backdrop' || theme === 'light')" />
-    <Galaxy v-else-if="showBackdrop" :seed="globalBackgroundSeed" />
+         背景室等页面会自己挂载背景；银河在明暗两种主题下都接管全站，
+         .galaxy--site 是「全站那一份」的标记，亮色下它会另取一套纸底墨星。 -->
+    <Backdrop v-if="showBackdrop && globalBackground === 'backdrop'" />
+    <Galaxy v-else-if="showBackdrop" :seed="globalBackgroundSeed" class="galaxy--site" />
 
     <!-- 加载：一枚朱印 -->
     <Transition name="fade">

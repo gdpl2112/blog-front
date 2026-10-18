@@ -59,7 +59,7 @@
 
         <p class="fx-hint">
           鼠标停在背景上会出现黑洞，周围星点会被弯折；切换明暗主题，亮色是恒星近距离照亮，暗色只留很暗的星光。
-          点「应用到全站」后，除背景室外所有页面都会使用当前效果；银河是深色底衬，只在深色主题下接管全站，亮色主题仍保留琉璃底衬。
+          点「应用到全站」后，除背景室外所有页面都会使用当前效果，明暗两种主题下都跟着走；亮色下全站那份会换成纸底墨星，免得深色正文读不清。
         </p>
       </section>
     </div>
@@ -72,7 +72,6 @@ import {useRoute, useRouter} from 'vue-router'
 import Backdrop from '@/components/Backdrop.vue'
 import Galaxy from '@/components/Galaxy.vue'
 import {globalBackground, setGlobalBackground} from '@/utils/background'
-import {setTheme, theme} from '@/utils/theme'
 import {toast} from '@/utils/utils'
 
 /**
@@ -203,16 +202,12 @@ function onGalaxyStats(payload: GalaxyStats) {
     stats.value = payload
 }
 
-/** 把当前效果设为全站背景：银河只记深色主题的种子，并顺手切到深色 */
+/** 把当前效果设为全站背景：银河连同种子一起记住，明暗两套取色由主题令牌决定 */
 function applyGlobal() {
     if (isGlobal.value) return
     if (activeId.value === 'galaxy') {
         setGlobalBackground('galaxy', seed.value)
-        const wasLight = theme.value === 'light'
-        if (wasLight) setTheme('dark')
-        toast(wasLight
-            ? '银河已设为全站背景，并切到深色主题；亮色主题下仍显示琉璃底衬'
-            : '银河已设为全站背景', 'success', 3200)
+        toast('银河已设为全站背景', 'success', 3200)
         return
     }
     setGlobalBackground('backdrop')

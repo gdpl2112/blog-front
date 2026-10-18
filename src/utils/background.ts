@@ -26,7 +26,7 @@ function readSeed(): number {
 /**
  * 全站背景：
  *  - backdrop：站点原来的琉璃底衬，亮色/暗色都适用；
- *  - galaxy：银河，只在深色主题下接管全站（亮色主题仍是琉璃底衬，保证正文对比度），
+ *  - galaxy：银河，明暗两种主题下都接管全站（亮色取纸底墨星、暗色取深空），
  *    种子会一起记住，保证全站看到的是同一片星空。
  */
 export const globalBackground = ref<BackgroundId>(readBackground())
