@@ -16,6 +16,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 import 'aplayer/dist/APlayer.min.css'
 
 import '@/styles/design-tokens.css'
+import '@/styles/element-skin.css'
 
 const app = createApp(App)
 

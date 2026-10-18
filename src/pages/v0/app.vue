@@ -1,67 +1,139 @@
 <style scoped>
-.app-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+/* =============================================
+   应用管理：注册 + 清单
+   ============================================= */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-5);
 }
 
-.form-card {
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  margin-bottom: var(--space-5);
+.panel-head h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
 }
 
-.form-card h4 {
-  font-size: 0.95rem;
+.panel-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.block {
+  padding-bottom: var(--gap-5);
+  margin-bottom: var(--gap-5);
+  border-bottom: 1px solid var(--rule);
+}
+
+.block:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.block h3 {
+  font-size: var(--text-base);
   font-weight: 600;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+  letter-spacing: 0.04em;
+  margin: 0 0 4px;
+}
+
+.block .tip {
+  margin: 0 0 var(--gap-4);
+  font-size: var(--text-xs);
+  line-height: 1.8;
+  color: var(--ink-3);
+}
+
+.block :deep(.el-form-item) {
+  margin-bottom: 12px;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--gap-2);
+}
+
+.mono-cell {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.secret-toggle {
+  border: 0;
+  background: none;
+  padding: 0 0 0 8px;
+  font-size: var(--text-2xs);
+  color: var(--seal);
+  cursor: pointer;
 }
 </style>
 
 <template>
-  <div class="app-section">
-    <h3>应用管理</h3>
-
-    <div class="form-card">
-      <h4>注册新应用</h4>
-      <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" label-width="100px" style="max-width:500px;">
-        <el-form-item label="应用名称" prop="appName">
-          <el-input v-model="registerForm.appName" placeholder="请输入应用名称" />
-        </el-form-item>
-        <el-form-item label="应用描述" prop="appDesc">
-          <el-input v-model="registerForm.appDesc" type="textarea" placeholder="请输入应用描述" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" :loading="registerLoading" @click="submitRegister(registerFormRef)" style="background:var(--color-accent);border-color:var(--color-accent);">注册应用</el-button>
-          <el-button @click="resetRegisterForm(registerFormRef)">重置</el-button>
-        </el-form-item>
-      </el-form>
+  <div class="ink-in">
+    <div class="panel-head">
+      <h2>应用管理</h2>
+      <span>{{ appList.length }} 个</span>
     </div>
 
-    <div class="form-card">
-      <h4>我的应用</h4>
-      <el-table :data="appList" style="width:100%" v-loading="loading">
-        <el-table-column prop="appId" label="App ID" width="180" />
-        <el-table-column prop="appName" label="应用名称" width="160" />
-        <el-table-column prop="appDesc" label="应用描述" />
-        <el-table-column label="密钥" width="200">
-          <template #default="scope">
-            <span>{{ scope.row.appSecret ? (showSecret[scope.row.appId] ? scope.row.appSecret : '********') : '无' }}</span>
-            <el-button v-if="scope.row.appSecret" size="small" @click="toggleSecret(scope.row.appId)" style="margin-left:8px;">
-              {{ showSecret[scope.row.appId] ? '隐藏' : '显示' }}
-            </el-button>
+    <!-- 注册 -->
+    <section class="block">
+      <h3>注册新应用</h3>
+      <p class="tip">
+        注册后会得到一个 App ID 和密钥，用于第三方登录与授权页（/authc）。
+      </p>
+      <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" label-width="84px" style="max-width: 520px">
+        <el-form-item label="应用名称" prop="appName">
+          <el-input v-model="registerForm.appName" placeholder="2–30 个字" />
+        </el-form-item>
+        <el-form-item label="应用描述" prop="appDesc">
+          <el-input v-model="registerForm.appDesc" type="textarea" :rows="3" placeholder="5–100 个字" />
+        </el-form-item>
+        <el-form-item>
+          <div class="form-actions">
+            <el-button type="primary" :loading="registerLoading" @click="submitRegister(registerFormRef)">注册应用</el-button>
+            <el-button @click="resetRegisterForm(registerFormRef)">重置</el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+    </section>
+
+    <!-- 清单 -->
+    <section class="block">
+      <h3>我的应用</h3>
+      <p v-if="appList.length === 0" class="tip">还没有注册过应用。</p>
+
+      <el-table v-else :data="appList" style="width: 100%" v-loading="loading">
+        <el-table-column label="App ID" width="190">
+          <template #default="{ row }"><span class="mono-cell">{{ row.appId }}</span></template>
+        </el-table-column>
+        <el-table-column prop="appName" label="名称" width="150" />
+        <el-table-column prop="appDesc" label="描述" min-width="200" show-overflow-tooltip />
+        <el-table-column label="密钥" width="230">
+          <template #default="{ row }">
+            <span class="mono-cell">
+              {{ row.appSecret ? (showSecret[row.appId] ? row.appSecret : '••••••••••••') : '无' }}
+            </span>
+            <button v-if="row.appSecret" class="secret-toggle" @click="toggleSecret(row.appId)">
+              {{ showSecret[row.appId] ? '隐藏' : '显示' }}
+            </button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
-          <template #default="scope">
-            <el-button size="small" type="warning" @click="resetAppKey(scope.row)" :loading="scope.row.resetting">重置密钥</el-button>
+        <el-table-column label="" width="96" align="right">
+          <template #default="{ row }">
+            <el-button size="small" type="warning" plain @click="resetAppKey(row)" :loading="row.resetting">重置密钥</el-button>
           </template>
         </el-table-column>
       </el-table>
-    </div>
+    </section>
   </div>
 </template>
 

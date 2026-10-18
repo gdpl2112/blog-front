@@ -1,102 +1,86 @@
 <style scoped>
+/* =============================================
+   音乐厅：一间只点了一盏灯的屋子
+   ============================================= */
+
 .music-room {
   position: relative;
-  min-height: 70vh;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-8);
+  justify-content: center;
+  gap: var(--gap-5);
+  min-height: calc(100vh - var(--nav-h) - 250px);
+  padding: var(--gap-7) var(--gap-6) var(--gap-6);
+  background:
+    radial-gradient(90% 70% at 50% 0%, rgba(48, 55, 68, 0.72) 0%, rgba(16, 19, 24, 0.92) 62%, rgba(9, 11, 14, 0.96) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r-lg);
+  box-shadow: 0 44px 90px -50px rgba(6, 9, 14, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  overflow: hidden;
 }
 
-/* Floating shapes */
-.music-room::before,
-.music-room::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.04);
-  animation: float 20s infinite ease-in-out;
-  pointer-events: none;
-}
-
-.music-room::before {
-  width: 300px; height: 300px;
-  top: 5%; left: 5%;
-}
-
-.music-room::after {
-  width: 200px; height: 200px;
-  bottom: 10%; right: 8%;
-  animation-delay: -7s;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0,0) rotate(0deg); }
-  25% { transform: translate(20px,20px) rotate(3deg); }
-  50% { transform: translate(0,40px) rotate(0deg); }
-  75% { transform: translate(-20px,20px) rotate(-3deg); }
-}
-
-/* Top actions */
+/* 顶部动作 */
 .music-actions {
   position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
-  right: var(--space-4);
+  top: var(--gap-4);
+  left: var(--gap-4);
+  right: var(--gap-4);
   display: flex;
   justify-content: space-between;
-  z-index: 10;
+  z-index: 5;
 }
 
 .action-group {
   display: flex;
-  gap: var(--space-2);
+  gap: 6px;
 }
 
 .action-icon {
-  width: 40px; height: 40px;
-  display: flex;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 13px;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 1.1rem;
-  backdrop-filter: blur(8px);
+  transition: all var(--dur) var(--ease);
 }
 
 .action-icon:hover {
-  background: rgba(255,255,255,0.15);
-  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.42);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
 }
 
-/* Content layout */
+/* 主体 */
 .music-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: var(--gap-7);
   align-items: center;
-  gap: var(--space-12);
-  flex: 1;
   width: 100%;
-  max-width: 900px;
-  padding-top: var(--space-8);
+  max-width: 880px;
+  padding-top: var(--gap-6);
 }
 
-/* Album art */
+/* 唱片 */
 .cover-wrap {
-  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
 }
 
 .cover-disc {
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
   position: relative;
+  width: 264px;
+  height: 264px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,9 +90,18 @@
 .cover-disc::before {
   content: '';
   position: absolute;
-  inset: -8px;
+  inset: -14px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.cover-disc::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  pointer-events: none;
 }
 
 .cover-img {
@@ -116,153 +109,226 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transition: transform 0.05s linear;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  filter: saturate(0.9) contrast(1.02);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+  transition: transform 0.06s linear;
 }
 
 .cover-center-dot {
   position: absolute;
-  width: 20px; height: 20px;
-  background: rgba(255,255,255,0.3);
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.15);
+  background: var(--seal);
+  box-shadow: 0 0 0 4px rgba(20, 21, 24, 0.9);
 }
 
-/* Info + Lyrics */
+/* 信息与歌词 */
 .info-section {
-  flex: 1;
   min-width: 0;
 }
 
 .song-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 var(--space-1);
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  color: #f4f2eb;
+  margin: 0 0 6px;
 }
 
 .song-artist {
-  font-size: 1rem;
-  color: rgba(255,255,255,0.5);
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 400;
-  margin: 0 0 var(--space-6);
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.42);
+  margin: 0 0 var(--gap-5);
 }
 
 .lyrics-box {
-  max-height: 260px;
+  max-height: 264px;
   overflow-y: auto;
-  padding-right: var(--space-2);
+  padding-right: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: var(--gap-5);
+}
+
+.lyrics-box::-webkit-scrollbar {
+  width: 3px;
+}
+
+.lyrics-box::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border: 0;
 }
 
 .lyric-line {
-  padding: 6px 0;
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.35);
+  padding: 5px 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.75;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.lyric-line.active {
-  color: var(--color-accent);
-  font-weight: 600;
-  font-size: 1.05rem;
+  transition: color var(--dur) var(--ease);
 }
 
 .lyric-line:hover {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.66);
 }
 
-/* Player controls */
+.lyric-line.active {
+  color: #f4f2eb;
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+/* 控制条 */
 .player-controls {
   width: 100%;
-  max-width: 600px;
-  padding-top: var(--space-6);
+  max-width: 700px;
+  padding-top: var(--gap-6);
 }
 
 .control-buttons {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  gap: var(--gap-3);
+  margin-bottom: var(--gap-5);
 }
 
 .ctrl-btn {
-  width: 44px; height: 44px;
-  display: flex;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 14px;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 1.2rem;
+  transition: all var(--dur) var(--ease);
 }
 
 .ctrl-btn:hover {
-  background: rgba(255,255,255,0.12);
-  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
 }
 
 .ctrl-btn.primary {
-  width: 56px; height: 56px;
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: white;
-  font-size: 1.4rem;
+  width: 56px;
+  height: 56px;
+  background: var(--seal);
+  border-color: var(--seal);
+  color: #fff;
+  font-size: 19px;
 }
 
 .ctrl-btn.primary:hover {
-  background: var(--color-accent-hover);
-  transform: scale(1.05);
+  background: #d4513c;
+  border-color: #d4513c;
 }
 
 .progress-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--gap-4);
 }
 
 .progress-time {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
   font-family: var(--font-mono);
-  min-width: 80px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 52px;
 }
 
 .progress-bar-wrap {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.1);
-  cursor: pointer;
   position: relative;
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.progress-bar-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -9px 0;
 }
 
 .progress-fill {
   height: 100%;
-  border-radius: 2px;
-  background: var(--color-accent);
+  background: var(--seal);
   transition: width 0.1s linear;
-  position: relative;
 }
 
-/* Dialog overrides */
+/* 房间名 */
+.room-name {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.38);
+  margin-bottom: var(--gap-3);
+}
+
+/* 弹窗内的检索条 */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.search-bar .grow {
+  flex: 1;
+}
+
+.playlist-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.playlist-menu .btn {
+  justify-content: flex-start;
+  height: 44px;
+  padding: 0 16px;
+  font-size: var(--text-sm);
+}
+
 :deep(.el-dialog) {
-  background: var(--color-bg-elevated) !important;
-  border-radius: var(--radius-lg) !important;
+  border-top: 2px solid var(--ink) !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .music-content {
-    flex-direction: column;
-    gap: var(--space-6);
+    grid-template-columns: 1fr;
+    gap: var(--gap-5);
+    padding-top: var(--gap-7);
   }
-  .cover-disc { width: 200px; height: 200px; }
-  .song-title { font-size: 1.2rem; }
+
+  .cover-disc {
+    width: 200px;
+    height: 200px;
+  }
+
+  .lyrics-box {
+    max-height: 200px;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-left: 0;
+    padding-top: var(--gap-3);
+  }
+
+  .music-room {
+    padding: var(--gap-6) var(--gap-4);
+  }
 }
 </style>
 
@@ -321,9 +387,7 @@
         </button>
         <button class="ctrl-btn" @click="ap.skipForward()"><i class="bi bi-skip-end"></i></button>
       </div>
-      <div v-if="lived" style="text-align:center;color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:var(--space-3);">
-        {{ roomdata.name || '音乐房间' }}
-      </div>
+      <div v-if="lived" class="room-name">{{ roomdata.name || '音乐房间' }}</div>
       <div class="progress-row">
         <span class="progress-time">{{ currentPn }}</span>
         <div class="progress-bar-wrap" @click="onProgressClick($event)">
@@ -333,11 +397,12 @@
     </div>
 
     <!-- Search dialog -->
-    <el-dialog v-model="dialogVisible0" title="搜索音乐" width="700px" draggable align-center>
-      <div style="display:flex;gap:12px;margin-bottom:16px;">
-        <el-input v-model="search" placeholder="搜索歌曲、歌手或专辑" @keyup.enter="onSearch" style="flex:1" />
-        <el-button :loading="searchLoading" type="primary" @click="onSearch" style="background:var(--color-accent);border-color:var(--color-accent);">搜索</el-button>
-        <el-button v-if="isSearchData" type="success" @click="addAllToTemp">全部添加</el-button>
+    <el-dialog
+      append-to-body v-model="dialogVisible0" title="搜索音乐" width="700px" draggable align-center>
+      <div class="search-bar">
+        <el-input v-model="search" class="grow" placeholder="搜索歌曲、歌手或专辑" @keyup.enter="onSearch" />
+        <el-button :loading="searchLoading" type="primary" @click="onSearch">搜索</el-button>
+        <el-button v-if="isSearchData" @click="addAllToTemp">全部添加</el-button>
       </div>
       <el-table :data="tableData" style="width:100%;" height="420px" class="music-table">
         <el-table-column label="曲名" prop="name" width="240" show-overflow-tooltip />
@@ -365,20 +430,21 @@
     </el-dialog>
 
     <!-- Playlist dialog -->
-    <el-dialog v-model="dialogVisibleList" title="选择音乐榜单" width="500px" draggable align-center>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <el-button :loading="toggleListLoading" type="danger" @click="toggleList('163')">
-          网易云音乐热歌榜
-        </el-button>
-        <el-button :loading="toggleListLoading" type="success" @click="toggleList('qq')">
-          QQ音乐热歌榜
-        </el-button>
-        <el-button :loading="toggleListLoading" type="primary" @click="toggleList('kg')">
-          酷狗音乐热歌榜
-        </el-button>
-        <el-button :loading="toggleListLoading" @click="toggleList()">
+    <el-dialog
+      append-to-body v-model="dialogVisibleList" title="选择音乐榜单" width="500px" draggable align-center>
+      <div class="playlist-menu">
+        <button class="btn btn--block" :disabled="toggleListLoading" @click="toggleList('163')">
+          网易云音乐 · 热歌榜
+        </button>
+        <button class="btn btn--block" :disabled="toggleListLoading" @click="toggleList('qq')">
+          QQ 音乐 · 热歌榜
+        </button>
+        <button class="btn btn--block" :disabled="toggleListLoading" @click="toggleList('kg')">
+          酷狗音乐 · 热歌榜
+        </button>
+        <button class="btn btn--block" :disabled="toggleListLoading" @click="toggleList()">
           我的个人歌单
-        </el-button>
+        </button>
       </div>
     </el-dialog>
   </div>

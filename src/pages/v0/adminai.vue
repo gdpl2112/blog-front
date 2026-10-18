@@ -1,92 +1,148 @@
 <style scoped>
-.admin-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-primary);
+/* =============================================
+   AI 配置
+   ============================================= */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-4);
 }
 
-.admin-hint {
-  font-size: 0.8rem;
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--space-5);
-  line-height: 1.6;
+.panel-head h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.panel-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.hint {
+  margin: 0 0 var(--gap-5);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  color: var(--ink-3);
 }
 
 .token-bar {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--gap-2);
   align-items: center;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--gap-5);
+  padding-bottom: var(--gap-5);
+  border-bottom: 1px solid var(--rule);
 }
 
-.token-bar .el-input { max-width: 520px; }
+.token-bar :deep(.el-input) {
+  max-width: 480px;
+}
+
+.group {
+  border-top: 1px solid var(--rule-2);
+  padding-top: var(--gap-4);
+  margin-bottom: var(--gap-6);
+}
+
+.group h3 {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  margin: 0 0 var(--gap-4);
+}
+
+.group :deep(.el-form-item) {
+  margin-bottom: 14px;
+}
 
 .config-form {
-  max-width: 760px;
-}
-
-.config-group {
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  margin-bottom: var(--space-4);
-}
-
-.config-group h4 {
-  margin: 0 0 var(--space-4);
-  font-size: 0.95rem;
-  color: var(--color-text-primary);
+  max-width: 720px;
 }
 
 .form-actions {
   display: flex;
-  gap: var(--space-2);
   align-items: center;
+  gap: var(--gap-2);
+  flex-wrap: wrap;
+}
+
+.stamp {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
 }
 
 @media (max-width: 640px) {
-  .token-bar { align-items: stretch; flex-direction: column; }
-  .token-bar .el-input { max-width: none; }
+  .token-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .token-bar :deep(.el-input) {
+    max-width: none;
+  }
 }
 </style>
 
 <template>
-  <div class="admin-section">
-    <h3>AI配置</h3>
-    <p class="admin-hint">仅管理员可访问。API Key 默认脱敏显示，查看完整 Key 或保存配置时请确认当前凭证安全。</p>
+  <div class="ink-in">
+    <div class="panel-head">
+      <h2>AI 配置</h2>
+      <span>仅管理员</span>
+    </div>
+
+    <p class="hint">
+      API Key 默认脱敏显示。查看完整 Key 或保存配置前，请确认当前设备的凭证安全。
+    </p>
 
     <div class="token-bar">
       <el-input v-model="adminToken" type="password" show-password clearable placeholder="可选：ADMIN_TOKEN" @keyup.enter="loadConfig" />
       <el-button :loading="loading" type="primary" @click="loadConfig">读取配置</el-button>
-      <el-button :loading="revealing" :disabled="!configLoaded" @click="toggleReveal">{{ reveal ? '隐藏完整 Key' : '查看完整 Key' }}</el-button>
+      <el-button :loading="revealing" :disabled="!configLoaded" @click="toggleReveal">
+        {{ reveal ? '隐藏完整 Key' : '查看完整 Key' }}
+      </el-button>
     </div>
 
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon :closable="false" class="mb-4" />
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon :closable="false" style="margin-bottom: 16px" />
 
-    <el-form v-if="configLoaded" ref="formRef" :model="form" :rules="rules" label-width="170px" class="config-form">
-      <div class="config-group">
-        <h4>对话模型</h4>
+    <el-form v-if="configLoaded" ref="formRef" :model="form" :rules="rules" label-width="160px" class="config-form">
+      <div class="group">
+        <h3>对话模型</h3>
         <el-form-item label="Base URL" prop="chatBaseUrl"><el-input v-model="form.chatBaseUrl" placeholder="https://api.example.com/" /></el-form-item>
         <el-form-item label="API Key"><el-input v-model="form.chatApiKey" type="password" show-password placeholder="留空表示保留原值" /></el-form-item>
         <el-form-item label="模型" prop="chatModel"><el-input v-model="form.chatModel" /></el-form-item>
         <el-form-item label="Completions Path" prop="chatCompletionsPath"><el-input v-model="form.chatCompletionsPath" /></el-form-item>
-        <el-form-item label="Temperature" prop="chatTemperature"><el-input-number v-model="form.chatTemperature" :min="0" :max="2" :step="0.05" :precision="2" /></el-form-item>
+        <el-form-item label="Temperature" prop="chatTemperature">
+          <el-input-number v-model="form.chatTemperature" :min="0" :max="2" :step="0.05" :precision="2" />
+        </el-form-item>
       </div>
 
-      <div class="config-group">
-        <h4>Embedding模型</h4>
+      <div class="group">
+        <h3>EMBEDDING 模型</h3>
         <el-form-item label="Base URL" prop="embeddingBaseUrl"><el-input v-model="form.embeddingBaseUrl" placeholder="https://embed.example.com/" /></el-form-item>
         <el-form-item label="API Key"><el-input v-model="form.embeddingApiKey" type="password" show-password placeholder="留空表示保留原值" /></el-form-item>
         <el-form-item label="模型" prop="embeddingModel"><el-input v-model="form.embeddingModel" /></el-form-item>
         <el-form-item label="Embeddings Path" prop="embeddingEmbeddingsPath"><el-input v-model="form.embeddingEmbeddingsPath" /></el-form-item>
-        <el-form-item label="Dimensions" prop="embeddingDimensions"><el-input-number v-model="form.embeddingDimensions" :min="1" :step="1" /></el-form-item>
+        <el-form-item label="Dimensions" prop="embeddingDimensions">
+          <el-input-number v-model="form.embeddingDimensions" :min="1" :step="1" />
+        </el-form-item>
       </div>
 
       <div class="form-actions">
         <el-button type="primary" :loading="saving" @click="saveConfig">保存配置</el-button>
-        <el-button :disabled="saving" @click="loadConfig">重置</el-button>
-        <span v-if="lastUpdated" style="font-size:0.8rem;color:var(--color-text-tertiary);">{{ lastUpdated }}</span>
+        <el-button :disabled="saving" @click="loadConfig">重新读取</el-button>
+        <span v-if="lastUpdated" class="stamp">{{ lastUpdated }}</span>
       </div>
     </el-form>
   </div>

@@ -1,63 +1,165 @@
 <style scoped>
-.admin-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
-}
+/* =============================================
+   帖子维护：一行一帖
+   ============================================= */
 
-.admin-hint {
-  font-size: 0.8rem;
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--space-4);
-  line-height: 1.6;
-}
-
-.post-item {
+.panel-head {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: 12px 16px;
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-2);
-  font-size: 0.88rem;
-  transition: all var(--transition-fast);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-4);
 }
 
-.post-item:hover {
-  background: var(--color-accent-soft);
+.panel-head h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.panel-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.hint {
+  margin: 0 0 var(--gap-5);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  color: var(--ink-3);
+}
+
+.hint b {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.post-row {
+  display: grid;
+  grid-template-columns: 56px 56px minmax(0, 1fr);
+  gap: var(--gap-3);
+  align-items: center;
+  padding: var(--gap-3) 0;
+  border-bottom: 1px solid var(--rule);
+  transition: background var(--dur) var(--ease);
+}
+
+.post-row:hover {
+  background: var(--paper-2);
+}
+
+.state-btn {
+  height: 26px;
+  border: 1px solid var(--rule-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+
+.state-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.state-btn.ok {
+  border-color: rgba(47, 107, 79, 0.5);
+  color: #2f6b4f;
+  background: rgba(47, 107, 79, 0.06);
+}
+
+.state-btn.seal {
+  border-color: var(--seal);
+  color: var(--seal);
+  background: var(--seal-wash);
 }
 
 .post-info {
-  flex: 1;
-  min-width: 0;
   display: flex;
-  gap: var(--space-3);
-  align-items: center;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
   flex-wrap: wrap;
+}
+
+.post-info strong {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.post-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+.pager {
+  margin-top: var(--gap-5);
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
 
 <template>
-  <div class="admin-section">
-    <h3>帖子管理</h3>
-    <div class="admin-hint">
-      可见状态: 0可见 / 1不可见 / 2私有 &nbsp;|&nbsp; 置顶指数: 越高越置顶
+  <div class="ink-in">
+    <div class="panel-head">
+      <h2>帖子维护</h2>
+      <span>{{ nr.total || 0 }} 篇</span>
     </div>
 
-    <div v-for="e in notices" :key="e.id" class="post-item">
-      <el-button :loading="e.svl" :type="e.state == 0 ? 'success' : 'danger'" size="small" @click="toVs(e)">{{ e.state }}</el-button>
-      <el-button :loading="e.svl" :type="e.sort>0?'success':'info'" size="small" @click="toSort(e)">{{ e.sort }}</el-button>
+    <p class="hint">
+      左侧数字是可见状态：<b>0</b> 可见、<b>1</b> 不可见、<b>2</b> 私有；右侧数字是置顶指数，越大越靠前。点击即可切换。
+    </p>
+
+    <div v-for="e in notices" :key="e.id" class="post-row">
+      <button
+        class="state-btn"
+        :class="e.state == 0 ? 'ok' : 'seal'"
+        :disabled="e.svl"
+        @click="toVs(e)"
+        :title="'可见状态 ' + e.state"
+      >{{ e.state }}</button>
+
+      <button
+        class="state-btn"
+        :class="e.sort > 0 ? 'ok' : ''"
+        :disabled="e.svl"
+        @click="toSort(e)"
+        :title="'置顶指数 ' + e.sort"
+      >{{ e.sort }}</button>
+
       <div class="post-info">
         <strong>{{ e.title }}</strong>
-        <span style="color:var(--color-text-tertiary);font-size:0.8rem;">{{ e.authorName }}</span>
-        <span style="color:var(--color-text-tertiary);font-size:0.8rem;">{{ e.date }}</span>
-        <span class="tag tag-accent" style="font-size:0.7rem;">{{ e.type }}</span>
+        <span class="post-meta">{{ e.authorName }}</span>
+        <span class="post-meta">{{ e.date }}</span>
+        <span class="chip">{{ e.type }}</span>
       </div>
     </div>
 
-    <el-pagination size="default" background layout="prev, pager, next" :total="nr.total" :page-size="nr.size" :current-page="p" @update:current-page="loadData" class="mt-4" />
+    <div class="pager">
+      <el-pagination
+        size="small"
+        background
+        layout="prev, pager, next"
+        :total="nr.total"
+        :page-size="nr.size"
+        :current-page="p"
+        @update:current-page="loadData"
+      />
+    </div>
   </div>
 </template>
 

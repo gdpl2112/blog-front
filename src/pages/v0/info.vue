@@ -1,190 +1,296 @@
 <style scoped>
-.info-section {
-  margin-bottom: var(--space-6);
+/* =============================================
+   账号设置：一页登记表
+   ============================================= */
+
+.sec {
+  margin-bottom: var(--gap-7);
 }
 
-.info-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+.sec-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-5);
+}
+
+.sec-h h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.sec-h span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* 身份卡 */
+.identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--gap-6);
+  align-items: start;
+}
+
+.avatar-box {
+  text-align: center;
+}
+
+.avatar-img {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  cursor: pointer;
+  filter: grayscale(0.1);
+  transition: filter var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.avatar-img:hover {
+  filter: none;
+  border-color: var(--ink);
+}
+
+.avatar-note {
+  margin: 6px 0 0;
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-3) var(--space-6);
-  font-size: 0.9rem;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--rule);
 }
 
-.info-label {
-  color: var(--color-text-tertiary);
-  font-weight: 500;
+.info-grid dt,
+.info-grid dd {
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--text-sm);
 }
 
-.info-value {
-  color: var(--color-text-primary);
+.info-grid dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  line-height: 2.2;
 }
 
-.info-value.clickable {
+.info-grid dd {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.info-grid dd.editable {
   cursor: pointer;
-  color: var(--color-accent);
+  color: var(--seal);
 }
 
-.info-value.clickable:hover {
+.info-grid dd.editable:hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.avatar-wrap {
-  text-align: center;
-  margin-bottom: var(--space-6);
+/* 表单块 */
+.block {
+  padding: var(--gap-5) 0;
+  border-bottom: 1px solid var(--rule);
 }
 
-.avatar-img {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
-  cursor: pointer;
-  border: 3px solid var(--color-border);
-  transition: all var(--transition-fast);
+.block:last-child {
+  border-bottom: 0;
 }
 
-.avatar-img:hover {
-  border-color: var(--color-accent);
-}
-
-.form-section {
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  margin-bottom: var(--space-4);
-}
-
-.form-section h4 {
-  font-size: 0.95rem;
+.block h3 {
+  font-size: var(--text-base);
   font-weight: 600;
-  margin: 0 0 var(--space-3);
-  color: var(--color-text-primary);
+  letter-spacing: 0.04em;
+  margin: 0 0 4px;
 }
 
-.form-section .tip {
-  font-size: 0.8rem;
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--space-3);
+.block .tip {
+  margin: 0 0 var(--gap-4);
+  font-size: var(--text-xs);
+  line-height: 1.8;
+  color: var(--ink-3);
+}
+
+.inline-form {
+  max-width: 420px;
+}
+
+.inline-form :deep(.el-form-item) {
+  margin-bottom: 10px;
+}
+
+.code-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .identity {
+    grid-template-columns: 1fr;
+    gap: var(--gap-4);
+  }
+
+  .avatar-box {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar-note {
+    margin: 0;
+  }
+
+  .avatar-img {
+    width: 64px;
+    height: 64px;
+  }
 }
 </style>
 
 <template>
-  <div>
-    <div class="info-section">
-      <h3>账号信息</h3>
-      <div class="avatar-wrap">
-        <el-upload :show-file-list="false" :before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess">
-          <img :src="userInfo.icon" class="avatar-img" alt="avatar" />
-        </el-upload>
-        <div style="font-size:0.8rem;color:var(--color-text-tertiary);margin-top:var(--space-2);">点击更换头像</div>
+  <div class="ink-in">
+    <!-- 账号 -->
+    <section class="sec">
+      <div class="sec-h">
+        <h2>账号</h2>
+        <span>点击可编辑的项即可修改</span>
       </div>
-      <div class="info-grid">
-        <span class="info-label">博客ID</span>
-        <span class="info-value clickable" @click="tipsBlogId">{{ userInfo.userId }}</span>
-        <span class="info-label">昵称</span>
-        <span class="info-value clickable" @click="modifyNick">{{ userInfo.nickname }}</span>
-        <span class="info-label">邮箱</span>
-        <span class="info-value">{{ userInfo.eid || '未绑定' }}</span>
-        <span class="info-label">QQ</span>
-        <span class="info-value">{{ userInfo.qid || '未绑定' }}</span>
-        <span class="info-label">注册方式</span>
-        <span class="info-value"><span class="tag tag-accent">{{ userInfo.type }}</span></span>
+
+      <div class="identity">
+        <div class="avatar-box">
+          <el-upload :show-file-list="false" :before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess">
+            <img :src="userInfo.icon" class="avatar-img" alt="头像" />
+          </el-upload>
+          <p class="avatar-note">点击更换头像</p>
+        </div>
+
+        <dl class="info-grid">
+          <dt>博客 ID</dt>
+          <dd class="editable" @click="tipsBlogId">{{ userInfo.userId }}</dd>
+          <dt>昵称</dt>
+          <dd class="editable" @click="modifyNick">{{ userInfo.nickname }}</dd>
+          <dt>邮箱</dt>
+          <dd>{{ userInfo.eid || '未绑定' }}</dd>
+          <dt>QQ</dt>
+          <dd>{{ userInfo.qid || '未绑定' }}</dd>
+          <dt>注册方式</dt>
+          <dd><span class="chip">{{ userInfo.type }}</span></dd>
+        </dl>
       </div>
-    </div>
+    </section>
 
-    <!-- Bind email -->
-    <div v-if="userInfo.eid === ''" class="form-section">
-      <h4>绑定邮箱</h4>
-      <p class="tip">邮箱为空时可绑定</p>
-      <el-form ref="eidFormRef" :model="edvfm" label-width="80px" style="max-width:400px;">
-        <el-form-item prop="email" label="邮箱" :rules="[{required:true,message:'邮箱不可空',trigger:'blur'},{type:'email',message:'格式不正确',trigger:'blur'}]">
-          <el-input v-model="edvfm.email" />
-        </el-form-item>
-        <el-form-item label="验证码">
-          <div style="display:flex;gap:8px;">
-            <el-input v-model="edvfm.code" type="text" style="flex:1;" />
-            <el-button :loading="reqLoading" @click="reqCode(eidFormRef)">发送</el-button>
-          </div>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitForm(eidFormRef)" style="background:var(--color-accent);border-color:var(--color-accent);">绑定</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+    <!-- 安全与绑定 -->
+    <section class="sec">
+      <div class="sec-h">
+        <h2>安全与绑定</h2>
+      </div>
 
-    <!-- Bind QQ -->
-    <div v-if="!userInfo.qoId" class="form-section">
-      <h4>绑定QQ</h4>
-      <p class="tip">若账号已经注册则将覆盖</p>
-      <el-button @click="gotoQqb" style="margin-top:var(--space-2);">
-        <img alt="qq" src="/tencentqq-icon.png" style="width:20px;height:20px;margin-right:6px;" /> QQ登录绑定
-      </el-button>
-    </div>
+      <!-- 绑定邮箱 -->
+      <div v-if="userInfo.eid === ''" class="block">
+        <h3>绑定邮箱</h3>
+        <p class="tip">邮箱为空时可以绑定，绑定后可用于找回密码。</p>
+        <el-form ref="eidFormRef" :model="edvfm" label-width="64px" class="inline-form">
+          <el-form-item prop="email" label="邮箱" :rules="[{required:true,message:'邮箱不可空',trigger:'blur'},{type:'email',message:'格式不正确',trigger:'blur'}]">
+            <el-input v-model="edvfm.email" placeholder="name@example.com" />
+          </el-form-item>
+          <el-form-item label="验证码">
+            <div class="code-row">
+              <el-input v-model="edvfm.code" type="text" style="flex: 1" placeholder="6 位验证码" />
+              <el-button :loading="reqLoading" @click="reqCode(eidFormRef)">发送</el-button>
+            </div>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitForm(eidFormRef)">绑定</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
 
-    <!-- Bind QQ number -->
-    <div v-if="userInfo.qid <= 0" class="form-section">
-      <h4>绑定QQ号</h4>
-      <p class="tip">绑定QQ号仅为了方便登录账号，无其他作用</p>
-      <el-form ref="qqFormRef" :model="qqValidateForm" label-width="60px" style="max-width:300px;">
-        <el-form-item label="QQ" :rules="[{type:'number',message:'必须是纯数字'}]">
-          <el-input v-model.number="qqValidateForm.qq" type="text" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitQq(qqFormRef)" style="background:var(--color-accent);border-color:var(--color-accent);">绑定</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+      <!-- 绑定QQ -->
+      <div v-if="!userInfo.qoId" class="block">
+        <h3>绑定 QQ 登录</h3>
+        <p class="tip">若该 QQ 已注册过账号，绑定后会覆盖原有绑定关系。</p>
+        <button class="btn" @click="gotoQqb">
+          <img alt="qq" src="/tencentqq-icon.png" style="width: 14px; height: 14px;" /> QQ 登录绑定
+        </button>
+      </div>
 
-    <!-- Modify blog ID -->
-    <div v-if="userInfo.modify_bid" class="form-section">
-      <h4>修改博客ID</h4>
-      <p class="tip">修改博客ID需谨慎，可能影响相关链接</p>
-      <el-form ref="bidFormRef" :model="bidValidateForm" label-width="80px" style="max-width:300px;">
-        <el-form-item label="博客ID" prop="bid" :rules="[{required:true,message:'不能为空',trigger:'blur'},{pattern:/^[a-zA-Z0-9._-]+$/,message:'只能包含字母、数字、点(.)、下划线(_)或连字符(-)',trigger:'blur'},{min:7,max:12,message:'长度7-12位',trigger:'blur'}]">
-          <el-input v-model="bidValidateForm.bid" type="text" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitBid(bidFormRef)" style="background:var(--color-accent);border-color:var(--color-accent);">修改</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+      <!-- 绑定QQ号 -->
+      <div v-if="userInfo.qid <= 0" class="block">
+        <h3>绑定 QQ 号</h3>
+        <p class="tip">仅用于登录账号，不做其他用途。</p>
+        <el-form ref="qqFormRef" :model="qqValidateForm" label-width="40px" class="inline-form">
+          <el-form-item label="QQ" :rules="[{type:'number',message:'必须是纯数字'}]">
+            <el-input v-model.number="qqValidateForm.qq" type="text" placeholder="QQ 号" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitQq(qqFormRef)">绑定</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
 
-    <!-- Password -->
-    <div class="form-section">
-      <h4>密码修改</h4>
-      <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="100px" style="max-width:400px;">
-        <el-form-item label="旧密码" prop="opass">
-          <el-input show-password type="password" v-model="ruleForm.opass">
-            <template #prefix><el-icon><Lock /></el-icon></template>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="新密码" prop="pass">
-          <el-input show-password type="password" v-model="ruleForm.pass">
-            <template #prefix><el-icon><Lock /></el-icon></template>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="确认新密码" prop="checkPass">
-          <el-input show-password type="password" v-model="ruleForm.checkPass">
-            <template #prefix><el-icon><Lock /></el-icon></template>
-          </el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitFormPass(ruleFormRef)" style="background:var(--color-accent);border-color:var(--color-accent);">提交</el-button>
-          <el-button @click="resetFormPass(ruleFormRef)">重置</el-button>
-          <el-button type="warning" @click="dialogVisible = true">忘记密码</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+      <!-- 修改博客ID -->
+      <div v-if="userInfo.modify_bid" class="block">
+        <h3>修改博客 ID</h3>
+        <p class="tip">修改后原有链接可能失效，请谨慎操作。</p>
+        <el-form ref="bidFormRef" :model="bidValidateForm" label-width="64px" class="inline-form">
+          <el-form-item label="博客ID" prop="bid" :rules="[{required:true,message:'不能为空',trigger:'blur'},{pattern:/^[a-zA-Z0-9._-]+$/,message:'只能包含字母、数字、点(.)、下划线(_)或连字符(-)',trigger:'blur'},{min:7,max:12,message:'长度7-12位',trigger:'blur'}]">
+            <el-input v-model="bidValidateForm.bid" type="text" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitBid(bidFormRef)">修改</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
 
-    <el-dialog v-model="dialogVisible" title="密码重置" width="400">
-      <p>将通过邮箱重置你的账号为随机密码。若邮箱未绑定此操作将失败。</p>
+      <!-- 密码 -->
+      <div class="block">
+        <h3>修改密码</h3>
+        <p class="tip">修改后当前设备不会被退出，其他设备需要重新登录。</p>
+        <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="88px" class="inline-form">
+          <el-form-item label="旧密码" prop="opass">
+            <el-input show-password type="password" v-model="ruleForm.opass">
+              <template #prefix><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="新密码" prop="pass">
+            <el-input show-password type="password" v-model="ruleForm.pass">
+              <template #prefix><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="确认新密码" prop="checkPass">
+            <el-input show-password type="password" v-model="ruleForm.checkPass">
+              <template #prefix><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitFormPass(ruleFormRef)">提交</el-button>
+            <el-button @click="resetFormPass(ruleFormRef)">重置</el-button>
+            <el-button type="warning" @click="dialogVisible = true">忘记密码</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </section>
+
+    <el-dialog
+      append-to-body v-model="dialogVisible" title="重置密码" width="420" align-center>
+      <p>系统会向已绑定的邮箱发送一个随机密码。邮箱未绑定时此操作会失败。</p>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button :loading="dialogLoading" type="danger" @click="forgetPass()">确定重置</el-button>

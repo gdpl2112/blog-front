@@ -1,397 +1,490 @@
 <style scoped>
-.home-page {
-  max-width: 860px;
-  margin: 0 auto;
+/* =============================================
+   首页：抬头 + 今日一句 + 文章账页
+   ============================================= */
+
+.home {
+  padding-top: var(--gap-5);
 }
 
-/* Daily quote section */
-.quote-card {
-  position: relative;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8) var(--space-6);
-  margin-bottom: var(--space-8);
-  overflow: hidden;
-  transition: all var(--transition-base);
-  cursor: pointer;
-}
+/* ---------- 抬头 ---------- */
 
-.quote-card:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-md);
-}
-
-.quote-card::before {
-  content: '"';
-  position: absolute;
-  top: -10px;
-  left: var(--space-4);
-  font-size: 5rem;
-  line-height: 1;
-  color: var(--color-accent-soft);
-  font-family: var(--font-serif, Georgia, serif);
-  pointer-events: none;
-}
-
-.quote-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: var(--space-3);
-}
-
-.quote-text {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  line-height: 1.7;
-  margin: 0 0 var(--space-2);
-  padding-left: var(--space-4);
-}
-
-.quote-source {
-  font-size: 0.85rem;
-  color: var(--color-text-tertiary);
-  margin: 0;
-}
-
-/* Post list */
-.posts-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.post-card {
+.masthead {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: var(--space-5);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  position: relative;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--gap-7);
+  align-items: start;
+  padding-bottom: var(--gap-7);
 }
 
-.post-card:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-md);
+.masthead-name {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+  margin: 0 0 var(--gap-4);
+  color: var(--ink);
+}
+
+.masthead-lede {
+  max-width: 26em;
+  margin: 0 0 var(--gap-4);
+  font-size: var(--text-base);
+  line-height: 1.95;
+  color: var(--ink-2);
+}
+
+.masthead-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+}
+
+.masthead-date::before {
+  content: '';
+  width: 26px;
+  height: 1px;
+  background: var(--rule-2);
+}
+
+/* ---------- 今日一句 ---------- */
+
+.quote {
+  position: relative;
+  padding: var(--gap-6) var(--gap-6) var(--gap-5);
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.quote:hover {
+  background: var(--glass-strong);
   transform: translateY(-2px);
 }
 
-.post-card:active {
-  transform: translateY(0);
+/* 文章清单整块托在玻璃上 */
+.archive-panel {
+  padding: var(--gap-3) var(--gap-6) var(--gap-4);
 }
 
-.post-image-wrap {
-  position: relative;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  aspect-ratio: 16 / 10;
-  background: var(--color-bg-soft);
-}
-
-.post-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-slow);
-}
-
-.post-card:hover .post-image {
-  transform: scale(1.05);
-}
-
-.sticky-badge {
+.quote-stamp {
   position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  z-index: 2;
-  background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
-  color: white;
-  padding: 2px 10px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  border-radius: var(--radius-full);
+  top: var(--gap-5);
+  right: var(--gap-5);
+  opacity: 0.9;
 }
 
-.post-body {
+.quote-text {
+  margin: 0 0 var(--gap-4);
+  padding-right: var(--gap-7);
+  font-family: var(--font-display);
+  font-size: clamp(19px, 2.1vw, 24px);
+  font-weight: 600;
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.quote-source {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-3);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.quote-source em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+}
+
+/* ---------- 章节头 ---------- */
+
+.archive-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding: var(--gap-3) 0 var(--gap-3);
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: 0;
+}
+
+.archive-head h2 {
+  font-size: var(--text-lg);
+  letter-spacing: 0.06em;
+}
+
+.archive-head .count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+/* ---------- 文章行 ---------- */
+
+.entry {
+  display: grid;
+  grid-template-columns: 74px 104px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--gap-5);
+  padding: var(--gap-5) 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+
+.entry:hover {
+  background: var(--glass-thin);
+}
+
+.entry-date {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  align-self: start;
+  padding-top: 4px;
+}
+
+.entry-date b {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+}
+
+.entry-thumb {
+  width: 104px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  filter: grayscale(1) contrast(0.95);
+  transition: filter 320ms var(--ease);
+  background: var(--paper-2);
+}
+
+.entry:hover .entry-thumb {
+  filter: none;
+}
+
+.entry-thumb--none {
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-size: 15px;
+  border: 1px solid var(--rule);
+  filter: none;
+}
+
+.entry-main {
   min-width: 0;
 }
 
-.post-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-2);
-  line-height: 1.4;
-  letter-spacing: -0.01em;
-  transition: color var(--transition-fast);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.post-card:hover .post-title {
-  color: var(--color-accent);
-}
-
-.post-meta {
+.entry-title {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  font-size: 0.85rem;
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--space-3);
-}
-
-.post-meta-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--color-text-tertiary);
-}
-
-.post-author {
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
   font-weight: 600;
-  color: var(--color-text-secondary);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0 0 6px;
+  transition: color var(--dur) var(--ease);
 }
 
-.post-summary {
-  font-size: 0.88rem;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-  margin: 0 0 var(--space-3);
+.entry:hover .entry-title {
+  color: var(--seal);
+}
+
+.entry-title .pinned {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--seal);
+  border: 1px solid currentColor;
+  padding: 1px 5px;
+  line-height: 1.4;
+}
+
+.entry-summary {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: var(--ink-2);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.post-stats {
+.entry-author {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  margin-right: 10px;
+}
+
+.entry-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ---------- 分页 ---------- */
+
+.pager {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
-  font-size: 0.8rem;
-  color: var(--color-text-tertiary);
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-top: var(--gap-5);
 }
 
-.stat-item {
+.pager-info {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+
+.pager-btns {
   display: flex;
-  align-items: center;
-  gap: var(--space-1);
+  gap: var(--gap-2);
 }
 
-.stat-item i {
-  font-size: 0.9rem;
+/* ---------- 骨架 ---------- */
+
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) 60px;
+  gap: var(--gap-5);
+  padding: var(--gap-5) 0;
+  border-bottom: 1px solid var(--rule);
 }
 
-/* Pagination */
-.pagination-wrap {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-10);
+.sk-bar {
+  height: 12px;
+  background: rgba(21, 26, 34, 0.07);
+  border-radius: 8px;
+  animation: sk-pulse 1.6s ease-in-out infinite;
 }
 
-.pagination-modern {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.sk-bar.wide { width: 62%; height: 16px; }
+.sk-bar.mid { width: 44%; }
+.sk-bar.short { width: 22%; }
+
+[data-theme="dark"] .sk-bar {
+  background: rgba(255, 255, 255, 0.09);
 }
 
-.page-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+@keyframes sk-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
-.page-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-.page-btn.active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: white;
-}
-
-.page-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Empty & loading */
-.empty-state {
-  text-align: center;
-  padding: var(--space-16) var(--space-6);
-  color: var(--color-text-tertiary);
-}
-
-.empty-state h3 {
-  font-weight: 600;
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-secondary);
-}
-
-.empty-state p {
-  margin: 0;
-}
-
-@media (max-width: 640px) {
-  .post-card {
+@media (max-width: 900px) {
+  .masthead {
     grid-template-columns: 1fr;
-    gap: var(--space-3);
+    gap: var(--gap-5);
   }
 
-  .post-image-wrap {
-    aspect-ratio: 16 / 9;
+  .entry {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: var(--gap-4);
+    align-items: start;
   }
 
-  .quote-text {
-    font-size: 1rem;
+  .entry-thumb,
+  .entry-stats {
+    display: none;
+  }
+
+  .entry-date {
+    padding-top: 2px;
+  }
+
+  .entry-date b {
+    font-size: 13px;
+  }
+
+  .entry-title {
+    font-size: var(--text-base);
+  }
+
+  .skeleton-row {
+    grid-template-columns: 58px minmax(0, 1fr);
   }
 }
 </style>
 
 <template>
-  <div class="home-page">
-    <!-- Daily quote -->
-    <div class="quote-card" @click="copyTextElement('#dayyan_div')" title="点击复制">
-      <div class="quote-label">每日一言</div>
-      <p id="dayyan_div" class="quote-text">“ {{ dayyan.line }} ”</p>
-      <p class="quote-source">— {{ dayyan.from }} —</p>
-    </div>
+  <div class="home ink-in">
+    <!-- 抬头 -->
+    <section class="masthead">
+      <div>
+        <h2 class="masthead-name">若<h3 style="display:inline">生</h3></h2>
+        <p class="masthead-lede">
+          不系之舟，逐梦之客；指尖代码，心中星河。
+        </p>
+        <div class="masthead-date">{{ today }}</div>
+      </div>
 
-    <!-- Loading -->
-    <div v-if="isLoading" class="empty-state">
-      <div class="loading-ring" style="margin:0 auto 12px;"></div>
-      <p>加载中...</p>
-    </div>
-
-    <!-- Empty -->
-    <div v-else-if="data.length === 0" class="empty-state">
-      <h3>暂无帖子</h3>
-      <p>当前没有可用的帖子内容</p>
-    </div>
-
-    <!-- Post list -->
-    <div v-else class="posts-list">
-      <article
-        v-for="d in data"
-        :key="d.id"
-        class="post-card"
-        @click="routerTo(d.id)"
-      >
-        <div class="post-image-wrap">
-          <img
-            v-if="d.icon"
-            class="post-image"
-            :src="d.icon"
-            :alt="d.title"
-          />
-          <div v-else class="post-image" style="display:flex;align-items:center;justify-content:center;background:var(--color-accent-soft);color:var(--color-accent);font-size:2rem;">
-            <i class="bi bi-file-text"></i>
-          </div>
-          <div v-if="d.sort > 0" class="sticky-badge">置顶</div>
+      <!-- 今日一句 -->
+      <div class="quote" @click="copyTextElement('#dayyan_div')" title="点击复制这一句">
+        <span class="seal seal--sm quote-stamp">言</span>
+        <p id="dayyan_div" class="quote-text">「{{ dayyan.line }}」</p>
+        <div class="quote-source">
+          <span>—— {{ dayyan.from }}</span>
+          <em>点击复制</em>
         </div>
-        <div class="post-body">
-          <h3 class="post-title">{{ d.title }}</h3>
-          <div class="post-meta">
-            <span class="post-author">{{ d.authorName }}</span>
-            <span class="post-meta-dot"></span>
-            <span>{{ getF(d.time) }}</span>
-          </div>
-          <p v-if="d.summary" class="post-summary">{{ d.summary }}</p>
-          <div class="post-stats">
-            <div class="stat-item">
-              <i class="bi bi-eye"></i>
-              <span>{{ d.views }}</span>
-            </div>
-            <div class="stat-item">
-              <i class="bi bi-chat-dots"></i>
-              <span>{{ d.comments || 0 }}</span>
-            </div>
-            <div class="stat-item">
-              <i class="bi bi-heart"></i>
-              <span>{{ d.likes || 0 }}</span>
-            </div>
-          </div>
-        </div>
-      </article>
-    </div>
+      </div>
+    </section>
 
-    <!-- Pagination -->
-    <div v-if="!isLoading && rawdata.pages > 1" class="pagination-wrap">
-      <ul class="pagination-modern">
-        <li>
-          <button class="page-btn" :disabled="pup <= 0" @click="showPageDatas(pn - 1)">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-        </li>
-        <li v-if="pup > 0">
-          <button class="page-btn" @click="showPageDatas(pn - 1)">{{ pn - 1 }}</button>
-        </li>
-        <li>
-          <button class="page-btn active">{{ pn }}</button>
-        </li>
-        <li v-if="pdown > 0">
-          <button class="page-btn" @click="showPageDatas(pn + 1)">{{ pn + 1 }}</button>
-        </li>
-        <li>
-          <button class="page-btn" :disabled="pdown <= 0" @click="showPageDatas(pn + 1)">
-            <i class="bi bi-chevron-right"></i>
-          </button>
-        </li>
-      </ul>
+    <!-- 文章账页 -->
+    <section class="panel archive-panel">
+      <div class="archive-head">
+        <h2>文章</h2>
+        <span class="count">{{ pageLabel }}</span>
+      </div>
+
+      <!-- 载入 -->
+      <div v-if="isLoading" aria-hidden="true">
+        <div v-for="i in 3" :key="i" class="skeleton-row">
+          <div class="sk-bar short"></div>
+          <div>
+            <div class="sk-bar wide" style="margin-bottom:10px;"></div>
+            <div class="sk-bar mid"></div>
+          </div>
+          <div class="sk-bar short"></div>
+        </div>
+      </div>
+
+      <!-- 空 -->
+      <div v-else-if="data.length === 0" class="empty">
+        <h3>这一页还是空的</h3>
+        <p>等下一篇写出来，它会出现在这里。</p>
+      </div>
+
+      <!-- 列表 -->
+      <div v-else>
+        <article
+          v-for="d in data"
+          :key="d.id"
+          class="entry"
+          @click="routerTo(d.id)"
+        >
+          <div class="entry-date">
+            <b>{{ dayOf(d.time) }}</b>
+            {{ yearOf(d.time) }}
+          </div>
+
+          <img v-if="d.icon" class="entry-thumb" :src="d.icon" :alt="d.title" loading="lazy" />
+          <div v-else class="entry-thumb entry-thumb--none">
+            <i class="bi bi-file-earmark-text"></i>
+          </div>
+
+          <div class="entry-main">
+            <h3 class="entry-title">
+              {{ d.title }}
+              <span v-if="d.sort > 0" class="pinned">置顶</span>
+            </h3>
+            <p v-if="d.summary" class="entry-summary">{{ d.summary }}</p>
+            <p v-else class="entry-summary" style="color: var(--ink-3);">（这篇没有写摘要）</p>
+          </div>
+
+          <div class="entry-stats">
+            <span>{{ d.views }} 阅</span>
+            <span>{{ d.comments || 0 }} 评</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 分页 -->
+    <div v-if="!isLoading && rawdata.pages > 1" class="pager">
+      <span class="pager-info">{{ pad(pn) }} / {{ pad(rawdata.pages) }}</span>
+      <div class="pager-btns">
+        <button class="btn btn--sm" :disabled="pup <= 0" @click="showPageDatas(pn - 1)">
+          <i class="bi bi-arrow-left"></i> 上一页
+        </button>
+        <button class="btn btn--sm" :disabled="pdown <= 0" @click="showPageDatas(pn + 1)">
+          下一页 <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import service from "@/axios";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {copyTextElement, formatMsgTime} from "@/utils/utils";
 import router from "@/router";
 import {ElMessage} from "element-plus";
 
 let rawdata = ref({current: 1, pages: 1, records: []})
-let data = ref([])
-let pup = ref(null)
-let pdown = ref(null)
+let data = ref([{id: 0, title: '', icon: '', summary: '', time: 0, views: 0, comments: 0,sort: 0}])
+let pup = ref(0)
+let pdown = ref(1)
 let pn = ref(1)
-let isLoading = ref(false)
+let isLoading = ref(true)
 
-let dayyan = ref({line: "每日一言内容", from: "来源"})
+let dayyan = ref({line: "生活不止眼前的苟且，还有诗和远方", from: "未知"})
+
+// 抬头处的当日日期（等宽显示）
+const today = new Date().toLocaleDateString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '.')
+
+const pageLabel = computed(() => {
+  if (isLoading.value) return '载入中'
+  const total = (rawdata.value as any).total
+  return total ? `共 ${total} 篇` : `第 ${pn.value} 页`
+})
+
+function pad(n: number) {
+  return String(n).padStart(2, '0')
+}
+
+function dayOf(t: number) {
+  const d = new Date(Number(t))
+  return `${pad(d.getMonth() + 1)}.${pad(d.getDate())}`
+}
+
+function yearOf(t: number) {
+  return new Date(Number(t)).getFullYear()
+}
 
 async function showPageDatas(p: number) {
   if (p < 1 || (rawdata.value.pages && p > rawdata.value.pages)) return;
   isLoading.value = true;
   try {
     const response = await service.get(`/notice/gets?pageNum=${p}`);
-    rawdata.value = response;
+    rawdata.value = response as any;
     pn.value = p;
     pup.value = rawdata.value.current - 1;
     pdown.value = rawdata.value.current + 1;
@@ -414,14 +507,14 @@ function routerTo(id: number) {
 }
 
 onMounted(async () => {
-  const promises = [loadDayyan(), showPageDatas(1)];
+  const promises = [await loadDayyan(), await showPageDatas(1)];
   await Promise.allSettled(promises);
 });
 
 async function loadDayyan() {
   try {
     const response = await service.get("/api/get/dayYan");
-    dayyan.value = response;
+    dayyan.value = response as any;
   } catch (err) {
     dayyan.value = {line: "生活不止眼前的苟且，还有诗和远方", from: "未知"};
   }

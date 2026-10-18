@@ -1,90 +1,154 @@
 <style scoped>
-.authc-page {
+/* =============================================
+   授权确认：一张待签的授权纸
+   ============================================= */
+
+.authc {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: calc(100vh - var(--nav-h) - 260px);
+  padding: var(--gap-6) 0;
 }
 
-.authc-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  max-width: 440px;
+.authc-sheet {
   width: 100%;
-  text-align: center;
-  box-shadow: var(--shadow-md);
+  max-width: 470px;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  background: var(--glass);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  padding: var(--gap-6);
 }
 
-.authc-card h2 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-primary);
+.authc-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: var(--gap-4);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--gap-5);
 }
 
-.authc-card p {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  margin: var(--space-2) 0 var(--space-6);
+.authc-top h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.authc-top p {
+  margin: 2px 0 0;
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.authc-app {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink);
+  margin: 0 0 var(--gap-2);
+  word-break: break-all;
+}
+
+.authc-desc {
+  margin: 0 0 var(--gap-5);
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: var(--ink-2);
 }
 
 .authc-perms {
-  text-align: left;
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-  margin-bottom: var(--space-6);
+  border-top: 1px solid var(--rule);
+  margin-bottom: var(--gap-5);
 }
 
-.authc-perms li {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-1);
-  line-height: 1.6;
+.perm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.perm-row i {
+  font-size: 12px;
+  color: var(--seal);
 }
 
 .authc-actions {
   display: flex;
-  gap: var(--space-3);
-  justify-content: center;
+  gap: var(--gap-2);
+}
+
+.authc-actions .btn {
+  flex: 1;
+}
+
+.authc-note {
+  margin: var(--gap-4) 0 0;
+  font-size: var(--text-2xs);
+  line-height: 1.8;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
 }
 </style>
 
 <template>
-  <div class="authc-page">
-    <div v-if="!isLoggedIn" class="authc-card">
-      <h2>需要登录</h2>
-      <p>请先登录后再进行应用授权</p>
+  <div class="authc ink-in">
+    <!-- 未登录 -->
+    <div v-if="!isLoggedIn" class="authc-sheet">
+      <div class="authc-top">
+        <span class="seal seal--sm">权</span>
+        <div>
+          <h2>需要先登录</h2>
+          <p>授权前请确认当前账号</p>
+        </div>
+      </div>
+      <p class="authc-desc">这个应用希望读取你的账号信息，登录之后才能继续。</p>
+      <div class="authc-actions">
+        <RouterLink to="/login" class="btn btn--solid">去登录</RouterLink>
+      </div>
     </div>
 
-    <div v-else class="authc-card">
-      <h2>授权确认</h2>
-      <p>应用 "{{ appName }}" 请求访问您的账户</p>
+    <!-- 已登录 -->
+    <div v-else class="authc-sheet">
+      <div class="authc-top">
+        <span class="seal seal--sm">权</span>
+        <div>
+          <h2>授权确认</h2>
+          <p>请核对下方信息</p>
+        </div>
+      </div>
+
+      <p class="authc-app">{{ appName }}</p>
+      <p v-if="appDesc" class="authc-desc">{{ appDesc }}</p>
 
       <div class="authc-perms">
-        <p style="font-weight:600;margin:0 0 8px;font-size:0.85rem;color:var(--color-text-primary);">请求权限：</p>
-        <ul style="margin:0;padding-left:20px;">
-          <li>访问您的基本资料</li>
-          <li>读取您的文章信息</li>
-        </ul>
-        <p v-if="appDesc" style="margin:8px 0 0;font-size:0.8rem;color:var(--color-text-tertiary);">{{ appDesc }}</p>
+        <div class="perm-row"><i class="bi bi-check2"></i> 读取你的基本资料</div>
+        <div class="perm-row"><i class="bi bi-check2"></i> 读取你发布的文章信息</div>
       </div>
 
       <div class="authc-actions">
-        <button class="btn-modern btn-modern-primary" :disabled="authorizing" @click="handleAuthorize">
-          {{ authorizing ? '授权中...' : '同意授权' }}
+        <button class="btn" @click="handleCancel">取消</button>
+        <button class="btn btn--solid" :disabled="authorizing" @click="handleAuthorize">
+          {{ authorizing ? '授权中…' : '同意授权' }}
         </button>
-        <button class="btn-modern" @click="handleCancel">取消</button>
       </div>
+
+      <p class="authc-note">同意后你会被带回应用。你随时可以收回授权。</p>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
+import {RouterLink, useRoute, useRouter} from 'vue-router'
 import {toast} from '@/utils/utils'
 import service, {loadUser} from '@/axios'
 

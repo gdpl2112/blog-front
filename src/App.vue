@@ -1,92 +1,53 @@
 <style>
 /* =============================================
-   App Layout - Redesigned v2
+   站点外壳：通栏顶栏 / 册页正文 / 墨色版权页
    ============================================= */
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
+.app-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
-/* 背景壁纸 + 半透明遮罩层 */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(
-      rgba(248, 249, 252, 0.42),
-      rgba(248, 249, 252, 0.42)
-    ),
-    url('/f/a12333dddff.png') center / cover no-repeat fixed;
-}
+/* ---------------- 加载：一枚朱印 ---------------- */
 
-@media (max-width: 768px) {
-  body::before {
-    background:
-      linear-gradient(
-        rgba(248, 249, 252, 0.42),
-        rgba(248, 249, 252, 0.42)
-      ),
-      url('/f/26-0112-640.png') top center / cover no-repeat fixed;
-  }
-}
-
-html[data-theme="dark"] body::before {
-  background:
-    linear-gradient(
-      rgba(15, 17, 23, 0.55),
-      rgba(15, 17, 23, 0.55)
-    ),
-    url('/f/a12333dddff.png') center / cover no-repeat fixed;
-}
-
-html[data-theme="dark"] body {
-  background-color: #0f1117;
-}
-
-@media (max-width: 768px) {
-  html[data-theme="dark"] body::before {
-    background:
-      linear-gradient(
-        rgba(15, 17, 23, 0.55),
-        rgba(15, 17, 23, 0.55)
-      ),
-      url('/f/26-0112-640.png') top center / cover no-repeat fixed;
-  }
-}
-
-/* Loading */
 .loading-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 17, 23, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  gap: 18px;
+  background: rgba(247, 248, 251, 0.62);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
 }
 
-.loading-ring {
-  width: 48px;
-  height: 48px;
-  border: 3px solid rgba(255, 255, 255, 0.08);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: loading-spin 0.8s linear infinite;
+[data-theme="dark"] .loading-overlay {
+  background: rgba(13, 15, 20, 0.66);
+}
+
+.loading-overlay .seal {
+  animation: seal-breathe 1.4s var(--ease) infinite;
+}
+
+.loading-overlay span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--ink-3);
+}
+
+@keyframes seal-breathe {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.96); }
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.18s ease;
+  transition: opacity 200ms var(--ease);
 }
 
 .fade-enter-from,
@@ -94,122 +55,72 @@ html[data-theme="dark"] body {
   opacity: 0;
 }
 
-@keyframes loading-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* =============================================
-   Navigation v3 - Layered glass, pill nav, active indicator
-   ============================================= */
+/* ---------------- 顶栏 ---------------- */
 
 .site-header {
   position: sticky;
-  top: var(--space-4);
-  z-index: 1000;
-  max-width: calc(var(--max-width) + var(--space-12));
-  margin: 0 auto;
-  padding: 0 var(--space-6);
+  top: 0;
+  z-index: 900;
+  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 12px 30px -26px rgba(30, 38, 54, 0.5);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 
-/* Outer glow layer */
-.nav-outer-glow {
-  position: absolute;
-  inset: -1px;
-  border-radius: var(--radius-xl);
-  background: linear-gradient(
-    135deg,
-    rgba(79, 110, 247, 0.08),
-    rgba(139, 92, 246, 0.06),
-    rgba(79, 110, 247, 0.04)
-  );
-  pointer-events: none;
-  z-index: -1;
+[data-theme="dark"] .site-header {
+  background: rgba(19, 22, 28, 0.55);
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 30px -22px rgba(0, 0, 0, 0.7);
 }
 
-[data-theme="dark"] .nav-outer-glow {
-  background: linear-gradient(
-    135deg,
-    rgba(107, 138, 255, 0.10),
-    rgba(141, 164, 255, 0.06),
-    rgba(107, 138, 255, 0.04)
-  );
-}
-
-/* Main nav shell */
-.nav-glass {
-  position: relative;
+.nav-inner {
   display: flex;
   align-items: center;
-  height: var(--nav-height);
-  padding: 0 var(--space-5);
-  /* Deeper glass: more opacity + stronger blur */
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px) saturate(190%) brightness(1.02);
-  -webkit-backdrop-filter: blur(20px) saturate(190%) brightness(1.02);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: var(--radius-xl);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.03),
-    0 8px 32px rgba(79, 110, 247, 0.04);
-  transition: all var(--transition-base);
+  gap: var(--gap-6);
+  height: var(--nav-h);
 }
 
-.nav-glass:hover {
-  background: rgba(255, 255, 255, 0.82);
-}
-
-[data-theme="dark"] .nav-glass {
-  background: rgba(20, 23, 35, 0.82);
-  border-color: rgba(255, 255, 255, 0.07);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.15),
-    0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="dark"] .nav-glass:hover {
-  background: rgba(20, 23, 35, 0.9);
-}
-
-/* ======== BRAND ======== */
+/* 品牌：宋体字名 + 等宽域名 */
 .nav-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
   text-decoration: none;
+  color: var(--ink);
   flex-shrink: 0;
-  margin-right: var(--space-6);
-  transition: transform var(--transition-fast);
 }
 
 .nav-brand:hover {
-  transform: scale(1.03);
+  color: var(--ink);
+  text-decoration: none;
 }
 
-.nav-brand img {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  object-fit: cover;
-  box-shadow: 0 2px 8px rgba(79, 110, 247, 0.18);
+.nav-brand-name {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
 }
 
-.nav-brand-text {
-  font-weight: 750;
-  font-size: 1.1rem;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #a78bfa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.nav-brand-mark {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  padding-left: 9px;
+  border-left: 1px solid var(--rule);
+  line-height: 1;
 }
 
-/* ======== NAV LINKS ======== */
+/* 主导航：小字，靠字距与下划朱线区分当前页 */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--gap-1);
   list-style: none;
-  margin: 0;
+  margin: 0 0 0 auto;
   padding: 0;
 }
 
@@ -217,535 +128,479 @@ html[data-theme="dark"] body {
   position: relative;
 }
 
-.nav-link-item a {
+.nav-link-item > a,
+.nav-dropdown-trigger {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  gap: 5px;
+  height: var(--nav-h);
+  padding: 0 13px;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
   text-decoration: none;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-base);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
 }
 
-.nav-link-item a::after {
+.nav-link-item > a:hover,
+.nav-dropdown-trigger:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* 当前页：底部一道 2px 朱线 */
+.nav-link-item > a.router-link-active,
+.nav-link-item > a.router-link-exact-active {
+  color: var(--ink);
+}
+
+.nav-link-item > a.router-link-active::after,
+.nav-link-item > a.router-link-exact-active::after {
   content: '';
   position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%) scaleX(0);
-  width: 20px;
-  height: 2.5px;
-  border-radius: 2px;
-  background: var(--color-accent);
-  transition: transform var(--transition-base);
+  left: 13px;
+  right: 13px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--seal);
 }
 
-.nav-link-item a:hover {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-}
-
-.nav-link-item a:hover::after {
-  transform: translateX(-50%) scaleX(1);
-}
-
-.nav-link-item a.router-link-active {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-  font-weight: 600;
-}
-
-.nav-link-item a.router-link-active::after {
-  transform: translateX(-50%) scaleX(1);
-}
-
-/* Highlight variant (sponsor) */
 .nav-link-highlight {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(234, 179, 8, 0.08)) !important;
-  color: #d97706 !important;
-  font-weight: 600 !important;
-}
-
-.nav-link-highlight:hover {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 179, 8, 0.14)) !important;
-  color: #b45309 !important;
-  transform: translateY(-1px);
-}
-
-.nav-link-highlight::after {
-  background: #d97706 !important;
-}
-
-/* ======== DROPDOWN (icon-btn trigger) ======== */
-.nav-dropdown {
-  position: relative;
-}
-
-.nav-dropdown-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  border: none;
-  border-radius: var(--radius-full);
-  background: none;
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.nav-dropdown-trigger:hover {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: var(--seal) !important;
 }
 
 .nav-dropdown-trigger .chevron {
-  font-size: 0.6rem;
-  transition: transform var(--transition-fast);
+  font-size: 8px;
+  color: var(--ink-3);
+  transition: transform var(--dur) var(--ease);
 }
 
 .nav-dropdown-trigger.open .chevron {
   transform: rotate(180deg);
 }
 
+/* 关于下拉：玻璃菜单 */
 .nav-dropdown-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 220px;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  padding: var(--space-2);
+  min-width: 244px;
+  padding: 6px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-6px) scale(0.97);
-  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 100;
+  transform: translateY(-6px) scale(0.985);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), visibility var(--dur);
+  z-index: 20;
   transform-origin: top right;
+}
+
+[data-theme="dark"] .nav-dropdown-menu {
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
 }
 
 .nav-dropdown-menu.show {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0) scale(1);
+  transform: none;
 }
 
 .nav-dropdown-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 10px 14px;
-  font-size: 0.85rem;
-  color: var(--color-text-primary);
+  gap: 10px;
+  padding: 9px 10px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
   text-decoration: none;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  margin-bottom: 1px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.nav-dropdown-item:last-of-type {
+  border-bottom: 0;
 }
 
 .nav-dropdown-item:hover {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  transform: translateX(3px);
+  background: var(--paper-2);
+  color: var(--ink);
+  text-decoration: none;
 }
 
 .nav-dropdown-item img {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 22px;
+  height: 22px;
   object-fit: cover;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-radius: 2px;
+  filter: grayscale(1);
+  opacity: 0.8;
+  transition: filter var(--dur) var(--ease);
+}
+
+.nav-dropdown-item:hover img {
+  filter: none;
+  opacity: 1;
 }
 
 .nav-dropdown-version {
-  padding: 8px 14px;
-  font-size: 0.7rem;
-  color: var(--color-text-tertiary);
-  text-align: center;
-  border-top: 1px solid var(--color-border-light);
-  margin-top: var(--space-1);
-  padding-top: 10px;
+  padding: 9px 10px 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  border-top: 1px solid var(--rule);
+  margin-top: 4px;
 }
 
-/* ======== RIGHT-SIDE ACTIONS ======== */
+/* 右侧动作 */
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  margin-left: var(--space-6);
+  gap: var(--gap-2);
   flex-shrink: 0;
 }
 
 .nav-icon-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-soft);
-  color: var(--color-text-tertiary);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 14px;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 1.05rem;
-  position: relative;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 
 .nav-icon-btn:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent-soft);
-  background: var(--color-accent-soft);
+  color: var(--ink);
+  border-color: var(--rule-2);
 }
 
-.nav-icon-btn:active {
-  transform: scale(0.94);
-}
-
-/* Divider between icon actions and user area */
 .nav-divider {
   width: 1px;
-  height: 24px;
-  background: var(--color-border);
-  margin: 0 var(--space-1);
+  height: 18px;
+  background: var(--rule);
+  margin: 0 6px;
 }
 
-/* User badge */
+/* 用户区块：方角头像 */
 .nav-user-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 5px 12px 5px 5px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  gap: 8px;
+  padding: 3px 10px 3px 3px;
   border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
 .nav-user-badge:hover {
-  background: var(--color-accent-soft);
-  border-color: var(--color-accent-soft);
+  border-color: var(--rule-2);
+  background: var(--paper-2);
 }
 
 .nav-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
   object-fit: cover;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 .nav-username {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  max-width: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  max-width: 92px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* CTA button in nav */
 .nav-cta {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 18px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
-  color: white;
-  border: none;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border-radius: 9px;
+  background: var(--ink);
+  color: var(--on-ink);
+  border: 1px solid var(--ink);
   text-decoration: none;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: 0 2px 10px rgba(79, 110, 247, 0.25);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .nav-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(79, 110, 247, 0.35);
-  color: white;
+  background: var(--seal);
+  border-color: var(--seal);
+  color: #fff;
+  text-decoration: none;
 }
 
-.nav-cta:active {
-  transform: scale(0.96);
-}
-
-.nav-cta-ghost {
-  background: var(--color-bg-card);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  box-shadow: none;
-  padding: 7px 16px;
-}
-
-.nav-cta-ghost:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Login button */
 .nav-login-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 8px 18px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  border: 1.5px solid var(--color-accent);
-  color: var(--color-accent);
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border-radius: 9px;
+  border: 1px solid var(--glass-line-2);
+  color: var(--ink);
   background: transparent;
   text-decoration: none;
-  cursor: pointer;
-  transition: all var(--transition-base);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .nav-login-btn:hover {
-  background: var(--color-accent);
-  color: white;
-  box-shadow: 0 4px 12px rgba(79, 110, 247, 0.3);
+  border-color: var(--seal);
+  color: var(--seal);
+  text-decoration: none;
 }
 
-/* ======== MOBILE ======== */
+/* 移动端触发 */
 .nav-toggle {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  color: var(--color-text-primary);
-  font-size: 1.1rem;
-  transition: all var(--transition-fast);
+  width: 34px;
+  height: 34px;
   margin-left: auto;
+  border: 1px solid var(--glass-line-2);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+  cursor: pointer;
 }
 
-.nav-toggle:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-/* =============================================
-   Main content area
-   ============================================= */
+/* ---------------- 正文 ---------------- */
 
 .main-content {
-  max-width: var(--max-width);
+  flex: 1;
+  width: 100%;
+  max-width: var(--w-page);
   margin: 0 auto;
-  padding: var(--space-6);
-  min-height: calc(100vh - var(--nav-height) - 200px);
+  padding: var(--gap-6) var(--pad-x) var(--gap-8);
 }
 
-/* Global glass: any card or section gets frosted */
-.main-content *[style*="var(--color-bg-card)"],
-.main-content .v0-content,
-.main-content .post-card,
-.main-content .quote-card,
-.main-content .api-card,
-.main-content .comments-section,
-.main-content .article-body,
-.main-content .sponsor-table-wrap,
-.main-content .qr-card,
-.main-content .info-section,
-.main-content .form-section,
-.main-content .article-group,
-.main-content .form-card,
-.main-content .admin-section,
-.main-content .upload-form,
-.main-content .update-form {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* =============================================
-   Footer
-   ============================================= */
+/* ---------------- 版权页 ---------------- */
 
 .site-footer {
-  margin-top: var(--space-16);
-  padding: var(--space-12) var(--space-6);
-  background: var(--color-bg-elevated);
-  border-top: 1px solid var(--color-border);
+  width: min(calc(100% - var(--pad-x) * 2), var(--w-page));
+  margin: var(--gap-8) auto var(--gap-5);
+  padding: var(--gap-7) 0 var(--gap-5);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 21, 27, 0.72);
+  color: var(--block-ink-2);
+  box-shadow: 0 44px 90px -50px rgba(12, 16, 24, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  overflow: hidden;
 }
 
 .footer-inner {
-  max-width: var(--max-width);
   margin: 0 auto;
+  padding: 0 clamp(22px, 3.4vw, 40px);
 }
 
-.footer-grid {
+.footer-top {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-12);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--gap-7);
+  padding-bottom: var(--gap-6);
+  border-bottom: 1px solid var(--block-rule);
 }
 
-.footer-brand h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-2);
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary);
+.footer-brand-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: var(--gap-4);
+}
+
+.footer-brand-head h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--block-ink);
+  margin: 0;
+}
+
+.footer-brand-head .seal {
+  background: var(--seal);
 }
 
 .footer-brand p {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
   margin: 0;
-  line-height: 1.7;
+  max-width: 34em;
+  font-size: var(--text-sm);
+  line-height: 1.9;
+  color: var(--block-ink-2);
 }
 
 .footer-links h4 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--block-ink-2);
+  margin: 0 0 var(--gap-4);
 }
 
 .footer-links-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 12px;
 }
 
 .friend-link {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--block-ink-2);
   text-decoration: none;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur) var(--ease);
 }
 
 .friend-link:hover {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  color: var(--block-ink);
+  text-decoration: none;
 }
 
 .friend-link img {
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-full);
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
   object-fit: cover;
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+.friend-link:hover img {
+  filter: none;
+  opacity: 1;
 }
 
 .footer-bottom {
-  margin-top: var(--space-8);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-4);
   flex-wrap: wrap;
-  gap: var(--space-3);
+  padding-top: var(--gap-4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--block-ink-2);
 }
 
 .footer-bottom p {
   margin: 0;
-  color: var(--color-text-tertiary);
-  font-size: 0.8rem;
 }
 
 .footer-bottom a {
-  color: var(--color-text-tertiary);
-  transition: color var(--transition-fast);
+  color: var(--block-ink-2);
+  text-decoration: none;
 }
 
 .footer-bottom a:hover {
-  color: var(--color-accent);
+  color: var(--block-ink);
+  text-decoration: none;
 }
 
-/* =============================================
-   APlayer styling
-   ============================================= */
+.footer-bottom .sep {
+  color: var(--block-rule);
+  margin: 0 6px;
+}
+
+/* ---------------- 歌单浮层 ---------------- */
 
 #player {
   position: fixed;
-  top: calc(var(--nav-height) + var(--space-4) + var(--space-4));
-  right: var(--space-4);
-  z-index: 999;
-  width: 340px;
-  max-height: 480px;
-  border-radius: var(--radius-md);
+  right: var(--gap-4);
+  bottom: var(--gap-4);
+  z-index: 880;
+  width: 328px;
+  max-height: 460px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-card);
-  transition: all var(--transition-base);
-}
-
-#player .aplayer-list {
-  overflow-y: auto !important;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
 }
 
 #player.aplayer {
   font-family: var(--font-sans);
 }
 
-/* =============================================
-   Responsive
-   ============================================= */
+#player .aplayer-info {
+  border-bottom: 1px solid var(--rule);
+}
 
-/* ======== MOBILE DRAWER (slide-over) ======== */
-@media (max-width: 768px) {
-  .site-header {
-    top: 0;
-    padding: 0 var(--space-3);
-    max-width: 100%;
-  }
+#player .aplayer-list ol li {
+  border-top: 1px solid var(--rule);
+}
 
-  .nav-glass {
-    border-radius: var(--radius-lg);
-    padding: 0 var(--space-4);
-  }
+#player .aplayer-list ol li.aplayer-list-light {
+  background: var(--paper-2);
+}
 
-  .nav-outer-glow {
-    border-radius: var(--radius-lg);
+/* ---------------- 移动端 ---------------- */
+
+.nav-mobile-backdrop,
+.nav-mobile-drawer {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .nav-links,
+  .nav-actions {
+    display: none;
   }
 
   .nav-toggle {
-    display: flex;
+    display: inline-flex;
   }
 
-  /* Hide desktop links on mobile */
-  .nav-links-desktop {
-    display: none !important;
-  }
-
-  .nav-actions-desktop {
-    display: none !important;
-  }
-
-  /* Mobile overlay backdrop */
   .nav-mobile-backdrop {
+    display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
+    z-index: 940;
+    background: rgba(21, 26, 34, 0.28);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    z-index: 998;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 250ms ease;
+    transition: opacity 220ms var(--ease), visibility 220ms;
   }
 
   .nav-mobile-backdrop.open {
@@ -753,234 +608,233 @@ html[data-theme="dark"] body {
     visibility: visible;
   }
 
-  /* Mobile slide-over drawer */
   .nav-mobile-drawer {
+    display: flex;
+    flex-direction: column;
+    flex-direction: column;
     position: fixed;
     top: 0;
     right: 0;
-    width: min(320px, 85vw);
-    height: 100vh;
+    z-index: 950;
+    width: min(360px, 88vw);
     height: 100dvh;
-    z-index: 999;
-    background: var(--color-bg-elevated);
-    border-left: 1px solid var(--color-border);
-    box-shadow: var(--shadow-xl);
-    padding: var(--space-6);
-    overflow-y: auto;
+    background: var(--glass-strong);
+    border-left: 1px solid var(--glass-line);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     transform: translateX(100%);
-    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
+    transition: transform 280ms var(--ease);
+    overflow-y: auto;
   }
 
   .nav-mobile-drawer.open {
-    transform: translateX(0);
+    transform: none;
   }
 
-  [data-theme="dark"] .nav-mobile-backdrop {
-    background: rgba(0, 0, 0, 0.6);
-  }
-
-  .nav-mobile-drawer-header {
+  .nav-mobile-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-6);
-    padding-bottom: var(--space-4);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .nav-mobile-drawer-header .nav-brand {
-    margin-right: 0;
+    height: var(--nav-h);
+    padding: 0 var(--gap-4);
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
   }
 
   .nav-mobile-close {
-    width: 36px;
-    height: 36px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-bg-soft);
-    color: var(--color-text-primary);
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--glass-line-2);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
     cursor: pointer;
-    font-size: 1.1rem;
   }
 
+  /* 目录式导航：序号 + 宋体条目 */
   .nav-mobile-links {
+    padding: var(--gap-4) var(--gap-4) 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
-    flex: 1;
   }
 
-  .nav-mobile-links .nav-link-item a {
-    width: 100%;
-    justify-content: flex-start;
-    padding: 12px 16px;
-    font-size: 0.95rem;
-    border-radius: var(--radius-md);
+  .nav-mobile-links .nav-link-item > a {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    height: auto;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--ink);
   }
 
-  .nav-mobile-links .nav-link-item a::after {
+  .nav-mobile-links .nav-link-item > a::after {
     display: none;
   }
 
+  .nav-mobile-links .nav-link-item > a::before {
+    counter-increment: navexc;
+    content: counter(navexc, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+  }
+
+  .nav-mobile-links {
+    counter-reset: navexc;
+  }
+
   .nav-mobile-links .nav-dropdown-trigger {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
     width: 100%;
-    justify-content: flex-start;
-    padding: 12px 16px;
-    font-size: 0.95rem;
-    border-radius: var(--radius-md);
+    height: auto;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--ink);
+  }
+
+  .nav-mobile-links .nav-mobile-index {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
   }
 
   .nav-mobile-links .nav-dropdown-menu {
     position: static;
+    display: block;
+    min-width: 0;
+    border: 0;
+    border-top: 1px solid var(--rule);
     box-shadow: none;
-    border: none;
-    margin-top: 2px;
-    padding: 0 0 0 var(--space-4);
-    background: transparent;
-    min-width: unset;
-    /* Keep show-driven visibility so ABOUT is collapsible */
-  }
-
-  /* Mobile: hide dropdown unless .show is present */
-  .nav-mobile-links .nav-dropdown-menu:not(.show) {
-    opacity: 0;
-    visibility: hidden;
-    max-height: 0;
-    overflow: hidden;
-  }
-
-  .nav-mobile-links .nav-dropdown-menu.show {
+    padding: 4px 0 10px;
     opacity: 1;
     visibility: visible;
     transform: none;
-    max-height: 600px;
-    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent;
+  }
+
+  .nav-mobile-links .nav-dropdown-menu:not(.show) {
+    display: none;
   }
 
   .nav-mobile-actions {
-    margin-top: var(--space-6);
-    padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+    margin-top: auto;
+    padding: var(--gap-5) var(--gap-4) var(--gap-6);
+    border-top: 1px solid var(--rule);
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-  }
-
-  .nav-mobile-actions .nav-icon-btn {
-    display: none;
+    gap: var(--gap-3);
   }
 
   .nav-mobile-toggles {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--gap-2);
   }
 
   .nav-mobile-toggle-btn {
     flex: 1;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    padding: 10px 14px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-soft);
-    color: var(--color-text-secondary);
+    gap: 6px;
+    height: 36px;
+    font-size: 12px;
+    color: var(--ink-2);
+    background: var(--glass-thin);
+    border: 1px solid var(--glass-line-2);
+    border-radius: 10px;
     cursor: pointer;
-    transition: all var(--transition-fast);
   }
 
   .nav-mobile-toggle-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-    background: var(--color-accent-soft);
+    border-color: var(--seal);
+    color: var(--seal);
   }
 
+  .nav-mobile-actions .nav-login-btn,
   .nav-mobile-actions .nav-cta {
     justify-content: center;
-    padding: 10px 20px;
-    font-size: 0.9rem;
-  }
-
-  .nav-mobile-actions .nav-login-btn {
-    justify-content: center;
-    padding: 10px 20px;
-    font-size: 0.9rem;
+    height: 40px;
+    width: 100%;
+    font-size: 13px;
   }
 
   .nav-mobile-actions .nav-user-badge {
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
+    justify-content: flex-start;
+    border: 1px solid var(--glass-line-2);
+    border-radius: 10px;
+    padding: 8px;
   }
 
-  .footer-grid {
+  .main-content {
+    padding-top: var(--gap-5);
+  }
+
+  .footer-top {
     grid-template-columns: 1fr;
-    gap: var(--space-8);
+    gap: var(--gap-6);
   }
 
   .footer-links-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    text-align: center;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   #player {
-    width: 280px;
-    right: var(--space-2);
-    max-height: 400px;
+    right: var(--gap-2);
+    bottom: var(--gap-2);
+    width: calc(100vw - 16px);
+    max-width: 300px;
+    max-height: 380px;
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 901px) {
   .nav-mobile-drawer,
   .nav-mobile-backdrop {
     display: none !important;
   }
 }
-
-@media (max-width: 480px) {
-  .footer-links-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
 </style>
 
 <template>
-  <div class="app-root" :data-theme="theme">
-    <!-- Loading overlay -->
+  <div class="app-shell">
+    <!-- 动态底衬：漂移光斑 + 指针柔光 -->
+    <Backdrop />
+
+    <!-- 加载：一枚朱印 -->
     <Transition name="fade">
       <div v-if="isLoading && !isDataLoaded" class="loading-overlay">
-        <div class="loading-ring"></div>
+        <div class="seal">若</div>
+        <span>LOADING</span>
       </div>
     </Transition>
 
-    <!-- Header / Navigation -->
+    <!-- 顶栏 -->
     <header class="site-header">
-      <nav class="nav-glass">
-        <div class="nav-outer-glow"></div>
-
+      <nav class="shell nav-inner">
         <RouterLink class="nav-brand" to="/">
-          <img src="/favicon.ico" alt="kloping's blog" />
-          <span class="nav-brand-text">kloping's blog</span>
+          <span class="nav-brand-name">若生</span>
+          <span class="nav-brand-mark">KLOPING</span>
         </RouterLink>
 
-        <!-- Desktop Nav Links -->
-        <ul class="nav-links nav-links-desktop">
+        <ul class="nav-links">
           <li class="nav-link-item">
-            <RouterLink to="/">首页</RouterLink>
+            <RouterLink to="/" exact-active-class="router-link-exact-active">文章</RouterLink>
           </li>
           <li class="nav-link-item">
-            <RouterLink to="/apis">公共API</RouterLink>
+            <RouterLink to="/apis">接口</RouterLink>
           </li>
           <li class="nav-link-item">
             <RouterLink to="/room">音乐厅</RouterLink>
@@ -991,43 +845,42 @@ html[data-theme="dark"] body {
               :class="{ open: aboutOpen }"
               @click="aboutOpen = !aboutOpen"
             >
-              ABOUT
+              关于
               <i class="bi bi-chevron-down chevron"></i>
             </button>
             <div class="nav-dropdown-menu" :class="{ show: aboutOpen }">
               <a class="nav-dropdown-item" target="_blank" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes">
                 <img alt="qq" loading="lazy" src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640" />
-                QQ (owner)
+                QQ · 找作者
               </a>
               <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=vdy2VbaBqujykAveW9LSf1NkHJnEdluyADdeASabqXmW0UMRl7U9DoG38VkxywDx&busi_data=eyJncm91cENvZGUiOiIyNzg2ODE1NTMiLCJ0b2tlbiI6IjAraFJPM2c3SS84cGVmMzFoY3dOL1lsekN4bUtWMi9sNGNtZVo5UEZQdk1HTVZYaVNCZDlNZzdhbWxFZmlKTHIiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=tytVVzt4Xk59uWCGdQ76HnXvp9pVmUYYu-0hwrupw2FX1nUuBtl8cEGYHMMBeEkG9ui_sK4mYWin_8dpNHhkLg&svctype=4&tempid=h5_group_info">
                 <img loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640" />
-                QQ GROUP (闲聊)
+                QQ 群 · 闲聊
               </a>
               <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=48SHxrAnIPg%2FSB9tcp3yAVFNY0%2BLD9Un4jrDckReN%2F9q2MmxF0PYmsXjd7fVcN%2Fh&busi_data=eyJncm91cENvZGUiOiI3OTQyMzg1NzIiLCJ0b2tlbiI6IklOTlhMNE00b1hsVWxIS1F5cWsyQy93RFVIaXRTRG50SitPbWZTSTJxWTMrM2JkaXVTZXROblVhRDhQMy91RmQiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=O39jKGFDN6F7w0E9OVEcAm6UWBQN9S1kVqiWPAArsh_-m3E7eYYGOP1Ysz7NOzmF8a1mhrKqXgAo2XggFtUWfg&svctype=4&tempid=h5_group_info">
                 <img alt="qq" loading="lazy" src="http://p.qlogo.cn/gh/794238572/794238572/640" />
-                QQ GROUP (技术)
+                QQ 群 · 技术
               </a>
               <a class="nav-dropdown-item" target="_blank" href="https://github.com/kloping">
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/87743020?v=4" />
-                github
+                GitHub
               </a>
               <a class="nav-dropdown-item" target="_blank" href="https://github.com/gdpl2112">
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
-                github organization
+                GitHub 组织
               </a>
-              <div class="nav-dropdown-version">front-vue3 update 26.10.14</div>
+              <div class="nav-dropdown-version">front-vue3 · 26.10.14</div>
             </div>
           </li>
           <li class="nav-link-item">
             <RouterLink to="/sponsors" class="nav-link-highlight">赞助</RouterLink>
           </li>
           <li class="nav-link-item">
-            <RouterLink to="/ai">AI对话</RouterLink>
+            <RouterLink to="/ai">AI 对话</RouterLink>
           </li>
         </ul>
 
-        <!-- Desktop Actions -->
-        <div class="nav-actions nav-actions-desktop">
+        <div class="nav-actions">
           <button class="nav-icon-btn" @click="toggleTheme" :title="theme === 'dark' ? '切换亮色' : '切换暗色'">
             <i :class="theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon'"></i>
           </button>
@@ -1037,144 +890,146 @@ html[data-theme="dark"] body {
 
           <span class="nav-divider"></span>
 
-          <!-- Logged in -->
           <template v-if="login_state">
-            <RouterLink to="/v0" class="nav-login-btn">个人中心</RouterLink>
+            <RouterLink to="/v0" class="nav-login-btn">控制台</RouterLink>
             <div class="nav-user-badge" @click="goToProfile">
               <img :src="userInfo.icon" alt="" class="nav-avatar" />
               <span class="nav-username">{{ userInfo.nickname }}</span>
             </div>
             <RouterLink to="/upload" class="nav-cta">
-              <i class="bi bi-pencil-square"></i> 发帖
+              <i class="bi bi-pencil"></i> 写文章
             </RouterLink>
             <button class="nav-icon-btn" @click="logout" title="退出登录">
               <i class="bi bi-box-arrow-right"></i>
             </button>
           </template>
 
-          <!-- Not logged in -->
           <template v-else>
             <RouterLink to="/login" class="nav-login-btn">登录</RouterLink>
           </template>
         </div>
 
-        <!-- Mobile toggle -->
-        <button class="nav-toggle" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
+        <button class="nav-toggle" @click="mobileOpen = !mobileOpen" aria-label="打开菜单">
           <i :class="mobileOpen ? 'bi bi-x-lg' : 'bi bi-list'"></i>
         </button>
       </nav>
 
-      <!-- Mobile Backdrop -->
-      <div class="nav-mobile-backdrop" :class="{ open: mobileOpen }" @click="mobileOpen = false"></div>
+    </header>
 
-      <!-- Mobile Drawer -->
-      <div class="nav-mobile-drawer" :class="{ open: mobileOpen }">
-        <div class="nav-mobile-drawer-header">
-          <RouterLink class="nav-brand" to="/" @click="mobileOpen = false">
-            <img src="/favicon.ico" alt="kloping's blog" />
-            <span class="nav-brand-text">kloping's blog</span>
-          </RouterLink>
-          <button class="nav-mobile-close" @click="mobileOpen = false">
-            <i class="bi bi-x-lg"></i>
+    <!-- 移动端目录 -->
+    <div class="nav-mobile-backdrop" :class="{ open: mobileOpen }" @click="mobileOpen = false"></div>
+
+    <div class="nav-mobile-drawer" :class="{ open: mobileOpen }">
+      <div class="nav-mobile-head">
+        <RouterLink class="nav-brand" to="/" @click="mobileOpen = false">
+          <span class="nav-brand-name">若生</span>
+        </RouterLink>
+        <button class="nav-mobile-close" @click="mobileOpen = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="nav-mobile-links">
+        <div class="nav-link-item">
+          <RouterLink to="/" @click="mobileOpen = false">文章</RouterLink>
+        </div>
+        <div class="nav-link-item">
+          <RouterLink to="/apis" @click="mobileOpen = false">接口</RouterLink>
+        </div>
+        <div class="nav-link-item">
+          <RouterLink to="/room" @click="mobileOpen = false">音乐厅</RouterLink>
+        </div>
+        <div class="nav-link-item nav-dropdown">
+          <button
+            class="nav-dropdown-trigger"
+            :class="{ open: aboutOpen }"
+            @click="aboutOpen = !aboutOpen"
+          >
+            <span class="nav-mobile-index">04</span>
+            关于
+            <i class="bi bi-chevron-down chevron"></i>
+          </button>
+          <div class="nav-dropdown-menu" :class="{ show: aboutOpen }">
+            <a class="nav-dropdown-item" target="_blank" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes" @click="mobileOpen = false">
+              <img alt="qq" loading="lazy" src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640" />
+              QQ · 找作者
+            </a>
+            <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=vdy2VbaBqujykAveW9LSf1NkHJnEdluyADdeASabqXmW0UMRl7U9DoG38VkxywDx&busi_data=eyJncm91cENvZGUiOiIyNzg2ODE1NTMiLCJ0b2tlbiI6IjAraFJPM2c3SS84cGVmMzFoY3dOL1lsekN4bUtWMi9sNGNtZVo5UEZQdk1HTVZYaVNCZDlNZzdhbWxFZmlKTHIiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=tytVVzt4Xk59uWCGdQ76HnXvp9pVmUYYu-0hwrupw2FX1nUuBtl8cEGYHMMBeEkG9ui_sK4mYWin_8dpNHhkLg&svctype=4&tempid=h5_group_info" @click="mobileOpen = false">
+              <img loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640" />
+              QQ 群 · 闲聊
+            </a>
+            <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=48SHxrAnIPg%2FSB9tcp3yAVFNY0%2BLD9Un4jrDckReN%2F9q2MmxF0PYmsXjd7fVcN%2Fh&busi_data=eyJncm91cENvZGUiOiI3OTQyMzg1NzIiLCJ0b2tlbiI6IklOTlhMNE00b1hsVWxIS1F5cWsyQy93RFVIaXRTRG50SitPbWZTSTJxWTMrM2JkaXVTZXROblVhRDhQMy91RmQiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=O39jKGFDN6F7w0E9OVEcAm6UWBQN9S1kVqiWPAArsh_-m3E7eYYGOP1Ysz7NOzmF8a1mhrKqXgAo2XggFtUWfg&svctype=4&tempid=h5_group_info" @click="mobileOpen = false">
+              <img alt="qq" loading="lazy" src="http://p.qlogo.cn/gh/794238572/794238572/640" />
+              QQ 群 · 技术
+            </a>
+            <a class="nav-dropdown-item" target="_blank" href="https://github.com/kloping" @click="mobileOpen = false">
+              <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/87743020?v=4" />
+              GitHub
+            </a>
+            <a class="nav-dropdown-item" target="_blank" href="https://github.com/gdpl2112" @click="mobileOpen = false">
+              <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
+              GitHub 组织
+            </a>
+            <div class="nav-dropdown-version">front-vue3 · 26.10.18</div>
+          </div>
+        </div>
+        <div class="nav-link-item">
+          <RouterLink to="/sponsors" class="nav-link-highlight" @click="mobileOpen = false">赞助</RouterLink>
+        </div>
+        <div class="nav-link-item">
+          <RouterLink to="/ai" @click="mobileOpen = false">AI 对话</RouterLink>
+        </div>
+      </div>
+
+      <div class="nav-mobile-actions">
+        <div class="nav-mobile-toggles">
+          <button class="nav-mobile-toggle-btn" @click="toggleTheme()">
+            <i :class="theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon'"></i>
+            <span>{{ theme === 'dark' ? '亮色' : '暗色' }}</span>
+          </button>
+          <button class="nav-mobile-toggle-btn" @click="ttplayer()">
+            <i class="bi bi-music-note-beamed"></i>
+            <span>歌单</span>
           </button>
         </div>
 
-        <div class="nav-mobile-links">
-          <div class="nav-link-item">
-            <RouterLink to="/" @click="mobileOpen = false">首页</RouterLink>
+        <template v-if="login_state">
+          <RouterLink to="/v0" class="nav-login-btn" @click="mobileOpen = false">控制台</RouterLink>
+          <div class="nav-user-badge" @click="goToProfile(); mobileOpen = false">
+            <img :src="userInfo.icon" alt="" class="nav-avatar" />
+            <span class="nav-username">{{ userInfo.nickname }}</span>
           </div>
-          <div class="nav-link-item">
-            <RouterLink to="/apis" @click="mobileOpen = false">公共API</RouterLink>
-          </div>
-          <div class="nav-link-item">
-            <RouterLink to="/room" @click="mobileOpen = false">音乐厅</RouterLink>
-          </div>
-          <div class="nav-link-item nav-dropdown">
-            <button
-              class="nav-dropdown-trigger"
-              :class="{ open: aboutOpen }"
-              @click="aboutOpen = !aboutOpen"
-            >
-              ABOUT
-              <i class="bi bi-chevron-down chevron"></i>
-            </button>
-            <div class="nav-dropdown-menu" :class="{ show: aboutOpen }">
-              <a class="nav-dropdown-item" target="_blank" href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes" @click="mobileOpen = false">
-                <img alt="qq" loading="lazy" src="http://q.qlogo.cn/g?b=qq&nk=3474006766&s=640" />
-                QQ (owner)
-              </a>
-              <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=vdy2VbaBqujykAveW9LSf1NkHJnEdluyADdeASabqXmW0UMRl7U9DoG38VkxywDx&busi_data=eyJncm91cENvZGUiOiIyNzg2ODE1NTMiLCJ0b2tlbiI6IjAraFJPM2c3SS84cGVmMzFoY3dOL1lsekN4bUtWMi9sNGNtZVo5UEZQdk1HTVZYaVNCZDlNZzdhbWxFZmlKTHIiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=tytVVzt4Xk59uWCGdQ76HnXvp9pVmUYYu-0hwrupw2FX1nUuBtl8cEGYHMMBeEkG9ui_sK4mYWin_8dpNHhkLg&svctype=4&tempid=h5_group_info" @click="mobileOpen = false">
-                <img loading="lazy" src="http://p.qlogo.cn/gh/278681553/278681553/640" />
-                QQ GROUP (闲聊)
-              </a>
-              <a class="nav-dropdown-item" target="_blank" href="https://qun.qq.com/universal-share/share?ac=1&authKey=48SHxrAnIPg%2FSB9tcp3yAVFNY0%2BLD9Un4jrDckReN%2F9q2MmxF0PYmsXjd7fVcN%2Fh&busi_data=eyJncm91cENvZGUiOiI3OTQyMzg1NzIiLCJ0b2tlbiI6IklOTlhMNE00b1hsVWxIS1F5cWsyQy93RFVIaXRTRG50SitPbWZTSTJxWTMrM2JkaXVTZXROblVhRDhQMy91RmQiLCJ1aW4iOiIzNDc0MDA2NzY2In0%3D&data=O39jKGFDN6F7w0E9OVEcAm6UWBQN9S1kVqiWPAArsh_-m3E7eYYGOP1Ysz7NOzmF8a1mhrKqXgAo2XggFtUWfg&svctype=4&tempid=h5_group_info" @click="mobileOpen = false">
-                <img alt="qq" loading="lazy" src="http://p.qlogo.cn/gh/794238572/794238572/640" />
-                QQ GROUP (技术)
-              </a>
-              <a class="nav-dropdown-item" target="_blank" href="https://github.com/kloping" @click="mobileOpen = false">
-                <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/87743020?v=4" />
-                github
-              </a>
-              <a class="nav-dropdown-item" target="_blank" href="https://github.com/gdpl2112" @click="mobileOpen = false">
-                <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
-                github organization
-              </a>
-              <div class="nav-dropdown-version">front-vue3 update 26.07.03</div>
-            </div>
-          </div>
-          <div class="nav-link-item">
-            <RouterLink to="/sponsors" class="nav-link-highlight" @click="mobileOpen = false">赞助</RouterLink>
-          </div>
-          <div class="nav-link-item">
-            <RouterLink to="/ai" @click="mobileOpen = false">AI对话</RouterLink>
-          </div>
-        </div>
-
-        <div class="nav-mobile-actions">
-          <!-- Theme & Music toggles -->
-          <div class="nav-mobile-toggles">
-            <button class="nav-mobile-toggle-btn" @click="toggleTheme(); mobileOpen = false">
-              <i :class="theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon'"></i>
-              <span>{{ theme === 'dark' ? '亮色模式' : '暗色模式' }}</span>
-            </button>
-            <button class="nav-mobile-toggle-btn" @click="ttplayer(); mobileOpen = false">
-              <i class="bi bi-music-note-beamed"></i>
-              <span>显隐歌单</span>
-            </button>
-          </div>
-
-          <template v-if="login_state">
-            <RouterLink to="/v0" class="nav-login-btn" @click="mobileOpen = false">个人中心</RouterLink>
-            <div class="nav-user-badge" @click="goToProfile(); mobileOpen = false">
-              <img :src="userInfo.icon" alt="" class="nav-avatar" />
-              <span class="nav-username">{{ userInfo.nickname }}</span>
-            </div>
-            <RouterLink to="/upload" class="nav-cta" @click="mobileOpen = false">
-              <i class="bi bi-pencil-square"></i> 发帖
-            </RouterLink>
-            <button class="nav-cta nav-cta-ghost" @click="logout(); mobileOpen = false">
-              <i class="bi bi-box-arrow-right"></i> 退出登录
-            </button>
-          </template>
-          <template v-else>
-            <RouterLink to="/login" class="nav-login-btn" @click="mobileOpen = false">登录</RouterLink>
-          </template>
-        </div>
+          <RouterLink to="/upload" class="nav-cta" @click="mobileOpen = false">
+            <i class="bi bi-pencil"></i> 写文章
+          </RouterLink>
+          <button class="nav-login-btn" @click="logout(); mobileOpen = false">
+            退出登录
+          </button>
+        </template>
+        <template v-else>
+          <RouterLink to="/login" class="nav-login-btn" @click="mobileOpen = false">登录</RouterLink>
+        </template>
       </div>
-    </header>
+    </div>
 
-    <!-- Main content -->
+    <!-- 正文 -->
     <main class="main-content">
-      <RouterView :apl="ap" />
+      <RouterView />
     </main>
 
-    <!-- Footer -->
+    <!-- 版权页 -->
     <footer class="site-footer">
       <div class="footer-inner">
-        <div class="footer-grid">
+        <div class="footer-top">
           <div class="footer-brand">
-            <h3>kloping's blog</h3>
-            <p>欢迎访问kloping的博客。本站提供API以及用户上传API、发帖等丰富功能。由若生(kloping)维护。</p>
+            <div class="footer-brand-head">
+              <span class="seal">若</span>
+              <h3>若生</h3>
+            </div>
+            <p>
+              一个人的记录：写过的东西、开放出去的接口，和一间随时可以坐下的音乐厅。
+              全部由若生（kloping）独自维护。
+            </p>
           </div>
           <div class="footer-links">
             <h4>友情链接</h4>
@@ -1189,12 +1044,12 @@ html[data-theme="dark"] body {
 
         <div class="footer-bottom">
           <p>
-            &copy; 2026&nbsp;
+            © 2026
             <a href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes" target="_blank">若生</a>
-            &nbsp;/&nbsp;
+            <span class="sep">/</span>
             <a href="//github.com/kloping" target="_blank">kloping</a>
-            &nbsp;·&nbsp;
-            <a :href="'//'+host0" target="_blank">{{ host0 }}</a>
+            <span class="sep">/</span>
+            <a :href="'//' + host0" target="_blank">{{ host0 }}</a>
           </p>
           <p>
             <a target="_blank" href="https://beian.miit.gov.cn/">皖ICP备2025088299号-1</a>
@@ -1203,25 +1058,28 @@ html[data-theme="dark"] body {
       </div>
     </footer>
 
-    <!-- Music player -->
+    <!-- 歌单 -->
     <div id="player"></div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {RouterLink, RouterView, useRouter} from 'vue-router'
+import {RouterLink, RouterView} from 'vue-router'
 import $ from 'jquery';
 import {onMounted, ref} from "vue";
 import {loadUser, login_state, service, userInfo, userLogout} from "@/axios";
 import {toast} from "@/utils/utils";
+//@ts-ignore
 import APlayer from 'aplayer/dist/APlayer.min';
+import router from "@/router";
+import Backdrop from "@/components/Backdrop.vue";
 
 let arr = ref([{color: "blue", url: "localhost", icon: "/icon.jpg", name: "slef"}])
 let host0 = ref("")
 let isDataLoaded = ref(false)
 let isLoading = ref(true)
 
-// Theme
+// 主题：localStorage 记忆 + html[data-theme] 驱动全部令牌
 const theme = ref(localStorage.getItem('blog-theme') || 'light')
 
 function applyTheme(t: string) {
@@ -1234,12 +1092,11 @@ function toggleTheme() {
   applyTheme(theme.value)
 }
 
-// Mobile
+// 移动端目录
 const mobileOpen = ref(false)
 const aboutOpen = ref(false)
 
 function goToProfile() {
-  const router = useRouter()
   router.push('/v0')
 }
 
@@ -1250,7 +1107,7 @@ service.get("/get-host?url=" + document.location).then(res => {
 })
 
 service.get("/user/flinks").then(res => {
-  arr.value = res
+  arr.value = res as unknown as any[]
 }).catch(err => {
   toast("获取友链失败" + err)
 })
@@ -1258,10 +1115,8 @@ service.get("/user/flinks").then(res => {
 let ap: APlayer;
 
 onMounted(async () => {
-  // Apply initial theme
+  // 应用初始主题
   applyTheme(theme.value);
-
-  const router = useRouter();
 
   router.beforeEach((to, from, next) => {
     isLoading.value = true;
@@ -1278,7 +1133,9 @@ onMounted(async () => {
     autoplay: false,
     listMaxHeight: 280,
     audio: [],
-    preload: "none"
+    preload: "none",
+    // 播放器主题色跟随站点的朱印色，避免默认浅蓝与整体纸墨观感冲突
+    theme: '#be3a28'
   });
 
   try {
@@ -1306,6 +1163,7 @@ onMounted(async () => {
   } catch (error) {
     toast("加载用户信息失败" + error);
   } finally {
+    // @ts-ignore
     window.ap = ap;
     isDataLoaded.value = true;
     setTimeout(() => { isLoading.value = false }, 600);

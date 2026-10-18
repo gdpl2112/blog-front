@@ -1,17 +1,69 @@
 <style scoped>
-.pnote-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+/* =============================================
+   密码本：可原地编辑的一页表格
+   ============================================= */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-4);
+}
+
+.panel-head h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.panel-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.tip {
+  margin: 0 0 var(--gap-4);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  color: var(--ink-3);
+}
+
+.cell-input {
+  height: 28px;
+}
+
+.cell-input :deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  background: var(--paper-2) !important;
+}
+
+:deep(.el-table .el-table__row) {
+  height: 48px;
+}
+
+:deep(.el-table__cell) {
+  font-size: var(--text-sm);
 }
 </style>
 
 <template>
-  <div class="pnote-section">
-    <h3>密码本</h3>
+  <div class="ink-in">
+    <div class="panel-head">
+      <h2>密码本</h2>
+      <span>悬停即编辑</span>
+    </div>
+
+    <p class="tip">
+      把光标移到任意一行即可编辑，移开后自动保存。把一行的内容全部清空，这一行会被删除；在最后一行填写内容即可新增一条。
+    </p>
+
     <el-table :data="dataList" @cell-mouse-enter="handleCellEnter" @cell-mouse-leave="handleCellLeave">
-      <el-table-column type="index" width="50" />
+      <el-table-column type="index" width="46" />
       <el-table-column label="平台" prop="type" width="120">
         <template #default="scope"><el-input v-if="scope.row.isEdit" class="cell-input" v-model="scope.row.type" /></template>
       </el-table-column>
@@ -24,7 +76,7 @@
       <el-table-column label="密码" prop="pwd" width="200">
         <template #default="scope"><el-input v-if="scope.row.isEdit" class="cell-input" v-model="scope.row.pwd" type="password" show-password /></template>
       </el-table-column>
-      <el-table-column label="备注" prop="tips" width="140">
+      <el-table-column label="备注" prop="tips" min-width="140">
         <template #default="scope"><el-input v-if="scope.row.isEdit" class="cell-input" v-model="scope.row.tips" /></template>
       </el-table-column>
     </el-table>
@@ -56,15 +108,9 @@ const handleCellLeave = (row: any) => {
 }
 
 onMounted(() => {
-  toast('修改示例表示添加新数据', 'warning', 5000)
   service.get("/api/pwdnote").then((res: any) => {
     let arr: Array<PwdNoteData> = res;
     if (arr.length != 0) arr.forEach((item) => { item.isEdit = true; dataList.push(item) })
   })
 })
 </script>
-
-<style scoped>
-.cell-input { height: 26px; margin-left: -10px; }
-:deep(.el-table .el-table__row) { height: 50px; }
-</style>

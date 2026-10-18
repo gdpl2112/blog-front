@@ -1,3 +1,7 @@
+.shots*
+.workbuddy
+.vscode
+.shots
 .codegraph
 .codebuddy
 # Logs

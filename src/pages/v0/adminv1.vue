@@ -1,46 +1,109 @@
 <style scoped>
-.admin-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+/* =============================================
+   一言维护
+   ============================================= */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-5);
+}
+
+.panel-head h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.panel-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
 }
 
 .add-bar {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--gap-2);
   flex-wrap: wrap;
-  align-items: center;
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
+  align-items: flex-start;
+  margin-top: var(--gap-5);
+  padding-top: var(--gap-4);
+  border-top: 1px solid var(--glass-line);
+}
+
+.add-bar .grow {
+  flex: 1;
+  min-width: 220px;
+}
+
+.pager {
+  margin-top: var(--gap-4);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cell-line {
+  font-size: var(--text-sm);
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+.cell-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
 }
 </style>
 
 <template>
-  <div class="admin-section">
-    <h3>每日一言管理</h3>
+  <div class="ink-in">
+    <div class="panel-head">
+      <h2>一言维护</h2>
+      <span>{{ ndata.total || 0 }} 条</span>
+    </div>
 
-    <el-table :data="data" stripe style="width:100%">
-      <el-table-column type="index" width="50" />
-      <el-table-column prop="date" label="日期" width="160" />
-      <el-table-column prop="from" label="来自" width="160" />
-      <el-table-column prop="line" label="内容" />
-      <el-table-column align="right" width="100">
+    <el-table :data="data" style="width: 100%">
+      <el-table-column type="index" width="46" />
+      <el-table-column label="日期" width="120">
+        <template #default="{ row }"><span class="cell-mono">{{ row.date }}</span></template>
+      </el-table-column>
+      <el-table-column label="来自" width="140">
+        <template #default="{ row }"><span class="cell-mono">{{ row.from }}</span></template>
+      </el-table-column>
+      <el-table-column label="内容">
+        <template #default="{ row }"><span class="cell-line">{{ row.line }}</span></template>
+      </el-table-column>
+      <el-table-column label="" width="80" align="right">
         <template #default="scope">
-          <el-button size="default" type="danger" @click="removed(scope.row)">删除</el-button>
+          <el-button size="small" type="danger" plain @click="removed(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-pagination size="default" background layout="prev, pager, next" :total="ndata.total" :page-size="ndata.size" :current-page="p" @update:current-page="loadData" class="mt-4" />
+    <div class="pager">
+      <el-pagination
+        size="small"
+        background
+        layout="prev, pager, next"
+        :total="ndata.total"
+        :page-size="ndata.size"
+        :current-page="p"
+        @update:current-page="loadData"
+      />
+    </div>
 
     <div class="add-bar">
-      <el-input v-model="vdate" style="width:100px;" placeholder="日期" />
-      <el-input v-model="vline" style="width:260px;" type="textarea" :autosize="{minRows:1,maxRows:2}" placeholder="内容" />
-      <el-input v-model="vfrom" style="width:100px;" type="textarea" :autosize="{minRows:1,maxRows:2}" placeholder="来源" />
-      <el-button @click="add" type="primary" plain>添加</el-button>
-      <el-button @click="gen" type="success" plain>生成一个</el-button>
+      <el-input v-model="vdate" style="width: 120px" placeholder="日期" />
+      <el-input v-model="vline" class="grow" type="textarea" :autosize="{minRows:1,maxRows:2}" placeholder="内容" />
+      <el-input v-model="vfrom" style="width: 120px" type="textarea" :autosize="{minRows:1,maxRows:2}" placeholder="来源" />
+      <el-button @click="add" type="primary">添加</el-button>
+      <el-button @click="gen">生成一条</el-button>
     </div>
   </div>
 </template>

@@ -1,131 +1,218 @@
 <style scoped>
-.sponsors-page {
-  max-width: 800px;
-  margin: 0 auto;
+/* =============================================
+   赞助页：两张收款图版 + 一份名单
+   ============================================= */
+
+.sponsors {
+  padding-top: var(--gap-4);
 }
 
-.sponsors-hero {
-  text-align: center;
-  margin-bottom: var(--space-8);
+.sponsors-head {
+  max-width: 36em;
+  padding-bottom: var(--gap-5);
 }
 
-.sponsors-hero h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 0 0 var(--space-3);
-  color: var(--color-text-primary);
+.sponsors-head h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
 }
 
-.sponsors-hero p {
-  color: var(--color-text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0 auto;
-  max-width: 48ch;
+.sponsors-head p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.95;
+  color: var(--ink-2);
 }
 
-.qr-grid {
+/* ---------- 图版 ---------- */
+
+.plates {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  margin-bottom: var(--space-10);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-5);
+  padding-bottom: var(--gap-7);
 }
 
-.qr-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  text-align: center;
-  transition: all var(--transition-base);
+.plate {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  padding: var(--gap-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-3);
+  background: var(--glass);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
-.qr-card:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-md);
+.plate:hover {
+  transform: translateY(-2px);
+  background: var(--glass-strong);
 }
 
-.qr-card h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+.plate h2 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin: 0;
+  align-self: flex-start;
 }
 
-.qr-image {
-  width: 200px;
-  height: 200px;
+.plate-img {
+  width: min(220px, 100%);
+  aspect-ratio: 1;
   object-fit: contain;
-  margin: 0 auto;
-  display: block;
-  border-radius: var(--radius-sm);
+  padding: var(--gap-2);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--glass-line-2);
+  border-radius: var(--r-md);
 }
 
-.qr-card p {
-  margin-top: var(--space-3);
-  font-size: 0.85rem;
-  color: var(--color-text-tertiary);
+.plate-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  margin: 0;
 }
 
-.sponsor-table-wrap {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
+/* ---------- 名单 ---------- */
+
+.list-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: var(--gap-3);
+  border-bottom: 1px solid var(--rule-2);
 }
 
-.sponsor-table-wrap h3 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-5);
-  color: var(--color-text-primary);
+.list-head h2 {
+  font-size: var(--text-lg);
+  letter-spacing: 0.06em;
+}
+
+.list-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+}
+
+.sponsor-row {
+  display: grid;
+  grid-template-columns: 160px 120px 120px minmax(0, 1fr);
+  gap: var(--gap-4);
+  align-items: baseline;
+  padding: var(--gap-4) var(--gap-1);
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--text-sm);
+  transition: background var(--dur) var(--ease);
+}
+
+.sponsor-row:hover {
+  background: var(--glass-thin);
+}
+
+.sponsor-name {
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sponsor-amount {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--seal);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.sponsor-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+.sponsor-msg {
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
 }
 
 .sponsor-empty {
-  text-align: center;
-  padding: var(--space-8);
-  color: var(--color-text-tertiary);
+  padding: var(--gap-7) 0;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
 }
 
-@media (max-width: 640px) {
-  .qr-grid { grid-template-columns: 1fr; }
-  .qr-image { width: 160px; height: 160px; }
+@media (max-width: 760px) {
+  .plates {
+    grid-template-columns: 1fr;
+  }
+
+  .sponsor-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+  }
+
+  .sponsor-name { grid-column: 1; }
+  .sponsor-amount { grid-column: 2; text-align: right; }
+  .sponsor-date { grid-column: 1; }
+  .sponsor-msg { grid-column: 1 / -1; }
 }
 </style>
 
 <template>
-  <div class="sponsors-page">
-    <div class="sponsors-hero">
-      <h1>赞助支持</h1>
-      <p>您们的支持是我前进的动力！赞助时请备注（昵称:留言），收到后第一时间更新数据。</p>
-    </div>
+  <div class="sponsors ink-in">
+    <header class="sponsors-head">
+      <h1>赞助</h1>
+      <p>
+        这个站点的服务器、域名和写文章时喝掉的咖啡，都由这些二维码支撑。
+        转账时留一句昵称和留言，我会把它记在下面的名单里。
+      </p>
+    </header>
 
-    <div class="qr-grid">
-      <div class="qr-card">
-        <h4>微信支付</h4>
-        <img src="/images/wechat-qrcode.png" alt="微信收款码" class="qr-image" />
-        <p>使用 WeChat 扫码</p>
+    <!-- 图版 -->
+    <section class="plates">
+      <div class="plate">
+        <h2>微信支付</h2>
+        <img src="/images/wechat-qrcode.png" alt="微信收款码" class="plate-img" />
+        <p class="plate-note">扫码转账</p>
       </div>
-      <div class="qr-card">
-        <h4>支付宝</h4>
-        <img src="/images/alipay-qrcode.png" alt="支付宝收款码" class="qr-image" />
-        <p>使用 Alipay 扫码</p>
+      <div class="plate">
+        <h2>支付宝</h2>
+        <img src="/images/alipay-qrcode.png" alt="支付宝收款码" class="plate-img" />
+        <p class="plate-note">扫码转账</p>
       </div>
-    </div>
+    </section>
 
-    <div class="sponsor-table-wrap">
-      <h3>赞助名单</h3>
-      <div v-if="sponsors.length === 0" class="sponsor-empty">暂时没有赞助信息</div>
-      <el-table v-else :data="sponsors" stripe style="width:100%">
-        <el-table-column prop="name" label="姓名" width="140" />
-        <el-table-column prop="amount" label="金额（元）" width="140">
-          <template #default="{ row }">￥{{ row.amount }}</template>
-        </el-table-column>
-        <el-table-column prop="date" label="日期" width="160" />
-        <el-table-column prop="msg" label="留言" />
-      </el-table>
-    </div>
+    <!-- 名单 -->
+    <section>
+      <div class="list-head">
+        <h2>赞助名单</h2>
+        <span>{{ sponsors.length }} 位</span>
+      </div>
+
+      <div v-if="sponsors.length === 0" class="sponsor-empty">还没有人留下名字。</div>
+
+      <div v-else>
+        <div v-for="s in sponsors" :key="s.id" class="sponsor-row">
+          <span class="sponsor-name">{{ s.name }}</span>
+          <span class="sponsor-amount">¥ {{ s.amount }}</span>
+          <span class="sponsor-date">{{ s.date }}</span>
+          <span class="sponsor-msg">{{ s.msg }}</span>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 

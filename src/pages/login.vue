@@ -1,84 +1,129 @@
 <style scoped>
-.login-page {
-  display: flex;
-  min-height: 70vh;
-  align-items: stretch;
-  border-radius: var(--radius-lg);
+/* =============================================
+   登录：左墨右纸的扉页
+   ============================================= */
+
+.entry-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  min-height: calc(100vh - var(--nav-h) - 232px);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  background: var(--glass);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   overflow: hidden;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
 }
 
-.login-brand {
-  flex: 1;
+/* 左侧墨块 */
+.entry-side {
+  position: relative;
+  background: linear-gradient(158deg, rgba(30, 35, 44, 0.94) 0%, rgba(13, 16, 22, 0.97) 100%);
+  color: var(--block-ink);
+  padding: var(--gap-7) var(--gap-6);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: var(--space-10) var(--space-8);
-  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
-  color: white;
+  justify-content: space-between;
+  gap: var(--gap-7);
+  overflow: hidden;
 }
 
-.login-brand h1 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 0 0 var(--space-3);
+.entry-side .seal {
+  width: 44px;
+  height: 44px;
+  font-size: 23px;
 }
 
-.login-brand p {
-  font-size: 1rem;
-  opacity: 0.85;
+.entry-side h1 {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  margin: var(--gap-5) 0 var(--gap-4);
+  color: var(--block-ink);
+}
+
+.entry-side p {
   margin: 0;
-  line-height: 1.6;
-  max-width: 32ch;
+  max-width: 24em;
+  font-size: var(--text-sm);
+  line-height: 2;
+  color: var(--block-ink-2);
 }
 
-.login-form-wrap {
-  flex: 1;
+.entry-side-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+}
+
+.entry-side-links a {
+  color: var(--block-ink-2);
+  text-decoration: none;
+}
+
+.entry-side-links a:hover {
+  color: var(--block-ink);
+  text-decoration: none;
+}
+
+/* 右侧表单 */
+.entry-form {
+  padding: var(--gap-7) var(--gap-6);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: var(--space-10) var(--space-8);
 }
 
-.login-form-wrap h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-6);
-  color: var(--color-text-primary);
+.entry-form h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: 0 0 6px;
 }
 
-.login-form {
+.entry-form .sub {
+  margin: 0 0 var(--gap-5);
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.form-block {
   width: 100%;
-  max-width: 320px;
 }
 
-.login-divider {
+.form-block :deep(.el-form-item) {
+  margin-bottom: 14px;
+}
+
+.divider {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  margin: var(--space-4) 0;
-  color: var(--color-text-tertiary);
-  font-size: 0.8rem;
+  gap: var(--gap-3);
+  margin: var(--gap-5) 0 var(--gap-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
 }
 
-.login-divider::before,
-.login-divider::after {
+.divider::before,
+.divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--color-border);
+  background: var(--rule);
 }
 
 .social-btns {
   display: flex;
-  gap: var(--space-3);
-  width: 100%;
-  margin-top: var(--space-3);
+  gap: var(--gap-2);
 }
 
 .social-btn {
@@ -86,76 +131,98 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  gap: 7px;
+  height: 42px;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--glass-thin);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--rule-2);
+  border-radius: 8px;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .social-btn:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 .social-btn img {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.75;
 }
 
-.login-footer-links {
+.social-btn:hover img {
+  filter: none;
+  opacity: 1;
+}
+
+.form-foot {
   display: flex;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-  width: 100%;
-  justify-content: center;
+  justify-content: space-between;
+  gap: var(--gap-3);
+  margin-top: var(--gap-5);
+  font-size: var(--text-xs);
 }
 
-.login-footer-links a {
-  font-size: 0.8rem;
-  color: var(--color-text-tertiary);
+.form-foot a {
+  color: var(--ink-3);
   cursor: pointer;
-  transition: color var(--transition-fast);
 }
 
-.login-footer-links a:hover {
-  color: var(--color-accent);
+.form-foot a:hover {
+  color: var(--seal);
+  text-decoration: none;
 }
 
-@media (max-width: 768px) {
-  .login-page {
-    flex-direction: column;
+@media (max-width: 860px) {
+  .entry-page {
+    grid-template-columns: 1fr;
     min-height: auto;
   }
-  .login-brand {
-    padding: var(--space-8) var(--space-6);
-    text-align: center;
+
+  .entry-side {
+    padding: var(--gap-6) var(--gap-5);
+    gap: var(--gap-5);
   }
-  .login-brand h1 { font-size: 1.6rem; }
-  .login-brand p { margin: 0 auto; }
-  .login-form-wrap {
-    padding: var(--space-8) var(--space-6);
+
+  .entry-side h1 {
+    font-size: 24px;
+    margin: var(--gap-4) 0 8px;
+  }
+
+  .entry-form {
+    padding: var(--gap-6) var(--gap-5);
   }
 }
 </style>
 
 <template>
-  <div class="login-page">
-    <div class="login-brand">
-      <h1>kloping's blog</h1>
-      <p>欢迎访问kloping的博客。本站提供API以及用户上传API、发帖等丰富功能。</p>
-    </div>
-    <div class="login-form-wrap">
-      <h2>欢迎回来</h2>
-      <el-form ref="formRef" :rules="rules" :model="form" class="login-form">
+  <div class="entry-page ink-in">
+    <aside class="entry-side">
+      <div>
+        <span class="seal">若</span>
+        <h1>回到这里<br />继续写下去</h1>
+        <p>登录后可以收藏文章、发表评论、把接口收进自己的清单，也能进控制台整理已经写过的东西。</p>
+      </div>
+      <div class="entry-side-links">
+        <a href="https://github.com/kloping" target="_blank">GITHUB</a>
+        <a href="//wpa.qq.com/msgrd?v=3&amp;uin=3474006766&amp;site=qq&amp;menu=yes" target="_blank">QQ 3474006766</a>
+      </div>
+    </aside>
+
+    <section class="entry-form">
+      <h2>登录</h2>
+      <p class="sub">用户名、QQ 号或邮箱都可以。</p>
+
+      <el-form ref="formRef" :rules="rules" :model="form" class="form-block">
         <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名/QQ/邮箱" size="large">
+          <el-input v-model="form.username" placeholder="用户名 / QQ / 邮箱" size="large">
             <template #prefix><el-icon><User /></el-icon></template>
           </el-input>
         </el-form-item>
@@ -165,13 +232,13 @@
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-button :loading="loading" type="primary" size="large" @click="submitForm" style="width:100%;background:var(--color-accent);border-color:var(--color-accent);">
+          <el-button :loading="loading" type="primary" size="large" @click="submitForm" style="width: 100%">
             登录
           </el-button>
         </el-form-item>
       </el-form>
 
-      <div class="login-divider">第三方登录</div>
+      <div class="divider">或使用</div>
 
       <div class="social-btns">
         <button class="social-btn" @click="gotoGithub">
@@ -184,11 +251,11 @@
         </button>
       </div>
 
-      <div class="login-footer-links">
+      <div class="form-foot">
         <a @click="resetEid()">忘记密码</a>
-        <a @click="gotoReg">邮箱注册</a>
+        <a @click="gotoReg">还没有账号，去注册</a>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 

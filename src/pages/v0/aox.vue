@@ -1,75 +1,148 @@
 <style scoped>
-.aox-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
+/* =============================================
+   接口管理：清单 + 新增表单
+   ============================================= */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-2);
+  margin-bottom: var(--gap-5);
 }
 
-.aox-add-btn {
-  margin-bottom: var(--space-4);
+.panel-head h2 {
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  margin: 0;
 }
 
-.aox-form {
-  background: var(--color-bg-soft);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  margin-bottom: var(--space-5);
-  display: none;
+.panel-head span {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
 }
 
-.aox-form.show {
-  display: block;
+.table-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  margin: var(--gap-5) 0;
+}
+
+.table-tools .hint {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.add-form {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-md);
+  padding: var(--gap-5);
+  margin-top: var(--gap-5);
+  background: var(--glass-thin);
+}
+
+.add-form h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 0 0 var(--gap-4);
+}
+
+.add-form :deep(.el-form-item) {
+  margin-bottom: 12px;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--gap-2);
+}
+
+.method-cell {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+.addr-cell {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
 }
 </style>
 
 <template>
-  <div class="aox-section">
-    <h3>API管理</h3>
+  <div class="ink-in">
+    <div class="panel-head">
+      <h2>接口管理</h2>
+      <span>{{ tableData.length }} 条</span>
+    </div>
 
-    <el-table :data="tableData" style="width:100%" max-height="300">
-      <el-table-column fixed prop="name" label="名字" width="140" />
-      <el-table-column prop="method" label="方法" width="100" />
-      <el-table-column prop="state" label="状态" width="100" />
-      <el-table-column prop="address" label="地址" width="120" />
-      <el-table-column prop="desc" label="描述" min-width="240" />
-      <el-table-column fixed="right" label="操作" width="100">
-        <template #default="scope">
-          <el-button link type="primary" size="small" @click.prevent="deleteRow(scope.$index)">Remove</el-button>
+    <el-table :data="tableData" style="width: 100%" max-height="340">
+      <el-table-column prop="name" label="名称" width="130" />
+      <el-table-column label="方法" width="80">
+        <template #default="{ row }"><span class="method-cell">{{ row.method }}</span></template>
+      </el-table-column>
+      <el-table-column label="状态" width="90">
+        <template #default="{ row }">
+          <span class="chip" :class="row.state === 'success' ? 'chip--ok' : ''">{{ row.state }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="地址" width="150">
+        <template #default="{ row }"><span class="addr-cell">{{ row.address }}</span></template>
+      </el-table-column>
+      <el-table-column prop="desc" label="描述" min-width="220" show-overflow-tooltip />
+      <el-table-column label="" width="72" align="right">
+        <template #default="{ $index }">
+          <el-button link type="danger" size="small" @click.prevent="deleteRow($index)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <button class="btn-modern aox-add-btn" @click="ttff">
-      <i class="bi bi-plus-circle"></i> 添加API
-    </button>
+    <div class="table-tools">
+      <span class="hint">新增的接口会出现在公开的接口目录里。</span>
+      <button class="btn btn--sm" @click="ttff">
+        <i :class="formVisible ? 'bi bi-x' : 'bi bi-plus'"></i>
+        {{ formVisible ? '收起表单' : '新增接口' }}
+      </button>
+    </div>
 
-    <div id="ff" class="aox-form" :class="{show: formVisible}">
-      <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="API名" prop="name">
-          <el-input v-model="ruleForm.name" placeholder="API名称" />
+    <div v-if="formVisible" class="add-form">
+      <h3>新增接口</h3>
+      <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="84px" style="max-width: 560px">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="ruleForm.name" placeholder="2–9 个字" />
         </el-form-item>
         <el-form-item label="状态" prop="state">
-          <el-select v-model="ruleForm.state" placeholder="选择状态">
+          <el-select v-model="ruleForm.state" placeholder="选择状态" style="width: 100%">
             <el-option label="稳定" value="success" />
             <el-option label="不确定" value="warning" />
           </el-select>
         </el-form-item>
         <el-form-item label="请求方式" prop="method">
-          <el-select v-model="ruleForm.method" placeholder="请求方式">
+          <el-select v-model="ruleForm.method" placeholder="请求方式" style="width: 100%">
             <el-option label="GET" value="GET" />
             <el-option label="POST" value="POST" />
           </el-select>
         </el-form-item>
-        <el-form-item label="API地址" prop="address">
-          <el-input v-model="ruleForm.address" placeholder="API地址" />
+        <el-form-item label="地址" prop="address">
+          <el-input v-model="ruleForm.address" placeholder="https://" />
         </el-form-item>
         <el-form-item label="描述" prop="desc">
-          <el-input v-model="ruleForm.desc" type="textarea" placeholder="参数格式和返回格式" />
+          <el-input v-model="ruleForm.desc" type="textarea" :rows="3" placeholder="参数格式和返回格式" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm(ruleFormRef)" style="background:var(--color-accent);border-color:var(--color-accent);">提交</el-button>
-          <el-button @click="resetForm(ruleFormRef)">重置</el-button>
+          <div class="form-actions">
+            <el-button type="primary" @click="submitForm(ruleFormRef)">提交</el-button>
+            <el-button @click="resetForm(ruleFormRef)">重置</el-button>
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -77,14 +150,12 @@
 </template>
 
 <script lang="ts" setup>
-import $ from 'jquery'
-import {onMounted, reactive, ref} from 'vue'
-import type {ComponentSize, FormInstance, FormRules} from 'element-plus'
+import {reactive, ref} from 'vue'
+import type {FormInstance, FormRules} from 'element-plus'
 import service from "@/axios";
 import {toast} from "@/utils/utils";
 
 interface RuleForm { name: string; state: string; method: string; address: string; desc: string }
-const formSize = ref<ComponentSize>('default')
 const ruleFormRef = ref<FormInstance>()
 const ruleForm = reactive<RuleForm>({name:'',state:'',method:'',address:'',desc:''})
 const rules = reactive<FormRules<RuleForm>>({

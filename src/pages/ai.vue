@@ -1,176 +1,201 @@
 <style scoped>
+/* =============================================
+   AI 对话：一封一封往来的信
+   ============================================= */
+
 .ai-page {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  height: calc(100vh - var(--nav-height) - var(--space-8));
-  min-height: 600px;
+  height: calc(100vh - var(--nav-h) - 96px);
+  min-height: 560px;
 }
 
 .ai-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: var(--space-4);
+  grid-template-columns: 244px minmax(0, 1fr);
   height: 100%;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  background: var(--glass);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   overflow: hidden;
 }
 
-/* Sidebar */
+/* ---------- 侧栏 ---------- */
+
 .ai-sidebar {
-  background: var(--color-bg-soft);
-  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
+  background: var(--glass-thin);
+  border-right: 1px solid var(--glass-line-2);
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  gap: 8px;
+  padding: var(--gap-4);
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
 }
 
 .sidebar-header h3 {
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
   margin: 0;
-  color: var(--color-text-primary);
 }
 
 .sidebar-count {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
-  background: var(--color-bg);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
 }
 
 .session-list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-2);
+  padding: 6px 0;
 }
 
 .session-item {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  gap: 8px;
+  padding: 10px var(--gap-4);
   cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-bottom: 2px;
+  border-bottom: 1px solid var(--rule);
+  transition: background var(--dur) var(--ease);
 }
 
 .session-item:hover {
-  background: var(--color-accent-soft);
+  background: var(--glass-thin);
 }
 
 .session-item.active {
-  background: var(--color-accent);
-  color: white;
+  background: var(--glass-thin);
 }
 
-.session-item.active .session-meta {
-  color: rgba(255,255,255,0.7);
+.session-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--seal);
 }
 
 .session-title {
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
+}
+
+.session-item.active .session-title {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .session-meta {
-  font-size: 0.7rem;
-  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
   margin-top: 2px;
+  letter-spacing: 0.04em;
 }
 
 .session-del {
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  border: none;
+  flex-shrink: 0;
+  border: 0;
   background: none;
-  color: inherit;
+  padding: 2px;
+  font-size: 11px;
+  color: var(--ink-3);
   cursor: pointer;
-  padding: 4px;
-  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .session-item:hover .session-del {
-  opacity: 0.6;
+  opacity: 1;
 }
 
-.session-item:hover .session-del:hover {
-  opacity: 1;
+.session-del:hover {
+  color: var(--color-danger);
 }
 
 .sidebar-collapsed {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: var(--space-3);
+  padding: var(--gap-4) 0;
   cursor: pointer;
-  color: var(--color-text-tertiary);
-  font-size: 1.2rem;
-  border-right: 1px solid var(--color-border);
-  background: var(--color-bg-soft);
-  transition: all var(--transition-fast);
+  color: var(--ink-3);
+  font-size: 14px;
+  border-right: 1px solid var(--rule);
+  background: var(--paper-2);
+  transition: color var(--dur) var(--ease);
 }
 
 .sidebar-collapsed:hover {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: var(--seal);
 }
 
-/* Main chat area */
+/* ---------- 会话区 ---------- */
+
 .chat-main {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
 }
 
 .chat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--gap-3);
+  padding: var(--gap-4) var(--gap-5);
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
 }
 
 .chat-header h4 {
-  font-size: 0.875rem;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
   font-weight: 600;
-  margin: 0;
-  color: var(--color-text-primary);
+  letter-spacing: 0.04em;
+  margin: 0 0 2px;
 }
 
 .chat-header small {
-  color: var(--color-text-tertiary);
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-3) var(--space-2);
+  padding: var(--gap-5) var(--gap-5) var(--gap-3);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--gap-5);
 }
 
 .message-row {
   display: flex;
-  gap: var(--space-2);
-  max-width: 92%;
+  gap: 10px;
+  max-width: 88%;
 }
 
 .message-row.user {
@@ -179,232 +204,262 @@
 }
 
 .message-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
-  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  border-radius: 8px;
+  color: #fff;
 }
 
 .avatar-assistant {
-  background: var(--color-accent);
+  background: var(--seal);
 }
 
 .avatar-user {
-  background: var(--color-success);
+  background: var(--ink);
+  color: var(--on-ink);
 }
 
 .message-bubble {
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  font-size: 0.8rem;
-  line-height: 1.55;
-  min-width: 60px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: var(--text-sm);
+  line-height: 1.85;
+  min-width: 40px;
+  overflow-wrap: anywhere;
 }
 
 .bubble-assistant {
-  background: var(--color-bg-soft);
-  color: var(--color-text-primary);
+  background: var(--glass-thin);
+  color: var(--ink);
+  border: 1px solid var(--glass-line-2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .bubble-user {
-  background: var(--color-accent);
-  color: white;
+  background: var(--ink);
+  color: var(--on-ink);
+  box-shadow: 0 12px 28px -18px rgba(21, 26, 34, 0.6);
+}
+
+.bubble-user a {
+  color: var(--on-ink);
 }
 
 .message-actions {
   display: flex;
-  gap: var(--space-1);
-  margin-top: var(--space-1);
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.message-row.user .message-actions {
   justify-content: flex-end;
 }
 
 .message-action-btn {
-  border: none;
+  border: 0;
   background: none;
-  color: var(--color-text-tertiary);
-  font-size: 0.75rem;
+  padding: 2px 4px;
+  font-size: 11px;
+  color: var(--ink-3);
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  border-radius: 8px;
+  transition: color var(--dur) var(--ease);
 }
 
 .message-action-btn:hover {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: var(--seal);
 }
 
 .message-time {
-  font-size: 0.7rem;
-  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+  margin-right: 4px;
 }
 
-/* Empty state */
+/* ---------- 空态 ---------- */
+
 .empty-chat {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-8);
+  padding: var(--gap-6);
   text-align: center;
 }
 
 .empty-chat-icon {
-  font-size: 2.5rem;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--gap-4);
 }
 
 .empty-chat h5 {
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
   font-weight: 600;
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-primary);
+  letter-spacing: 0.06em;
+  margin: 0 0 6px;
 }
 
 .empty-chat p {
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-  margin: 0 0 var(--space-6);
-  max-width: 36ch;
+  max-width: 30em;
+  margin: 0 0 var(--gap-5);
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  line-height: 1.8;
 }
 
 .quick-prompts {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 8px;
   justify-content: center;
+  max-width: 560px;
 }
 
 .quick-prompt-btn {
-  padding: 7px 14px;
-  font-size: 0.8rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-card);
-  color: var(--color-text-secondary);
+  padding: 7px 13px;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--rule-2);
+  border-radius: 8px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .quick-prompt-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: var(--seal);
+  color: var(--seal);
 }
 
-/* Input area */
+/* ---------- 输入 ---------- */
+
 .chat-input-area {
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
-  background: var(--color-bg-card);
+  flex-shrink: 0;
+  border-top: 1px solid var(--glass-line-2);
+  padding: var(--gap-3) var(--gap-5) var(--gap-4);
+  background: transparent;
 }
 
 .format-toolbar {
   display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-3);
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
 .format-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-card);
-  color: var(--color-text-tertiary);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 11px;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 0.85rem;
+  transition: all var(--dur) var(--ease);
 }
 
 .format-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: var(--rule-2);
+  color: var(--ink);
 }
 
 .format-hint {
-  font-size: 0.7rem;
-  color: var(--color-text-tertiary);
-  align-self: center;
   margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
 }
 
 .input-row {
   display: flex;
-  gap: var(--space-2);
+  gap: 8px;
+  align-items: flex-end;
 }
 
 .input-row textarea {
   flex: 1;
-  padding: 10px 14px;
-  font-size: 0.85rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-  color: var(--color-text-primary);
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--glass-thin);
+  border: 1px solid var(--glass-line-2);
+  border-radius: var(--r-md);
   resize: none;
   outline: none;
-  transition: all var(--transition-fast);
-  font-family: inherit;
+  transition: border-color var(--dur) var(--ease);
 }
 
 .input-row textarea:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-soft);
+  border-color: var(--glass-line);
+  background: var(--glass-strong);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.input-row textarea::placeholder {
+  color: var(--ink-3);
 }
 
 .send-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: 600;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-
-.send-btn.send {
-  background: var(--color-accent);
-  color: white;
+  transition: all var(--dur) var(--ease);
 }
 
 .send-btn.send:hover {
-  background: var(--color-accent-hover);
+  background: var(--seal);
+  border-color: var(--seal);
+  color: #fff;
 }
 
 .send-btn.stop {
-  background: var(--color-danger);
-  color: white;
+  background: transparent;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .send-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .image-row {
   display: flex;
-  gap: var(--space-2);
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: var(--space-2);
+  margin-bottom: 8px;
 }
 
 .image-attachment {
   position: relative;
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-sm);
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--color-border);
 }
 
 .image-attachment img {
@@ -415,111 +470,158 @@
 
 .image-remove {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(239,68,68,0.9);
-  color: white;
-  font-size: 0.6rem;
+  top: 1px;
+  right: 1px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(22, 24, 26, 0.8);
+  color: #fff;
+  font-size: 9px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* Overlay / modal */
+.image-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--rule-2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+
+.image-upload-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+/* ---------- 浮层 ---------- */
+
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0,0,0,0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
+  padding: var(--gap-4);
+  background: rgba(22, 24, 26, 0.46);
+}
+
+[data-theme="dark"] .overlay {
+  background: rgba(0, 0, 0, 0.62);
 }
 
 .overlay-content {
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  max-width: 720px;
   width: 100%;
-  max-height: 80vh;
+  max-width: 720px;
+  max-height: 82vh;
   overflow-y: auto;
+  padding: var(--gap-5);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
 }
 
 .overlay-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-4);
+  justify-content: space-between;
+  gap: var(--gap-3);
+  padding-bottom: var(--gap-3);
+  margin-bottom: var(--gap-4);
+  border-bottom: 1px solid var(--rule);
 }
 
 .overlay-header h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: 0.04em;
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
 }
 
 .overlay-close {
-  border: none;
+  border: 0;
   background: none;
-  font-size: 1.2rem;
+  font-size: 14px;
+  color: var(--ink-3);
   cursor: pointer;
-  color: var(--color-text-tertiary);
 }
 
-/* Image upload */
-.image-upload-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  background: var(--color-bg-card);
+.overlay-close:hover {
+  color: var(--ink);
 }
 
-.image-upload-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
+/* ---------- Markdown 预览 ---------- */
 
-@media (max-width: 768px) {
-  .ai-layout { grid-template-columns: 1fr; }
-  .ai-sidebar { display: none; }
-  .message-row { max-width: 95%; }
-}
-
-/* Dark mode overrides for markdown */
 :deep(.md-editor-preview) {
   background: transparent !important;
   color: inherit;
-  font-size: 0.8rem !important;
-  line-height: 1.55 !important;
+  font-size: var(--text-sm) !important;
+  line-height: 1.85 !important;
+  padding: 0 !important;
 }
 
-/* 缩小 markdown 内部各级字号 */
-:deep(.md-editor-preview h1) { font-size: 1.2rem !important; }
-:deep(.md-editor-preview h2) { font-size: 1.1rem !important; }
-:deep(.md-editor-preview h3) { font-size: 1rem !important; }
-:deep(.md-editor-preview h4) { font-size: 0.95rem !important; }
-:deep(.md-editor-preview h5) { font-size: 0.9rem !important; }
-:deep(.md-editor-preview h6) { font-size: 0.85rem !important; }
-:deep(.md-editor-preview p) { font-size: 0.8rem !important; }
-:deep(.md-editor-preview li) { font-size: 0.8rem !important; }
-:deep(.md-editor-preview code) { font-size: 0.75rem !important; }
-:deep(.md-editor-preview pre) { font-size: 0.75rem !important; }
-:deep(.md-editor-preview blockquote) { font-size: 0.8rem !important; }
-:deep(.md-editor-preview table) { font-size: 0.8rem !important; }
+:deep(.md-editor-preview h1) { font-size: 1.25rem !important; margin: 0.8em 0 0.5em; }
+:deep(.md-editor-preview h2) { font-size: 1.12rem !important; margin: 0.8em 0 0.5em; }
+:deep(.md-editor-preview h3) { font-size: 1rem !important; margin: 0.8em 0 0.4em; }
+:deep(.md-editor-preview h4) { font-size: 0.94rem !important; }
+:deep(.md-editor-preview h5) { font-size: 0.88rem !important; }
+:deep(.md-editor-preview h6) { font-size: 0.84rem !important; }
+:deep(.md-editor-preview p) { font-size: var(--text-sm) !important; margin: 0 0 0.8em; }
+:deep(.md-editor-preview li) { font-size: var(--text-sm) !important; }
+:deep(.md-editor-preview code) { font-size: 0.82em !important; }
+:deep(.md-editor-preview pre) { font-size: 12px !important; }
+:deep(.md-editor-preview blockquote) { font-size: var(--text-sm) !important; }
+:deep(.md-editor-preview table) { font-size: var(--text-sm) !important; }
+
+:deep(.md-editor-preview p:last-child) {
+  margin-bottom: 0;
+}
+
+@media (max-width: 860px) {
+  .ai-page {
+    height: calc(100vh - var(--nav-h) - 80px);
+  }
+
+  .ai-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-sidebar {
+    display: none;
+  }
+
+  .message-row {
+    max-width: 94%;
+  }
+
+  .chat-messages {
+    padding: var(--gap-4) var(--gap-3) var(--gap-2);
+  }
+
+  .chat-input-area {
+    padding: var(--gap-2) var(--gap-3) var(--gap-3);
+  }
+
+  .format-hint {
+    display: none;
+  }
+}
 </style>
 
 <template>
@@ -531,7 +633,7 @@
           <h3>会话历史</h3>
           <div style="display:flex;align-items:center;gap:var(--space-2);">
             <span class="sidebar-count">{{ sessions.length }}</span>
-            <button class="btn-modern btn-modern-primary" @click="addSession" style="padding:4px 10px;font-size:0.75rem;">
+            <button class="btn btn--sm btn--solid" @click="addSession">
               <i class="bi bi-plus"></i> 新建
             </button>
           </div>
@@ -564,10 +666,10 @@
             <small>{{ currentSession?.messages.length || 0 }} 条消息 · 会话历史最长保存7日</small>
           </div>
           <div style="display:flex;gap:var(--space-2);">
-            <button class="btn-modern btn-modern-ghost" @click="toggleSessionSidebar" style="padding:4px 10px;font-size:0.8rem;" title="切换侧栏">
+            <button class="btn btn--sm btn--ghost" @click="toggleSessionSidebar" title="切换侧栏">
               <i class="bi bi-layout-sidebar"></i>
             </button>
-            <button class="btn-modern btn-modern-ghost" @click="confirmClearSession" style="padding:4px 10px;font-size:0.8rem;color:var(--color-danger);" title="清空会话">
+            <button class="btn btn--sm btn--ghost" @click="confirmClearSession" style="color:var(--color-danger);" title="清空会话">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -576,7 +678,7 @@
         <div class="chat-messages" ref="chatHistory">
           <!-- Empty state -->
           <div v-if="messages.length === 0" class="empty-chat">
-            <div class="empty-chat-icon">🤖</div>
+            <div class="empty-chat-icon"><span class="seal seal--lg">问</span></div>
             <h5>开始新的对话</h5>
             <p>输入您的问题，AI助手将为您提供帮助。</p>
             <div class="quick-prompts">
@@ -633,7 +735,7 @@
 
           <!-- Load more -->
           <div v-if="hasMoreMessages" style="text-align:center;padding:8px;">
-            <button class="btn-modern" @click="loadMoreMessages" style="padding:6px 16px;font-size:0.8rem;">加载更多</button>
+            <button class="btn btn--sm" @click="loadMoreMessages">加载更多</button>
           </div>
         </div>
 
@@ -705,7 +807,7 @@
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:16px;">
           <span style="font-size:0.8rem;color:var(--color-text-tertiary);">{{ fullScreenMessage ? formatMessageTime(fullScreenMessage) : '' }}</span>
-          <button class="btn-modern" @click="copyMessageContent(fullScreenMessage?.content || '')" style="padding:6px 14px;font-size:0.8rem;">
+          <button class="btn btn--sm" @click="copyMessageContent(fullScreenMessage?.content || '')">
             <i class="bi bi-clipboard"></i> 复制
           </button>
         </div>
@@ -718,8 +820,8 @@
         <h4 style="margin:0 0 12px;">{{ confirmTitle }}</h4>
         <p style="margin:0 0 20px;color:var(--color-text-secondary);">{{ confirmMessage }}</p>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
-          <button class="btn-modern" @click="showConfirmDialog = false">取消</button>
-          <button class="btn-modern" style="background:var(--color-danger);color:white;border-color:var(--color-danger);" @click="handleConfirmAction">确认</button>
+          <button class="btn" @click="showConfirmDialog = false">取消</button>
+          <button class="btn btn--seal" @click="handleConfirmAction">确认</button>
         </div>
       </div>
     </div>
@@ -730,8 +832,8 @@
         <h4 style="margin:0 0 12px;">编辑消息</h4>
         <textarea v-model="editMessageContent" style="width:100%;padding:12px;border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:0.9rem;resize:vertical;min-height:100px;" rows="4"></textarea>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
-          <button class="btn-modern" @click="cancelEditMessage">取消</button>
-          <button class="btn-modern btn-modern-primary" @click="saveEditedMessage">保存</button>
+          <button class="btn" @click="cancelEditMessage">取消</button>
+          <button class="btn btn--solid" @click="saveEditedMessage">保存</button>
         </div>
       </div>
     </div>
