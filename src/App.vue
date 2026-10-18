@@ -84,6 +84,16 @@ html[data-theme="dark"] body {
   animation: loading-spin 0.8s linear infinite;
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 @keyframes loading-spin {
   to { transform: rotate(360deg); }
 }
@@ -949,7 +959,7 @@ html[data-theme="dark"] body {
   <div class="app-root" :data-theme="theme">
     <!-- Loading overlay -->
     <Transition name="fade">
-      <div v-if="isLoading" class="loading-overlay">
+      <div v-if="isLoading && !isDataLoaded" class="loading-overlay">
         <div class="loading-ring"></div>
       </div>
     </Transition>
