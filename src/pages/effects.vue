@@ -2,7 +2,7 @@
   <div ref="pageRef" class="fx-page">
     <!-- 背景舞台：当前效果以 fixed 图层铺满视口 -->
     <Galaxy v-if="activeId === 'galaxy'" :seed="seed" @stats="onGalaxyStats" />
-    <Backdrop v-else />
+    <Landscape v-else />
 
     <div class="fx-layout">
       <section class="fx-deck ink-in" aria-label="背景效果选择">
@@ -58,8 +58,7 @@
         </div>
 
         <p class="fx-hint">
-          鼠标停在背景上会出现黑洞，周围星点会被弯折；切换明暗主题，亮色是恒星近距离照亮，暗色只留很暗的星光。
-          点「应用到全站」后，除背景室外所有页面都会使用当前效果，明暗两种主题下都跟着走；亮色下全站那份会换成纸底墨星，免得深色正文读不清。
+          切换明暗主题，每副背景都另有一套天色；点「应用到全站」后，除背景室外所有页面都会使用当前效果。
         </p>
       </section>
     </div>
@@ -69,9 +68,9 @@
 <script setup lang="ts">
 import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import Backdrop from '@/components/Backdrop.vue'
 import Galaxy from '@/components/Galaxy.vue'
-import {globalBackground, setGlobalBackground} from '@/utils/background'
+import Landscape from '@/components/Landscape.vue'
+import {globalBackground, setGlobalBackground, type BackgroundId} from '@/utils/background'
 import {toast} from '@/utils/utils'
 
 /**
@@ -88,7 +87,7 @@ import {toast} from '@/utils/utils'
  */
 
 interface FxCase {
-    id: string
+    id: BackgroundId
     name: string
     note: string
     detail: string
@@ -104,35 +103,36 @@ interface GalaxyStats {
 // 缩略图用固定渐变：它代表效果本体，不随站点明暗切换
 const CASES: FxCase[] = [
     {
-        id: 'galaxy',
-        name: '银河',
-        note: '实时星场：恒星、流星与黑洞',
-        detail: '银河带由更密的星点组成，偶尔有流星划过。亮色主题像被一颗近距离的恒星照亮，暗色主题只留很暗的星光。鼠标停留处会出现一枚黑洞，周围的星点会被引力错位重排。同一颗种子能复现同一片星空。',
-        swatch: 'radial-gradient(2px 2px at 22% 28%, rgba(255,255,255,.95) 0, rgba(255,255,255,0) 70%), radial-gradient(1.6px 1.6px at 46% 18%, rgba(216,230,255,.9) 0, rgba(216,230,255,0) 70%), radial-gradient(1.4px 1.4px at 36% 62%, rgba(255,232,198,.8) 0, rgba(255,232,198,0) 70%), radial-gradient(1.6px 1.6px at 78% 74%, rgba(226,236,255,.85) 0, rgba(226,236,255,0) 70%), radial-gradient(58% 54% at 68% 30%, rgba(255,196,120,.45) 0%, rgba(255,196,120,0) 62%), radial-gradient(circle at 42% 58%, #000 0 4px, rgba(255,176,104,.9) 5px 6px, rgba(255,176,104,0) 8px), linear-gradient(160deg, #0a1020 0%, #02040a 100%)',
+        id: 'landscape',
+        name: '山水',
+        note: '站点当前：户外风景，天亮与天黑',
+        detail: '一叶扁舟停在湖上，三重山脊由淡到浓，山影落进水里。亮色主题是天亮：冷青天幕、地平线暖光、初升的日；暗色主题是天黑：深蓝天幕、低垂的月、星子与萤火。雾带极慢横移，水面波光各自明灭。',
+        swatch: 'radial-gradient(30% 34% at 66% 44%, rgba(255,250,238,.98) 0 24%, rgba(255,214,150,.6) 44%, rgba(255,214,150,0) 100%), radial-gradient(64% 30% at 26% 62%, rgba(140,158,184,.85) 0 80%, rgba(140,158,184,0) 100%), radial-gradient(88% 32% at 80% 64%, rgba(112,128,150,.85) 0 76%, rgba(112,128,150,0) 100%), radial-gradient(4% 4% at 30% 74%, rgba(30,38,52,.85) 0 100%, rgba(30,38,52,0) 100%), linear-gradient(180deg, #dbe7f6 0%, #f7e6cb 64%, #cbdcea 100%)',
         isNew: true,
     },
     {
-        id: 'backdrop',
-        name: '琉璃底衬',
-        note: '站点当前：柔光、稿纸格与光尘',
-        detail: '站点正在使用的底衬：四团超慢色片、稿纸格与跟随指针的光尘，逐帧节流后保持低开销。',
-        swatch: 'radial-gradient(70% 70% at 22% 24%, rgba(126,158,255,.75) 0%, rgba(126,158,255,0) 70%), radial-gradient(64% 64% at 80% 28%, rgba(246,166,148,.6) 0%, rgba(246,166,148,0) 70%), radial-gradient(70% 70% at 58% 92%, rgba(104,208,176,.5) 0%, rgba(104,208,176,0) 72%), radial-gradient(70% 70% at 16% 82%, rgba(168,140,246,.45) 0%, rgba(168,140,246,0) 72%), linear-gradient(160deg, #eef4fc 0%, #dae5f5 100%)',
+        id: 'galaxy',
+        name: '银河',
+        note: '实时星场：恒星、流星与黑洞',
+        detail: '银河带由更密的星点组成，偶尔有流星划过。亮色主题像被一颗近距离的恒星照亮，暗色主题只留很暗的星光。鼠标停留处会出现一枚黑洞，周围的星点会被引力错位重排。同一颗种子能复现同一片星空。应用到全站后，它在亮色下会换成纸底墨星，免得深色正文读不清。',
+        swatch: 'radial-gradient(2px 2px at 22% 28%, rgba(255,255,255,.95) 0, rgba(255,255,255,0) 70%), radial-gradient(1.6px 1.6px at 46% 18%, rgba(216,230,255,.9) 0, rgba(216,230,255,0) 70%), radial-gradient(1.4px 1.4px at 36% 62%, rgba(255,232,198,.8) 0, rgba(255,232,198,0) 70%), radial-gradient(1.6px 1.6px at 78% 74%, rgba(226,236,255,.85) 0, rgba(226,236,255,0) 70%), radial-gradient(58% 54% at 68% 30%, rgba(255,196,120,.45) 0%, rgba(255,196,120,0) 62%), radial-gradient(circle at 42% 58%, #000 0 4px, rgba(255,176,104,.9) 5px 6px, rgba(255,176,104,0) 8px), linear-gradient(160deg, #0a1020 0%, #02040a 100%)',
+        isNew: true,
     },
 ]
 
 const cases = CASES
-const DEFAULT_ID = 'galaxy'
+const DEFAULT_ID: BackgroundId = 'landscape'
 
 const route = useRoute()
 const router = useRouter()
 
 const pageRef = ref<HTMLElement | null>(null)
-const validIds = CASES.map((item) => item.id)
+const validIds: string[] = CASES.map((item) => item.id)
 
-function normalizeId(raw: unknown) {
+function normalizeId(raw: unknown): BackgroundId {
     const value = Array.isArray(raw) ? raw[0] : raw
     const id = typeof value === 'string' ? value : ''
-    return validIds.includes(id) ? id : DEFAULT_ID
+    return validIds.includes(id) ? (id as BackgroundId) : DEFAULT_ID
 }
 
 function normalizeSeed(raw: unknown): number | null {
@@ -192,7 +192,7 @@ watch(() => route.query.seed, (raw) => {
     if (next !== seed.value) seed.value = next
 })
 
-function selectCase(id: string) {
+function selectCase(id: BackgroundId) {
     if (id === activeId.value) return
     activeId.value = id
     if (id !== 'galaxy') stats.value = null
@@ -202,7 +202,7 @@ function onGalaxyStats(payload: GalaxyStats) {
     stats.value = payload
 }
 
-/** 把当前效果设为全站背景：银河连同种子一起记住，明暗两套取色由主题令牌决定 */
+/** 把当前效果设为全站背景：银河连同种子一起记住，山水不带种子 */
 function applyGlobal() {
     if (isGlobal.value) return
     if (activeId.value === 'galaxy') {
@@ -210,8 +210,8 @@ function applyGlobal() {
         toast('银河已设为全站背景', 'success', 3200)
         return
     }
-    setGlobalBackground('backdrop')
-    toast('已把琉璃底衬设为全站背景', 'success')
+    setGlobalBackground('landscape')
+    toast('山水已设为全站背景', 'success')
 }
 
 /** 换一个种子就换一片星空；同一片星空可从种子复现 */

@@ -810,11 +810,12 @@
 
 <template>
   <div class="app-shell">
-    <!-- 全站背景：琉璃底衬 / 银河，由背景室的「应用到全站」决定。
-         背景室等页面会自己挂载背景；银河在明暗两种主题下都接管全站，
+    <!-- 全站背景：山水（默认） / 银河，由背景室的「应用到全站」决定。
+         背景室等页面会自己挂载背景；两者在明暗两种主题下都接管全站，
          .galaxy--site 是「全站那一份」的标记，亮色下它会另取一套纸底墨星。 -->
-    <Backdrop v-if="showBackdrop && globalBackground === 'backdrop'" />
-    <Galaxy v-else-if="showBackdrop" :seed="globalBackgroundSeed" class="galaxy--site" />
+    <Galaxy v-if="showBackdrop && globalBackground === 'galaxy'" :seed="globalBackgroundSeed"
+            class="galaxy--site" />
+    <Landscape v-else-if="showBackdrop" />
 
     <!-- 加载：一枚朱印 -->
     <Transition name="fade">
@@ -1081,8 +1082,8 @@ import {toast} from "@/utils/utils";
 //@ts-ignore
 import APlayer from 'aplayer/dist/APlayer.min';
 import router from "@/router";
-import Backdrop from "@/components/Backdrop.vue";
 import Galaxy from "@/components/Galaxy.vue";
+import Landscape from "@/components/Landscape.vue";
 import {applyTheme, theme, toggleTheme} from "@/utils/theme";
 import {globalBackground, globalBackgroundSeed} from "@/utils/background";
 

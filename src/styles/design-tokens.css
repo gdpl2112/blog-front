@@ -31,39 +31,6 @@
   --glass-shadow: 0 30px 64px -30px rgba(30, 38, 54, 0.3), 0 6px 18px -10px rgba(30, 38, 54, 0.14);
   --glass-inner: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 
-  /* ---- 动态底衬（Backdrop.vue 专用） ----
-     全部由令牌驱动，切主题只换这一组值，组件里不出现写死的颜色。
-     命名：base 打底 / sheet 漂移色片 / beam 光束 / grid 稿纸格 / dust 光尘
-     色片用「rgb 三元组 + 独立透明度」两个令牌：渐变要收在 rgba(同色, 0) 上，
-     直接写 transparent 会让 Chrome 插值出一圈发灰的硬边。 */
-  --bd-base-1: #eef4fc;
-  --bd-base-2: #dae5f5;
-  --bd-sheet-1: 126, 158, 255;
-  --bd-sheet-1-a: 0.52;
-  --bd-sheet-2: 246, 166, 148;
-  --bd-sheet-2-a: 0.36;
-  --bd-sheet-3: 104, 208, 176;
-  --bd-sheet-3-a: 0.34;
-  --bd-sheet-4: 168, 140, 246;
-  --bd-sheet-4-a: 0.38;
-  --bd-haze: rgba(255, 255, 255, 0.55);
-  --bd-beam: rgba(255, 255, 255, 0.40);
-  --bd-grid: rgba(32, 48, 76, 0.055);
-  --bd-vignette: rgba(38, 50, 72, 0.13);
-  /* 光尘用 rgb 三元组，供 canvas 拼接 rgba() */
-  --bd-dust: 38, 52, 78;
-  --bd-dust-warm: 150, 104, 62;
-  --bd-dust-alpha: 0.32;
-  /* 指针光池：色相由 JS 按坐标算（--spot-hue），这里只给饱和/亮度/透明度与暖芯 */
-  --bd-spot-h: 232;
-  --bd-spot-s: 88%;
-  --bd-spot-l: 66%;
-  --bd-spot-a: 0.42;
-  --bd-spot-warm: 255, 200, 168;
-  --bd-spot-warm-a: 0.30;
-  /* 聚光收暗：离指针越远略压暗，形成"凸显" */
-  --bd-focus: rgba(24, 34, 52, 0.10);
-
   /* ---- 银河底衬（Galaxy.vue 专用） ----
      亮色不是白纸：仍是暗色星空，但被一颗近距离的恒星照亮——深蓝底、
      暖光、亮星；暗色则把光收掉，只留很暗的星光。
@@ -86,6 +53,40 @@
   --gx-hole-glow: 255, 152, 82;
   --gx-vignette: 0, 0, 0;
   --gx-vignette-a: 0.5;
+
+  /* ---- 山水底衬（Landscape.vue 专用） ----
+     亮色是「天亮」：冷青天幕、地平线暖光、初升的日、淡墨远山、湖上薄雾；
+     暗色翻成「天黑」：深蓝天幕、低垂的月、星子、浓墨近山、暖色萤火。
+     山水的颜色都用「rgb 三元组 + 独立透明度」两个令牌，canvas 读三元组自己拼 rgba。
+     水平线 --ls-water-y 只在 .scene 上定义一次，canvas 侧读同一个值对齐山脊与倒影。 */
+  --ls-sky-1: #dbe7f6;
+  --ls-sky-2: #f7e6cb;
+  --ls-glow: 255, 214, 150;
+  --ls-glow-a: 0.5;
+  --ls-orb-x: 68%;
+  --ls-orb-y: 44%;
+  --ls-orb-size: 12vmin;
+  --ls-sun: 255, 226, 176;
+  --ls-sun-ink: 255, 250, 238;
+  --ls-reflect-a: 0.4;
+  --ls-ridge-1: 178, 194, 214;
+  --ls-ridge-2: 140, 158, 184;
+  --ls-ridge-3: 112, 128, 150;
+  --ls-ridge-a: 1;
+  --ls-mist: 255, 255, 255;
+  --ls-mist-a: 0.5;
+  --ls-water-1: #cbdcea;
+  --ls-water-2: #f2e5cd;
+  --ls-water: 255, 255, 255;
+  --ls-water-a: 0.8;
+  --ls-star: 255, 255, 255;
+  --ls-star-a: 0;
+  --ls-ink: 30, 38, 52;
+  --ls-ink-a: 0.72;
+  --ls-mote: 255, 240, 210;
+  --ls-mote-a: 0.32;
+  --ls-vignette: 40, 52, 74;
+  --ls-vignette-a: 0.14;
 
   /* ---- 反相填充上的文字色（实心按钮、用户气泡等） ---- */
   --on-ink: #ffffff;
@@ -245,32 +246,6 @@
 
   --on-ink: #11141a;
 
-  /* ---- 动态底衬：暗色下不再"提亮"，而是压低基色、放大色片，让光尘成为唯一亮点 ---- */
-  --bd-base-1: #141a24;
-  --bd-base-2: #07090d;
-  --bd-sheet-1: 58, 92, 196;
-  --bd-sheet-1-a: 0.55;
-  --bd-sheet-2: 158, 66, 56;
-  --bd-sheet-2-a: 0.38;
-  --bd-sheet-3: 22, 116, 98;
-  --bd-sheet-3-a: 0.42;
-  --bd-sheet-4: 96, 70, 168;
-  --bd-sheet-4-a: 0.42;
-  --bd-haze: rgba(140, 170, 230, 0.10);
-  --bd-beam: rgba(150, 182, 255, 0.15);
-  --bd-grid: rgba(180, 205, 255, 0.05);
-  --bd-vignette: rgba(0, 0, 0, 0.55);
-  --bd-dust: 208, 222, 245;
-  --bd-dust-warm: 255, 196, 138;
-  --bd-dust-alpha: 0.46;
-  --bd-spot-h: 218;
-  --bd-spot-s: 92%;
-  --bd-spot-l: 62%;
-  --bd-spot-a: 0.34;
-  --bd-spot-warm: 255, 196, 150;
-  --bd-spot-warm-a: 0.16;
-  --bd-focus: rgba(0, 0, 0, 0.42);
-
   /* ---- 银河底衬：暗色只留很暗的星光 ---- */
   --gx-base-1: #080d1a;
   --gx-base-2: #03050b;
@@ -290,6 +265,36 @@
   --gx-hole-glow: 255, 152, 82;
   --gx-vignette: 0, 0, 0;
   --gx-vignette-a: 0.55;
+
+  /* ---- 山水底衬：天黑 ---- */
+  --ls-sky-1: #050912;
+  --ls-sky-2: #16203a;
+  --ls-glow: 255, 190, 140;
+  --ls-glow-a: 0.16;
+  --ls-orb-x: 72%;
+  --ls-orb-y: 26%;
+  --ls-orb-size: 6.4vmin;
+  --ls-sun: 226, 236, 255;
+  --ls-sun-ink: 246, 250, 255;
+  --ls-reflect-a: 0.16;
+  --ls-ridge-1: 44, 56, 78;
+  --ls-ridge-2: 26, 36, 54;
+  --ls-ridge-3: 12, 18, 30;
+  --ls-ridge-a: 1;
+  --ls-mist: 150, 180, 220;
+  --ls-mist-a: 0.16;
+  --ls-water-1: #070c16;
+  --ls-water-2: #1b2740;
+  --ls-water: 200, 220, 255;
+  --ls-water-a: 0.5;
+  --ls-star: 232, 240, 255;
+  --ls-star-a: 0.85;
+  --ls-ink: 6, 10, 18;
+  --ls-ink-a: 0.9;
+  --ls-mote: 255, 214, 140;
+  --ls-mote-a: 0.7;
+  --ls-vignette: 0, 0, 0;
+  --ls-vignette-a: 0.5;
 
   --seal: #e2604b;
   --seal-ink: #f0806c;
@@ -318,8 +323,8 @@
 
 html {
   scroll-behavior: smooth;
-  /* 最底层底色：Backdrop 未就绪（首帧、脚本禁用）时的兜底 */
-  background: var(--bd-base-2);
+  /* 最底层底色：背景组件未就绪（首帧、脚本禁用）时的兜底，取山水的天幕色 */
+  background: var(--ls-sky-1);
 }
 
 body {
@@ -327,7 +332,8 @@ body {
   min-height: 100vh;
   /* 关键：body 不画底衬。动态背景是 position: fixed + z-index: -1，
      按 CSS 绘制顺序，负层级图层会排在 body 背景之下 —— body 一旦有不透明背景，
-     整层动态底衬就被盖掉了。底衬因此全部交给 Backdrop.vue，body 保持透明。 */
+     整层动态底衬就被盖掉了。底衬因此全部交给背景组件（Landscape / Galaxy），
+     body 保持透明。 */
   background: transparent;
   color: var(--ink);
   font-family: var(--font-sans);

@@ -1,16 +1,19 @@
 import {ref} from 'vue'
 
-export type BackgroundId = 'backdrop' | 'galaxy'
+export type BackgroundId = 'landscape' | 'galaxy'
 
 const BACKGROUND_KEY = 'blog-background'
 const SEED_KEY = 'blog-background-seed'
 const DEFAULT_SEED = 20261018
+const BACKGROUND_IDS: BackgroundId[] = ['landscape', 'galaxy']
+const DEFAULT_BACKGROUND: BackgroundId = 'landscape'
 
 function readBackground(): BackgroundId {
     try {
-        return localStorage.getItem(BACKGROUND_KEY) === 'galaxy' ? 'galaxy' : 'backdrop'
+        const value = localStorage.getItem(BACKGROUND_KEY) as BackgroundId | null
+        return value && BACKGROUND_IDS.includes(value) ? value : DEFAULT_BACKGROUND
     } catch {
-        return 'backdrop'
+        return DEFAULT_BACKGROUND
     }
 }
 
@@ -25,7 +28,7 @@ function readSeed(): number {
 
 /**
  * 全站背景：
- *  - backdrop：站点原来的琉璃底衬，亮色/暗色都适用；
+ *  - landscape：山水（默认），亮色是天亮、暗色是天黑，两副天色都在令牌里，不用额外记东西；
  *  - galaxy：银河，明暗两种主题下都接管全站（亮色取纸底墨星、暗色取深空），
  *    种子会一起记住，保证全站看到的是同一片星空。
  */
