@@ -348,7 +348,7 @@
     <!-- 抬头 -->
     <section class="masthead">
       <div>
-        <h2 class="masthead-name">若<h3 style="display:inline">生</h3></h2>
+        <h2 class="masthead-name">若<span style="display:inline;font-size:1.17em">生</span></h2>
         <p class="masthead-lede">
           不系之舟，逐梦之客；指尖代码，心中星河。
         </p>

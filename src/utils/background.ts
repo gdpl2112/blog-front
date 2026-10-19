@@ -1,11 +1,11 @@
 import {ref} from 'vue'
 
-export type BackgroundId = 'landscape' | 'galaxy'
+export type BackgroundId = 'landscape' | 'galaxy' | 'city'
 
 const BACKGROUND_KEY = 'blog-background'
 const SEED_KEY = 'blog-background-seed'
 const DEFAULT_SEED = 20261018
-const BACKGROUND_IDS: BackgroundId[] = ['landscape', 'galaxy']
+const BACKGROUND_IDS: BackgroundId[] = ['landscape', 'galaxy', 'city']
 const DEFAULT_BACKGROUND: BackgroundId = 'landscape'
 
 function readBackground(): BackgroundId {
@@ -30,7 +30,8 @@ function readSeed(): number {
  * 全站背景：
  *  - landscape：山水（默认），亮色是天亮、暗色是天黑，两副天色都在令牌里，不用额外记东西；
  *  - galaxy：银河，明暗两种主题下都接管全站（亮色取纸底墨星、暗色取深空），
- *    种子会一起记住，保证全站看到的是同一片星空。
+ *    种子会一起记住，保证全站看到的是同一片星空；
+ *  - city：现代城市，亮色是清晨、暗色是夜晚，窗灯按楼栋错峰明灭。
  */
 export const globalBackground = ref<BackgroundId>(readBackground())
 export const globalBackgroundSeed = ref<number>(readSeed())

@@ -2,6 +2,7 @@
   <div ref="pageRef" class="fx-page">
     <!-- 背景舞台：当前效果以 fixed 图层铺满视口 -->
     <Galaxy v-if="activeId === 'galaxy'" :seed="seed" @stats="onGalaxyStats" />
+    <City v-else-if="activeId === 'city'" />
     <Landscape v-else />
 
     <div class="fx-layout">
@@ -68,6 +69,7 @@
 <script setup lang="ts">
 import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import City from '@/components/City.vue'
 import Galaxy from '@/components/Galaxy.vue'
 import Landscape from '@/components/Landscape.vue'
 import {globalBackground, setGlobalBackground, type BackgroundId} from '@/utils/background'
@@ -116,6 +118,14 @@ const CASES: FxCase[] = [
         note: '实时星场：恒星、流星与黑洞',
         detail: '银河带由更密的星点组成，偶尔有流星划过。亮色主题像被一颗近距离的恒星照亮，暗色主题只留很暗的星光。鼠标停留处会出现一枚黑洞，周围的星点会被引力错位重排。同一颗种子能复现同一片星空。应用到全站后，它在亮色下会换成纸底墨星，免得深色正文读不清。',
         swatch: 'radial-gradient(2px 2px at 22% 28%, rgba(255,255,255,.95) 0, rgba(255,255,255,0) 70%), radial-gradient(1.6px 1.6px at 46% 18%, rgba(216,230,255,.9) 0, rgba(216,230,255,0) 70%), radial-gradient(1.4px 1.4px at 36% 62%, rgba(255,232,198,.8) 0, rgba(255,232,198,0) 70%), radial-gradient(1.6px 1.6px at 78% 74%, rgba(226,236,255,.85) 0, rgba(226,236,255,0) 70%), radial-gradient(58% 54% at 68% 30%, rgba(255,196,120,.45) 0%, rgba(255,196,120,0) 62%), radial-gradient(circle at 42% 58%, #000 0 4px, rgba(255,176,104,.9) 5px 6px, rgba(255,176,104,0) 8px), linear-gradient(160deg, #0a1020 0%, #02040a 100%)',
+        isNew: true,
+    },
+    {
+        id: 'city',
+        name: '城市',
+        note: '现代天际线，窗灯错峰明灭',
+        detail: '一组现代高楼沿地平线展开，玻璃楼与石材楼交叠成立体天际线。亮色主题是清晨蓝调，少量窗户开始亮灯；暗色主题转入夜晚，暖光窗户成组亮起、熄灭，楼顶信标间歇闪烁。',
+        swatch: 'radial-gradient(2px 2px at 22% 50%, #ffd18a 0 80%, transparent 90%), radial-gradient(2px 2px at 44% 68%, #ffd18a 0 80%, transparent 90%), radial-gradient(2px 2px at 72% 42%, #ffd18a 0 80%, transparent 90%), linear-gradient(90deg, transparent 0 8%, #31495f 8% 15%, transparent 15% 20%, #22384d 20% 28%, transparent 28% 33%, #2b4357 33% 46%, transparent 46% 51%, #1c3142 51% 68%, transparent 68% 72%, #31495f 72% 90%, transparent 90%), linear-gradient(180deg, #a9c2d5 0%, #ecd2ae 66%, #101a24 66% 100%)',
         isNew: true,
     },
 ]
@@ -210,8 +220,8 @@ function applyGlobal() {
         toast('银河已设为全站背景', 'success', 3200)
         return
     }
-    setGlobalBackground('landscape')
-    toast('山水已设为全站背景', 'success')
+    setGlobalBackground(activeId.value)
+    toast(`${activeCase.value.name}已设为全站背景`, 'success')
 }
 
 /** 换一个种子就换一片星空；同一片星空可从种子复现 */

@@ -21,20 +21,24 @@
     <!-- 6. 动层：扁舟（随波轻晃）、水面波光、浮尘 / 萤火 -->
     <canvas ref="fxRef" class="scene__fx"></canvas>
 
-    <!-- 7. 暗角 -->
+    <!-- 7. 鼠标水光：柔和光晕落在指针处，水面留一道横向亮痕 -->
+    <div class="scene__cursor"></div>
+
+    <!-- 8. 暗角 -->
     <div class="scene__vignette"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {onBeforeUnmount, onMounted, ref} from 'vue'
+import {bindPointerBackdrop} from '@/utils/backgroundPointer'
 
 /**
  * 户外风景底衬（纯 canvas + CSS，不含任何视频/图片资源）
  *
  * 一副山水，两时天色：
- *  - 亮色「天亮」：冷青天幕、地平线暖光、初升的日、湖上薄雾、淡墨远山；
- *  - 暗色「天黑」：深蓝天幕、低垂的月、星子、暖色萤火、浓墨近山。
+ *  - 亮色「天亮」：冷青天幕、远处红日、成行大雁、湖上薄雾、淡墨远山；
+ *  - 暗色「天黑」：深蓝天幕、低垂的月、星子、水上的渔夫小舟与暖色灯影。
  *  两副天色都由 CSS 令牌（--ls-*）给出，切主题只是换一组值，
  *  所以同一份画法在两种主题下都成立，也保证正文的深浅字各自读得清。
  *
@@ -44,8 +48,9 @@ import {onBeforeUnmount, onMounted, ref} from 'vue'
  *  3) water   —— 水面渐变与倒影柱；
  *  4) still   —— 静层 canvas：星、三重山脊、山脊倒影，按固定种子烘焙一次；
  *  5) mist    —— 两条极慢横移的雾带；
- *  6) fx      —— 动层 canvas：扁舟轻晃、水面波光、浮尘 / 萤火；
- *  7) vignette—— 暗角。
+ *  6) fx      —— 动层 canvas：雁阵、扁舟轻晃、水面波光、浮尘 / 萤火；
+ *  7) pointer —— 鼠标水光：经过的水面波光增亮，雾与扁舟轻微位移；
+ *  8) vignette—— 暗角。
  *
  * 几何：水平线位置只由 CSS 的 --ls-water-y 定义，山脊、倒影、波光都按它对齐，
  * canvas 侧读同一个值，避免两条线错位。
@@ -94,6 +99,16 @@ const RIDGES = [
     {mean: 0.07, amp: 0.05, steps: 64, alpha: 0.88, mirror: 0.28},
 ]
 
+const GOOSE_OFFSETS: Array<[number, number]> = [
+    [0, 0],
+    [-1, 0.45],
+    [1, 0.45],
+    [-2, 0.9],
+    [2, 0.9],
+    [-3, 1.35],
+    [3, 1.35],
+]
+
 /* ---------- 类型 ---------- */
 
 type RGB = [number, number, number]
@@ -110,6 +125,8 @@ interface Palette {
     inkAlpha: number
     mote: RGB
     moteAlpha: number
+    geeseAlpha: number
+    fishermanAlpha: number
 }
 
 interface Shimmer {
@@ -148,6 +165,8 @@ let palette: Palette = {
     inkAlpha: 0.75,
     mote: [255, 240, 210],
     moteAlpha: 0.35,
+    geeseAlpha: 0.68,
+    fishermanAlpha: 0,
 }
 let paletteSignature = ''
 
@@ -164,6 +183,9 @@ let lastTick = 0
 let timeSec = 0
 let visible = true
 let reduced = false
+let pointerActive = false
+let pointerX = 0
+let pointerY = 0
 let resizeTimer = 0
 let themeTimer = 0
 let themeObserver: MutationObserver | null = null
@@ -227,12 +249,14 @@ function readPalette(): Palette {
         inkAlpha: parseNumber(cs.getPropertyValue('--ls-ink-a'), 0.75),
         mote: parseRGB(cs.getPropertyValue('--ls-mote'), [255, 240, 210]),
         moteAlpha: parseNumber(cs.getPropertyValue('--ls-mote-a'), 0.35),
+        geeseAlpha: parseNumber(cs.getPropertyValue('--ls-geese-a'), 0),
+        fishermanAlpha: parseNumber(cs.getPropertyValue('--ls-fisherman-a'), 0),
     }
 }
 
 function signatureOf(p: Palette) {
     return [p.star.join(','), p.starAlpha, p.ridges.map((c) => c.join(',')).join('/'), p.ridgeAlpha,
-        p.ink.join(','), p.inkAlpha, p.mote.join(','), p.moteAlpha].join('|')
+        p.ink.join(','), p.inkAlpha, p.mote.join(','), p.moteAlpha, p.geeseAlpha, p.fishermanAlpha].join('|')
 }
 
 /* ---------- 尺寸 ---------- */
@@ -387,7 +411,7 @@ function buildMotes(rand: () => number) {
     }
 }
 
-/** 一叶扁舟：船身 + 乌篷 + 一支竹篙；倒影是同一个形状翻过来压扁 */
+/** 一叶扁舟：船身与甲板线；倒影是同一个形状翻过来压扁 */
 function boatShape(ctx: CanvasRenderingContext2D, w: number, h: number) {
     ctx.fillStyle = rgba(palette.ink, palette.inkAlpha)
     ctx.beginPath()
@@ -396,16 +420,109 @@ function boatShape(ctx: CanvasRenderingContext2D, w: number, h: number) {
     ctx.quadraticCurveTo(0, h * 0.42, -w / 2, 0)
     ctx.closePath()
     ctx.fill()
+
+    ctx.strokeStyle = rgba(palette.ink, palette.inkAlpha * 0.72)
+    ctx.lineWidth = Math.max(1, w * 0.018)
     ctx.beginPath()
-    ctx.arc(-w * 0.06, -h * 0.1, w * 0.2, Math.PI, 0)
+    ctx.moveTo(-w * 0.38, -h * 0.08)
+    ctx.lineTo(w * 0.38, -h * 0.08)
+    ctx.stroke()
+}
+
+/** 雁：两笔曲线写一只小雁，亮色下由远及近排成一行 */
+function drawGoose(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, alpha: number) {
+    ctx.strokeStyle = rgba(palette.ink, alpha)
+    ctx.lineWidth = Math.max(1, size * 0.13)
+    ctx.beginPath()
+    ctx.moveTo(x - size, y)
+    ctx.quadraticCurveTo(x - size * 0.45, y - size * 0.62, x, y - size * 0.08)
+    ctx.quadraticCurveTo(x + size * 0.45, y - size * 0.62, x + size, y)
+    ctx.stroke()
+}
+
+function drawGeese(ctx: CanvasRenderingContext2D, t: number) {
+    if (palette.geeseAlpha < 0.02) return
+    const size = clamp(vw * 0.006, 5, 10)
+    const progress = (t * 0.018 + 0.25) % 1.25
+    const x = vw * (-0.1 + progress)
+    const y = vh * 0.24 + Math.sin(t * 0.16) * vh * 0.012
+    const edge = clamp(Math.min(x, vw - x) / Math.max(1, vw * 0.12), 0, 1)
+
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    GOOSE_OFFSETS.forEach(([dx, dy], index) => {
+        drawGoose(
+            ctx,
+            x + dx * size * 1.85,
+            y + dy * size * 1.25,
+            size * (index === 0 ? 1.08 : 0.94),
+            palette.geeseAlpha * edge * (index < 2 ? 0.92 : 0.72),
+        )
+    })
+}
+
+/** 渔夫：斗笠、蓑衣、钓竿、灯影与一枚梭形浮标，只在夜色里出现 */
+function fishermanShape(ctx: CanvasRenderingContext2D, w: number, h: number) {
+    const alpha = palette.fishermanAlpha * palette.inkAlpha
+    if (alpha < 0.02) return
+
+    ctx.fillStyle = rgba(palette.ink, alpha)
+    ctx.beginPath()
+    ctx.moveTo(-w * 0.15, -h * 0.82)
+    ctx.lineTo(w * 0.05, -h * 0.82)
+    ctx.lineTo(w * 0.12, h * 0.42)
+    ctx.lineTo(-w * 0.22, h * 0.42)
     ctx.closePath()
     ctx.fill()
-    ctx.strokeStyle = rgba(palette.ink, palette.inkAlpha * 0.85)
-    ctx.lineWidth = Math.max(1, w * 0.022)
+
     ctx.beginPath()
-    ctx.moveTo(w * 0.2, -h * 1.5)
-    ctx.lineTo(w * 0.34, h * 0.2)
+    ctx.arc(-w * 0.05, -h * 1.2, w * 0.105, 0, TAU)
+    ctx.fill()
+
+    ctx.beginPath()
+    ctx.moveTo(-w * 0.2, -h * 1.38)
+    ctx.lineTo(-w * 0.05, -h * 1.78)
+    ctx.lineTo(w * 0.12, -h * 1.38)
+    ctx.closePath()
+    ctx.fill()
+
+    ctx.strokeStyle = rgba(palette.ink, alpha * 0.9)
+    ctx.lineWidth = Math.max(1, w * 0.018)
+    ctx.beginPath()
+    ctx.moveTo(w * 0.02, -h * 1.14)
+    ctx.quadraticCurveTo(w * 0.42, -h * 2.1, w * 0.72, -h * 3.2)
     ctx.stroke()
+
+    ctx.save()
+    ctx.translate(w * 0.78, h * 0.08)
+    ctx.rotate(-0.12)
+    ctx.beginPath()
+    ctx.moveTo(-w * 0.5, 0)
+    ctx.lineTo(-w * 0.18, 0)
+    ctx.stroke()
+    ctx.fillStyle = rgba(palette.ink, alpha * 0.92)
+    ctx.beginPath()
+    ctx.moveTo(-w * 0.18, 0)
+    ctx.quadraticCurveTo(0, -h * 0.34, w * 0.18, 0)
+    ctx.quadraticCurveTo(0, h * 0.34, -w * 0.18, 0)
+    ctx.closePath()
+    ctx.fill()
+    ctx.restore()
+
+    const lx = w * 0.28
+    const ly = -h * 0.5
+    const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.7)
+    glow.addColorStop(0, rgba(palette.mote, palette.moteAlpha * 0.46))
+    glow.addColorStop(0.32, rgba(palette.mote, palette.moteAlpha * 0.18))
+    glow.addColorStop(1, rgba(palette.mote, 0))
+    ctx.fillStyle = glow
+    ctx.beginPath()
+    ctx.arc(lx, ly, w * 0.7, 0, TAU)
+    ctx.fill()
+    ctx.fillStyle = rgba(palette.mote, palette.moteAlpha * 0.82)
+    ctx.beginPath()
+    ctx.arc(lx, ly, w * 0.075, 0, TAU)
+    ctx.fill()
 }
 
 function drawBoat(ctx: CanvasRenderingContext2D, wy: number, t: number) {
@@ -422,6 +539,7 @@ function drawBoat(ctx: CanvasRenderingContext2D, wy: number, t: number) {
     ctx.restore()
     ctx.globalAlpha = 1
     boatShape(ctx, w, h)
+    fishermanShape(ctx, w, h)
     ctx.restore()
 }
 
@@ -429,7 +547,12 @@ function drawBoat(ctx: CanvasRenderingContext2D, wy: number, t: number) {
 function drawShimmer(ctx: CanvasRenderingContext2D, t: number) {
     for (const line of shimmer) {
         const k = 0.5 + 0.5 * Math.sin(t * line.speed + line.phase)
-        const alpha = palette.waterAlpha * (0.12 + 0.6 * k * k)
+        const dx = Math.abs(line.x + line.w / 2 - pointerX)
+        const dy = Math.abs(line.y - pointerY)
+        const nearPointer = pointerActive && dx < 180 && dy < 130
+            ? (1 - dx / 180) * (1 - dy / 130)
+            : 0
+        const alpha = clamp(palette.waterAlpha * (0.12 + 0.6 * k * k) * (1 + nearPointer * 1.8), 0, 1)
         if (alpha < 0.02) continue
         ctx.fillStyle = rgba(palette.water, alpha)
         ctx.fillRect(line.x + Math.sin(t * 0.4 + line.phase) * 6, line.y, line.w, 1)
@@ -469,6 +592,7 @@ function drawFx(dt: number) {
     timeSec += dt
     ctx.clearRect(0, 0, vw, vh)
     const wy = vh * waterY
+    drawGeese(ctx, timeSec)
     drawBoat(ctx, wy, timeSec)
     drawShimmer(ctx, timeSec)
     updateMotes(dt)
@@ -544,6 +668,8 @@ function onThemeChange() {
 
 let mediaReduced: MediaQueryList | null = null
 let detach = () => {}
+let detachPointer = () => {
+}
 
 onMounted(() => {
     mediaReduced = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -555,6 +681,16 @@ onMounted(() => {
     window.addEventListener('resize', onResize, {passive: true})
     document.addEventListener('visibilitychange', onVisibility)
     mediaReduced.addEventListener('change', onReducedChange)
+    detachPointer = bindPointerBackdrop(rootRef, {
+        onMove: (x, y) => {
+            pointerX = x
+            pointerY = y
+            pointerActive = true
+        },
+        onLeave: () => {
+            pointerActive = false
+        },
+    })
 
     // 主题切换后重新取色（App.vue 改的是 html[data-theme]）
     themeObserver = new MutationObserver(onThemeChange)
@@ -573,6 +709,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     stop()
     detach()
+    detachPointer()
     window.clearTimeout(resizeTimer)
     window.clearTimeout(themeTimer)
 })
@@ -594,6 +731,10 @@ onBeforeUnmount(() => {
     background: var(--ls-sky-1);
     /* 水平线：canvas 侧也读这一个值，别在两处各写一遍 */
     --ls-water-y: 64%;
+    --pointer-x: 50vw;
+    --pointer-y: 50vh;
+    --pointer-nx: 0;
+    --pointer-ny: 0;
 }
 
 /* ---------- 1. 天幕 ---------- */
@@ -665,6 +806,8 @@ onBeforeUnmount(() => {
 .scene__mist {
     position: absolute;
     inset: 0;
+    will-change: transform;
+    transform: translate3d(calc(var(--pointer-nx, 0) * 8px), calc(var(--pointer-ny, 0) * 4px), 0);
 }
 
 .mist {
@@ -705,11 +848,36 @@ onBeforeUnmount(() => {
     rgba(var(--ls-vignette), var(--ls-vignette-a)) 100%);
 }
 
+.scene__cursor {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    transition: opacity 240ms var(--ease);
+    background:
+        radial-gradient(150px 110px at var(--pointer-x, 50vw) var(--pointer-y, 50vh),
+        rgba(var(--ls-pointer), var(--ls-pointer-a)) 0%,
+        rgba(var(--ls-pointer), 0) 74%),
+        radial-gradient(90px 4px at var(--pointer-x, 50vw) var(--ls-water-y),
+        rgba(var(--ls-pointer), calc(var(--ls-pointer-a) * 0.8)) 0%,
+        rgba(var(--ls-pointer), 0) 100%);
+}
+
+.scene.is-pointing .scene__cursor {
+    opacity: 1;
+}
+
 /* ---------- 降级 ---------- */
 
 @media (prefers-reduced-motion: reduce) {
     .mist {
         animation: none;
+    }
+
+    .scene__mist,
+    .scene__fx {
+        transform: none;
     }
 }
 </style>

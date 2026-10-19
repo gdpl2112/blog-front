@@ -810,11 +810,12 @@
 
 <template>
   <div class="app-shell">
-    <!-- 全站背景：山水（默认） / 银河，由背景室的「应用到全站」决定。
+    <!-- 全站背景：山水（默认） / 银河 / 城市，由背景室的「应用到全站」决定。
          背景室等页面会自己挂载背景；两者在明暗两种主题下都接管全站，
          .galaxy--site 是「全站那一份」的标记，亮色下它会另取一套纸底墨星。 -->
     <Galaxy v-if="showBackdrop && globalBackground === 'galaxy'" :seed="globalBackgroundSeed"
             class="galaxy--site" />
+    <City v-else-if="showBackdrop && globalBackground === 'city'" />
     <Landscape v-else-if="showBackdrop" />
 
     <!-- 加载：一枚朱印 -->
@@ -876,7 +877,7 @@
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
                 GitHub 组织
               </a>
-              <div class="nav-dropdown-version">front-vue3 · 26.10.18</div>
+              <div class="nav-dropdown-version">front-vue3 · 26.10.19</div>
             </div>
           </li>
           <li class="nav-link-item">
@@ -1082,6 +1083,7 @@ import {toast} from "@/utils/utils";
 //@ts-ignore
 import APlayer from 'aplayer/dist/APlayer.min';
 import router from "@/router";
+import City from "@/components/City.vue";
 import Galaxy from "@/components/Galaxy.vue";
 import Landscape from "@/components/Landscape.vue";
 import {applyTheme, theme, toggleTheme} from "@/utils/theme";
