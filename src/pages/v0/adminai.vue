@@ -139,6 +139,14 @@
         </el-form-item>
       </div>
 
+      <div class="group">
+        <h3>生图模型（可选）</h3>
+        <el-form-item label="Base URL"><el-input v-model="form.imageBaseUrl" placeholder="https://image.example.com" /></el-form-item>
+        <el-form-item label="API Key"><el-input v-model="form.imageApiKey" type="password" show-password placeholder="留空表示保留原值" /></el-form-item>
+        <el-form-item label="模型"><el-input v-model="form.imageModel" placeholder="gpt-image-2.5" /></el-form-item>
+        <p class="hint">配置后，AI 会在需要时自动调用 /v1/images/generations；带参考图时调用 /v1/images/edits。</p>
+      </div>
+
       <div class="form-actions">
         <el-button type="primary" :loading="saving" @click="saveConfig">保存配置</el-button>
         <el-button :disabled="saving" @click="loadConfig">重新读取</el-button>
@@ -158,11 +166,13 @@ import {toast} from '@/utils/utils'
 interface AiConfig {
   chatBaseUrl: string; chatApiKey: string; chatModel: string; chatCompletionsPath: string; chatTemperature: number
   embeddingBaseUrl: string; embeddingApiKey: string; embeddingModel: string; embeddingEmbeddingsPath: string; embeddingDimensions: number
+  imageBaseUrl: string; imageApiKey: string; imageModel: string
 }
 
 const emptyConfig = (): AiConfig => ({
   chatBaseUrl: '', chatApiKey: '', chatModel: '', chatCompletionsPath: '/v1/chat/completions', chatTemperature: 0.7,
-  embeddingBaseUrl: '', embeddingApiKey: '', embeddingModel: '', embeddingEmbeddingsPath: '/v1/embeddings', embeddingDimensions: 1024
+  embeddingBaseUrl: '', embeddingApiKey: '', embeddingModel: '', embeddingEmbeddingsPath: '/v1/embeddings', embeddingDimensions: 1024,
+  imageBaseUrl: '', imageApiKey: '', imageModel: 'gpt-image-2.5'
 })
 
 const form = reactive<AiConfig>(emptyConfig())
@@ -263,6 +273,7 @@ async function saveConfig() {
     const payload: Partial<AiConfig> = {...form}
     if (!payload.chatApiKey || isMasked(payload.chatApiKey)) delete payload.chatApiKey
     if (!payload.embeddingApiKey || isMasked(payload.embeddingApiKey)) delete payload.embeddingApiKey
+    if (!payload.imageApiKey || isMasked(payload.imageApiKey)) delete payload.imageApiKey
     const response = await service.put('/adm/ai/config', payload, {headers: authHeaders()})
     applyConfig(unwrapResponse(response))
     toast('配置已更新', 'success')
