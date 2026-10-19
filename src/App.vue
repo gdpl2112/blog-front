@@ -877,7 +877,7 @@
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
                 GitHub 组织
               </a>
-              <div class="nav-dropdown-version">front-vue3 · 26.10.19</div>
+              <div class="nav-dropdown-version">front-vue3 · 26.10.19.</div>
             </div>
           </li>
           <li class="nav-link-item">

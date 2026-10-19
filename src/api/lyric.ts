@@ -28,38 +28,25 @@ const parseLyrics = (dataStr: string): Lyric[] => {
 export default parseLyrics
 
 /**
- * 获取最近的歌词
- * @param time
- * @param nextn
- * @param lyrics
+ * 获取歌词窗口
+ * @param time 当前播放时间，单位毫秒
+ * @param nextn 当前句之后最多展示的歌词数
+ * @param lyrics 按时间排序的歌词
+ * @returns lines 为上一句、当前句及后续句，activeIndex 为当前句下标
  */
 export function getNearst(time: number, nextn: number = 3, lyrics: Lyric[]) {
-    //最终返回歌词
-    let outs = []
-    //匹配到当前时间应的歌词
-    let ns = false
-    //上一次的歌词
-    let ul = null;
-    //上上一次的歌词
-    let ull = null;
+    let currentIndex = -1
 
     for (let i = 0; i < lyrics.length; i++) {
-        let ee = lyrics[i]
-        if (ns) {
-            if (outs.length >= (nextn + 2)) {
-                break
-            }
-            outs.push(ee)
-        } else {
-            if (ee.timestamp > time) {
-                ns = true
-                if (ull != null) outs.push(ull)
-                if (ul != null) outs.push(ul)
-                outs.push(ee)
-            }
-            ull = ul;
-            ul = ee;
-        }
+        if (lyrics[i].timestamp > time) break
+        currentIndex = i
     }
-    return outs
+
+    const start = currentIndex > 0 ? currentIndex - 1 : 0
+    const end = currentIndex < 0 ? nextn + 1 : currentIndex + nextn + 1
+
+    return {
+        lines: lyrics.slice(start, end),
+        activeIndex: currentIndex < 0 ? 0 : currentIndex - start
+    }
 }

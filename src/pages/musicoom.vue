@@ -179,6 +179,10 @@
   color: rgba(255, 255, 255, 0.66);
 }
 
+.lyric-line.previous {
+  color: rgba(255, 255, 255, 0.48);
+}
+
 .lyric-line.active {
   color: #f4f2eb;
   font-size: 16.5px;
@@ -370,7 +374,7 @@
         <h2 class="song-artist">{{ info.artist || '未知艺术家' }}</h2>
         <div class="lyrics-box">
           <div v-for="(e, i) in nowLyrics" :key="i"
-               :class="['lyric-line', { active: i === 0 }]"
+               :class="['lyric-line', { active: i === activeLyricIndex, previous: i === activeLyricIndex - 1 }]"
                @click="ap.seek(e.timestamp/1000)">
             {{ e.content || '' }}
           </div>
@@ -462,6 +466,7 @@ const now_id = ref("");
 const lyric = ref("");
 const lyrics = ref([] as any[]);
 const nowLyrics = ref([] as any[]);
+const activeLyricIndex = ref(-1);
 const info = ref({} as any);
 const cover0 = ref("");
 const ap = {
@@ -645,7 +650,9 @@ onMounted(async () => {
     if (!ap.audio || !ap.list) return;
     currentPn.value = `${getTimeMs(ap.audio.currentTime.toFixed(0))}/${getTimeMs(ap.audio.duration.toFixed(0))}`;
     if (!isNaN(ap.audio.duration)) { percentage.value = Number(((ap.audio.currentTime / ap.audio.duration) * 100).toFixed(2)); }
-    nowLyrics.value = getNearst(ap.audio.currentTime * 1000, 6, lyrics.value);
+    const lyricWindow = getNearst(ap.audio.currentTime * 1000, 6, lyrics.value);
+    nowLyrics.value = lyricWindow.lines;
+    activeLyricIndex.value = lyricWindow.activeIndex;
     const currentAudio = ap.list.audios[ap.list.index];
     if (currentAudio && now_id.value !== (currentAudio.songId || currentAudio.id)) loadRes(0);
     const currentPlayingState = !ap.audio.paused;
