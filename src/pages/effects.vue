@@ -3,6 +3,7 @@
     <!-- 背景舞台：当前效果以 fixed 图层铺满视口 -->
     <Galaxy v-if="activeId === 'galaxy'" :seed="seed" @stats="onGalaxyStats" />
     <City v-else-if="activeId === 'city'" />
+    <InkTide v-else-if="activeId === 'ink-tide'" />
     <Landscape v-else />
 
     <div class="fx-layout">
@@ -72,6 +73,7 @@ import {useRoute, useRouter} from 'vue-router'
 import City from '@/components/City.vue'
 import Galaxy from '@/components/Galaxy.vue'
 import Landscape from '@/components/Landscape.vue'
+import InkTide from '@/components/InkTide.vue'
 import {globalBackground, setGlobalBackground, type BackgroundId} from '@/utils/background'
 import {toast} from '@/utils/utils'
 
@@ -126,6 +128,14 @@ const CASES: FxCase[] = [
         note: '现代天际线，窗灯错峰明灭',
         detail: '一组现代高楼沿地平线展开，玻璃楼与石材楼交叠成立体天际线。亮色主题是清晨蓝调，少量窗户开始亮灯；暗色主题转入夜晚，暖光窗户成组亮起、熄灭，楼顶信标间歇闪烁。',
         swatch: 'radial-gradient(2px 2px at 22% 50%, #ffd18a 0 80%, transparent 90%), radial-gradient(2px 2px at 44% 68%, #ffd18a 0 80%, transparent 90%), radial-gradient(2px 2px at 72% 42%, #ffd18a 0 80%, transparent 90%), linear-gradient(90deg, transparent 0 8%, #31495f 8% 15%, transparent 15% 20%, #22384d 20% 28%, transparent 28% 33%, #2b4357 33% 46%, transparent 46% 51%, #1c3142 51% 68%, transparent 68% 72%, #31495f 72% 90%, transparent 90%), linear-gradient(180deg, #a9c2d5 0%, #ecd2ae 66%, #101a24 66% 100%)',
+        isNew: true,
+    },
+    {
+        id: 'ink-tide',
+        name: '折光深渊',
+        note: '深海折光，轻量三维空间',
+        detail: '一个深海中心折出一座浮空晶体，外围是逐层后退的几何光面和细潮线。鼠标移动时，不同深度的光面会产生轻微景深差，像一件悬在海面上方的折光标本。亮色偏青瓷和银绿，暗色则沉入黑曜蓝。',
+        swatch: 'radial-gradient(50% 72% at 50% 72%, rgba(121, 224, 214, .5), transparent 60%), linear-gradient(132deg, transparent 0 28%, rgba(232, 255, 244, .9) 29% 31%, transparent 32% 42%), linear-gradient(48deg, transparent 0 43%, rgba(237, 177, 103, .8) 44% 46%, transparent 47% 58%), linear-gradient(160deg, #123243 0%, #0a1a2a 100%)',
         isNew: true,
     },
 ]

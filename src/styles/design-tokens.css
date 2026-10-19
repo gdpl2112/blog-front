@@ -54,6 +54,32 @@
   --gx-vignette: 0, 0, 0;
   --gx-vignette-a: 0.5;
 
+  /* ---- Refractive abyss: light 3D geometry ---- */
+  --td-sky-1: #c8dfe4;
+  --td-sky-2: #557d8b;
+  --td-water-1: #0d2b38;
+  --td-glow: 239, 191, 132;
+  --td-glow-a: 0.34;
+  --td-horizon: 111, 222, 211;
+  --td-horizon-a: 0.2;
+  --td-moon: #e7f5e6;
+  --td-moon-hi: #fffbed;
+  --td-moon-rgb: 222, 246, 229;
+  --td-tide-cool: 116, 224, 214;
+  --td-tide-warm: 239, 177, 103;
+  --td-water-line: 118, 202, 201;
+  --td-star: 255, 255, 255;
+  --td-grid: 181, 244, 229;
+  --td-edge: 216, 255, 245;
+  --td-tide: 101, 222, 214;
+  --td-warm: 245, 183, 106;
+  --td-prism-a: 96, 181, 190;
+  --td-prism-b: 20, 72, 91;
+  --td-pointer: 205, 255, 234;
+  --td-vignette: 10, 35, 45;
+  --td-vignette-a: 0.34;
+
+
   /* ---- 山水底衬（Landscape.vue 专用） ----
      亮色是「天亮」：冷青天幕、地平线暖光、初升的日、淡墨远山、湖上薄雾；
      暗色翻成「天黑」：深蓝天幕、低垂的月、星子、浓墨近山、暖色萤火。
@@ -276,6 +302,34 @@
 }
 
 [data-theme="dark"] {
+  /* ---- Refractive abyss: dark 3D geometry ---- */
+  --td-sky-1: #050d17;
+  --td-sky-2: #0a2532;
+  --td-water-1: #020f18;
+  --td-glow: 247, 180, 110;
+  --td-glow-a: 0.16;
+  --td-horizon: 46, 178, 170;
+  --td-horizon-a: 0.14;
+  --td-moon: #cfe7d6;
+  --td-moon-hi: #f5f6df;
+  --td-moon-rgb: 205, 235, 211;
+  --td-tide-cool: 65, 198, 190;
+  --td-tide-warm: 216, 142, 83;
+  --td-water-line: 56, 146, 155;
+  --td-star: 200, 245, 238;
+  --td-grid: 72, 177, 174;
+  --td-edge: 140, 235, 222;
+  --td-tide: 69, 201, 191;
+  --td-warm: 226, 149, 84;
+  --td-prism-a: 43, 127, 143;
+  --td-prism-b: 6, 35, 52;
+  --td-pointer: 169, 255, 222;
+  --td-vignette: 0, 5, 9;
+  --td-vignette-a: 0.62;
+
+
+
+
   color-scheme: dark;
 
   --paper: #eef1f6;

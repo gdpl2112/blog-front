@@ -1,11 +1,11 @@
 import {ref} from 'vue'
 
-export type BackgroundId = 'landscape' | 'galaxy' | 'city'
+export type BackgroundId = 'landscape' | 'galaxy' | 'city' | 'ink-tide'
 
 const BACKGROUND_KEY = 'blog-background'
 const SEED_KEY = 'blog-background-seed'
 const DEFAULT_SEED = 20261018
-const BACKGROUND_IDS: BackgroundId[] = ['landscape', 'galaxy', 'city']
+const BACKGROUND_IDS: BackgroundId[] = ['landscape', 'galaxy', 'city', 'ink-tide']
 const DEFAULT_BACKGROUND: BackgroundId = 'landscape'
 
 function readBackground(): BackgroundId {

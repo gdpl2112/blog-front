@@ -820,6 +820,7 @@
     <Galaxy v-if="showBackdrop && globalBackground === 'galaxy'" :seed="globalBackgroundSeed"
             class="galaxy--site" />
     <City v-else-if="showBackdrop && globalBackground === 'city'" />
+    <InkTide v-else-if="showBackdrop && globalBackground === 'ink-tide'" />
     <Landscape v-else-if="showBackdrop" />
 
     <!-- 加载：一枚朱印 -->
@@ -1090,6 +1091,7 @@ import router from "@/router";
 import City from "@/components/City.vue";
 import Galaxy from "@/components/Galaxy.vue";
 import Landscape from "@/components/Landscape.vue";
+import InkTide from "@/components/InkTide.vue";
 import {applyTheme, theme, toggleTheme} from "@/utils/theme";
 import {globalBackground, globalBackgroundSeed} from "@/utils/background";
 
