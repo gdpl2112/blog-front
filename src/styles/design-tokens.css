@@ -165,6 +165,20 @@
   --ct-pointer-a: 0.16;
   --ct-pointer-line-a: 0.05;
 
+  /* ---- 引力场（Gravity.vue 专用） ----
+     亮色「晨雾」：纸白底、靛蓝与天蓝浮尘，普通混合、透明度 0.15~0.35；
+     暗色「深空」：近黑冷蓝底、青蓝与紫粒子，加法叠加发光。
+     canvas 读取 --gv-a / --gv-b / --gv-ripple 的 rgb 三元组，主题切换时逐帧插值；
+     --gv-grid-a 只在暗色给一点点 1px 网格，亮色直接关掉。 */
+  --gv-base: #f7f8fb;
+  --gv-a: 110, 118, 246;
+  --gv-b: 34, 178, 242;
+  --gv-ripple: 192, 57, 43;
+  --gv-flash: 196, 208, 255;
+  --gv-grid: 21, 26, 34;
+  --gv-grid-a: 0;
+  --gv-vignette-a: 0.07;
+
   /* ---- 反相填充上的文字色（实心按钮、用户气泡等） ---- */
   --on-ink: #ffffff;
 
@@ -450,6 +464,16 @@
   --ct-vignette-a: 0.38;
   --ct-pointer-a: 0.26;
   --ct-pointer-line-a: 0.08;
+
+  /* ---- 引力场：深空 ---- */
+  --gv-base: #05060a;
+  --gv-a: 110, 231, 255;
+  --gv-b: 167, 139, 250;
+  --gv-ripple: 226, 96, 75;
+  --gv-flash: 214, 236, 255;
+  --gv-grid: 110, 231, 255;
+  --gv-grid-a: 0.06;
+  --gv-vignette-a: 0.46;
 
   --seal: #e2604b;
   --seal-ink: #f0806c;

@@ -814,13 +814,16 @@
 
 <template>
   <div class="app-shell">
-    <!-- 全站背景：山水（默认） / 银河 / 城市，由背景室的「应用到全站」决定。
+    <!-- 全站背景：山水（默认） / 银河 / 城市 / 折光深渊 / 引力场，由背景室的「应用到全站」决定。
          背景室等页面会自己挂载背景；两者在明暗两种主题下都接管全站，
          .galaxy--site 是「全站那一份」的标记，亮色下它会另取一套纸底墨星。 -->
     <Galaxy v-if="showBackdrop && globalBackground === 'galaxy'" :seed="globalBackgroundSeed"
             class="galaxy--site" />
     <City v-else-if="showBackdrop && globalBackground === 'city'" />
     <InkTide v-else-if="showBackdrop && globalBackground === 'ink-tide'" />
+    <!-- 引力场：亮色是晨雾浮尘、暗色是深空能量流，两边正文都读得清，
+         全站那一份带 .gravity--site，粒子层再收一点，不抢内容 -->
+    <Gravity v-else-if="showBackdrop && globalBackground === 'gravity'" class="gravity--site" />
     <Landscape v-else-if="showBackdrop" />
 
     <!-- 加载：一枚朱印 -->
@@ -1090,6 +1093,7 @@ import APlayer from 'aplayer/dist/APlayer.min';
 import router from "@/router";
 import City from "@/components/City.vue";
 import Galaxy from "@/components/Galaxy.vue";
+import Gravity from "@/components/Gravity.vue";
 import Landscape from "@/components/Landscape.vue";
 import InkTide from "@/components/InkTide.vue";
 import {applyTheme, theme, toggleTheme} from "@/utils/theme";

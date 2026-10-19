@@ -4,6 +4,8 @@
     <Galaxy v-if="activeId === 'galaxy'" :seed="seed" @stats="onGalaxyStats" />
     <City v-else-if="activeId === 'city'" />
     <InkTide v-else-if="activeId === 'ink-tide'" />
+    <!-- 背景室是「看背景」的场合：展签就浮在背景上，所以关掉阅读降透明 -->
+    <Gravity v-else-if="activeId === 'gravity'" :protect="false" @stats="onGravityStats" />
     <Landscape v-else />
 
     <div class="fx-layout">
@@ -41,6 +43,9 @@
         <p v-if="activeId === 'galaxy' && stats" class="fx-stats mono">
           星点 {{ statStars }}，种子 {{ seed }}
         </p>
+        <p v-else-if="activeId === 'gravity' && gravityStats" class="fx-stats mono">
+          粒子 {{ gravityCount }}，curl noise 流场
+        </p>
 
         <div class="fx-actions">
           <button
@@ -72,6 +77,7 @@ import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import City from '@/components/City.vue'
 import Galaxy from '@/components/Galaxy.vue'
+import Gravity from '@/components/Gravity.vue'
 import Landscape from '@/components/Landscape.vue'
 import InkTide from '@/components/InkTide.vue'
 import {globalBackground, setGlobalBackground, type BackgroundId} from '@/utils/background'
@@ -138,6 +144,14 @@ const CASES: FxCase[] = [
         swatch: 'radial-gradient(50% 72% at 50% 72%, rgba(121, 224, 214, .5), transparent 60%), linear-gradient(132deg, transparent 0 28%, rgba(232, 255, 244, .9) 29% 31%, transparent 32% 42%), linear-gradient(48deg, transparent 0 43%, rgba(237, 177, 103, .8) 44% 46%, transparent 47% 58%), linear-gradient(160deg, #123243 0%, #0a1a2a 100%)',
         isNew: true,
     },
+    {
+        id: 'gravity',
+        name: '引力场',
+        note: 'GPU 流场粒子：curl noise 与鼠标引力',
+        detail: '上万颗粒子在 curl noise 流场里漂移：流场取标量势的旋度，散度为零，粒子只换位置、从不堆积。鼠标 200px 内是引力源，移动越快扰动越强，静止 1.5s 后流场自己抹平痕迹；点击落下一圈涟漪，波前把粒子推开。暗色是深空，青蓝与紫的粒子加法叠加、流速越快越亮；亮色是晨雾，靛蓝浮尘普通混合、透明度压到 0.15~0.35。切换主题时颜色与行为在 800ms 内插值，并重铸出一次全屏涟漪；粒子位置存在浮点纹理里走 GPU 迭代，CPU 每帧只提交一次绘制。',
+        swatch: 'radial-gradient(1.5px 1.5px at 26% 34%, rgba(110,231,255,.95) 0, rgba(110,231,255,0) 70%), radial-gradient(1.5px 1.5px at 45% 58%, rgba(167,139,250,.9) 0, rgba(167,139,250,0) 70%), radial-gradient(1.5px 1.5px at 62% 28%, rgba(110,231,255,.8) 0, rgba(110,231,255,0) 70%), radial-gradient(1.5px 1.5px at 74% 66%, rgba(167,139,250,.85) 0, rgba(167,139,250,0) 70%), radial-gradient(1.4px 1.4px at 36% 78%, rgba(110,231,255,.7) 0, rgba(110,231,255,0) 70%), radial-gradient(48% 44% at 52% 48%, rgba(110,231,255,.22) 0, rgba(110,231,255,0) 70%), linear-gradient(160deg, #0a1020 0%, #05060a 100%)',
+        isNew: true,
+    },
 ]
 
 const cases = CASES
@@ -168,6 +182,10 @@ const isGlobal = computed(() => globalBackground.value === activeId.value)
 const seed = ref(normalizeSeed(route.query.seed) ?? 20261018)
 const stats = ref<GalaxyStats | null>(null)
 const statStars = computed(() => (stats.value ? stats.value.stars.toLocaleString('zh-CN') : ''))
+
+// 引力场的展签上写实际粒子数：它随视口与 DPR 自适应，值得让访客看见
+const gravityStats = ref<{particles: number} | null>(null)
+const gravityCount = computed(() => (gravityStats.value ? gravityStats.value.particles.toLocaleString('zh-CN') : ''))
 const canFullscreen = Boolean(document.fullscreenEnabled)
 const isFullscreen = ref(Boolean(document.fullscreenElement))
 
@@ -216,10 +234,15 @@ function selectCase(id: BackgroundId) {
     if (id === activeId.value) return
     activeId.value = id
     if (id !== 'galaxy') stats.value = null
+    if (id !== 'gravity') gravityStats.value = null
 }
 
 function onGalaxyStats(payload: GalaxyStats) {
     stats.value = payload
+}
+
+function onGravityStats(payload: {particles: number}) {
+    gravityStats.value = payload
 }
 
 /** 把当前效果设为全站背景：银河连同种子一起记住，山水不带种子 */
