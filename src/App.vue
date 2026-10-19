@@ -404,6 +404,10 @@
   padding: var(--gap-6) var(--pad-x) var(--gap-8);
 }
 
+.main-content-console {
+  max-width: 1320px;
+}
+
 /* ---------------- 版权页 ---------------- */
 
 .site-footer {
@@ -1024,7 +1028,7 @@
     </div>
 
     <!-- 正文 -->
-    <main class="main-content">
+    <main class="main-content" :class="{'main-content-console': route.path.startsWith('/v0')}">
       <RouterView />
     </main>
 

@@ -62,6 +62,49 @@
   color: var(--seal);
 }
 
+.console-group {
+  border-bottom: 1px solid var(--rule);
+}
+
+.console-group-label {
+  padding: 12px 0 4px;
+  color: var(--ink-3);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.12em;
+}
+
+.console-group-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.console-group-title::after {
+  content: '＋';
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+}
+
+.console-group[open] .console-group-title::after {
+  content: '－';
+}
+
+.console-group-items {
+  padding-left: 26px;
+}
+
+.console-group-items .console-item {
+  border-bottom: 0;
+}
+
 .console-main {
   min-width: 0;
   padding: clamp(18px, 2.6vw, 30px);
@@ -108,30 +151,39 @@
   <div class="console ink-in">
     <aside class="console-nav">
       <p class="console-label">控制台</p>
+      <div class="console-group-label">基础</div>
       <RouterLink to="/v0/info" class="console-item" active-class="active">
         <span class="idx">01</span> 账号设置
       </RouterLink>
       <RouterLink to="/v0/articles" class="console-item" active-class="active">
         <span class="idx">02</span> 文章管理
       </RouterLink>
+      <div class="console-group-label">能力</div>
       <RouterLink to="/v0/aox" class="console-item" active-class="active">
         <span class="idx">03</span> 接口管理
       </RouterLink>
       <RouterLink to="/v0/app" class="console-item" active-class="active">
         <span class="idx">04</span> 应用管理
       </RouterLink>
-      <RouterLink to="/v0/pnote" class="console-item" active-class="active">
-        <span class="idx">05</span> 密码本
-      </RouterLink>
+      <div class="console-group-label">工具</div>
+      <details class="console-group" :open="toolsOpen">
+        <summary class="console-group-title">展开工具</summary>
+        <div class="console-group-items">
+          <RouterLink to="/v0/pnote" class="console-item" active-class="active">
+            <span class="idx">05</span> 密码本
+          </RouterLink>
+          <RouterLink v-if="roles.includes('admin')" to="/v0/adminv2" class="console-item" active-class="active">
+            <span class="idx">08</span> 卡密维护
+          </RouterLink>
+        </div>
+      </details>
       <template v-if="roles.includes('admin')">
+        <div class="console-group-label">管理</div>
         <RouterLink to="/v0/adminv0" class="console-item" active-class="active">
           <span class="idx">06</span> 帖子维护
         </RouterLink>
         <RouterLink to="/v0/adminv1" class="console-item" active-class="active">
           <span class="idx">07</span> 一言维护
-        </RouterLink>
-        <RouterLink to="/v0/adminv2" class="console-item" active-class="active">
-          <span class="idx">08</span> 卡密维护
         </RouterLink>
         <RouterLink to="/v0/adminai" class="console-item" active-class="active">
           <span class="idx">09</span> AI 配置
@@ -146,12 +198,14 @@
 </template>
 
 <script lang="ts" setup>
-import {RouterLink, RouterView} from 'vue-router'
-import {onMounted, ref} from "vue";
+import {RouterLink, RouterView, useRoute} from 'vue-router'
+import {computed, onMounted, ref} from "vue";
 import service from "@/axios";
 import Cookie from "js-cookie";
 
 const roles = ref(['user'])
+const route = useRoute()
+const toolsOpen = computed(() => ['/v0/pnote', '/v0/adminv2'].includes(route.path))
 onMounted(() => {
   if (sessionStorage.getItem('admin-token') && !Cookie.get('token') && !Cookie.get('authorization')) {
     roles.value = ['admin']
