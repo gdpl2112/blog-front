@@ -191,6 +191,68 @@
   transform: translateX(3px);
 }
 
+/* ---------- 分组 / 折叠 ---------- */
+
+.api-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: var(--gap-4) var(--gap-2);
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+
+.api-group-head:hover {
+  background: var(--glass-thin);
+}
+
+.api-group-head > i {
+  font-size: 10px;
+  color: var(--ink-3);
+  transition: transform var(--dur) var(--ease);
+}
+
+.api-group-head.open > i {
+  transform: rotate(90deg);
+}
+
+.api-group-head .g-title {
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+.api-group-head .g-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.api-group-head .g-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.api-group-head.open .g-count {
+  color: var(--ink-2);
+}
+
+/* 组内条目左侧留出层级缩进，视觉上从属于分组 */
+.api-group-body > .api-row {
+  padding-left: calc(var(--gap-2) + 18px);
+}
+
 /* 空态也托在玻璃上，避免页面出现无归属的文字块 */
 .empty {
   padding: var(--gap-8) var(--gap-6);
@@ -530,8 +592,8 @@
 
       <div class="search">
         <i class="bi bi-search"></i>
-        <input v-model="searchText" placeholder="搜索名称或描述" @input="filterList" />
-        <span v-if="searchText" class="found">{{ list.length }} / {{ rawList.length }}</span>
+        <input v-model="searchText" placeholder="搜索名称或描述" />
+        <span v-if="searchText" class="found">{{ filteredList.length }} / {{ rawList.length }}</span>
       </div>
     </div>
 
@@ -542,32 +604,49 @@
     </div>
 
     <!-- 目录 -->
-    <div v-else-if="list.length > 0" class="api-list">
-      <div
-        v-for="item in list"
-        :key="item.id"
-        class="api-row"
-        @click="openTest(item)"
-      >
-        <span class="method" :class="(item.method || 'get').toLowerCase()">{{ item.method || 'GET' }}</span>
+    <div v-else-if="filteredList.length > 0" class="api-list">
+      <div v-for="group in groups" :key="group.key" class="api-group">
+        <!-- 分组头（仅可折叠分组渲染） -->
+        <button
+          v-if="group.collapsible"
+          class="api-group-head"
+          :class="{ open: qqOpen }"
+          @click="qqOpen = !qqOpen"
+        >
+          <i class="bi bi-chevron-right"></i>
+          <span class="g-title">{{ group.title }}</span>
+          <span class="g-hint">{{ group.hint }}</span>
+          <span class="g-count">{{ group.items.length }} 个</span>
+        </button>
 
-        <div>
-          <h2 class="api-name">{{ item.name }}</h2>
-          <p class="api-desc">{{ item.desc }}</p>
-        </div>
-
-        <div class="api-addr" :title="item.address">{{ item.address }}</div>
-
-        <div class="api-tail">
-          <span v-if="item.state" class="chip">{{ item.state }}</span>
-          <button
-            class="btn btn--ghost btn--sm"
-            title="复制地址"
-            @click.stop="copyApi(item.address)"
+        <div v-show="!group.collapsible || qqOpen" :class="{ 'api-group-body': group.collapsible }">
+          <div
+            v-for="item in group.items"
+            :key="item.id"
+            class="api-row"
+            @click="openTest(item)"
           >
-            <i class="bi bi-clipboard"></i>
-          </button>
-          <i class="bi bi-arrow-right go"></i>
+            <span class="method" :class="(item.method || 'get').toLowerCase()">{{ item.method || 'GET' }}</span>
+
+            <div>
+              <h2 class="api-name">{{ item.name }}</h2>
+              <p class="api-desc">{{ item.desc }}</p>
+            </div>
+
+            <div class="api-addr" :title="item.address">{{ item.address }}</div>
+
+            <div class="api-tail">
+              <span v-if="item.state" class="chip">{{ item.state }}</span>
+              <button
+                class="btn btn--ghost btn--sm"
+                title="复制地址"
+                @click.stop="copyApi(item.address)"
+              >
+                <i class="bi bi-clipboard"></i>
+              </button>
+              <i class="bi bi-arrow-right go"></i>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -676,7 +755,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
 import { ElMessage } from "element-plus";
 import { copyTextElement } from '@/utils/utils'
@@ -698,10 +777,60 @@ interface ApiDefinition {
   requestBody?: string
 }
 
-const list = ref<ApiDefinition[]>([])
 const rawList = ref<ApiDefinition[]>([])
 const searchText = ref('')
 const isLoading = ref(true)
+
+/** QQ 相关接口默认收拢，避免十几条同类接口把目录撑长 */
+const qqOpen = ref(false)
+const QQ_PREFIX = 'QQ'
+
+function isQqApi(item: ApiDefinition): boolean {
+  return (item.name || '').trim().toUpperCase().startsWith(QQ_PREFIX)
+}
+
+/** 搜索过滤：命中名称或描述 */
+const filteredList = computed<ApiDefinition[]>(() => {
+  const t = searchText.value.trim().toLowerCase()
+  if (!t) return rawList.value
+  return rawList.value.filter(item =>
+    (item.name && item.name.toLowerCase().includes(t)) ||
+    (item.desc && item.desc.toLowerCase().includes(t))
+  )
+})
+
+interface ApiGroup {
+  key: string
+  title: string
+  hint: string
+  collapsible: boolean
+  items: ApiDefinition[]
+}
+
+/** 常规接口平铺，QQ 相关接口归入末尾可折叠分组 */
+const groups = computed<ApiGroup[]>(() => {
+  const normal: ApiDefinition[] = []
+  const qq: ApiDefinition[] = []
+  for (const item of filteredList.value) (isQqApi(item) ? qq : normal).push(item)
+
+  const result: ApiGroup[] = []
+  if (normal.length) result.push({ key: 'normal', title: '', hint: '', collapsible: false, items: normal })
+  if (qq.length) {
+    result.push({
+      key: 'qq',
+      title: 'QQ 相关接口',
+      hint: '空间 / 音乐',
+      collapsible: true,
+      items: qq,
+    })
+  }
+  return result
+})
+
+/** 搜索命中 QQ 组时自动展开，避免结果被折叠隐藏 */
+watch(searchText, v => {
+  if (v.trim() && groups.value.some(g => g.key === 'qq')) qqOpen.value = true
+})
 
 interface KV { key: string; value: string }
 const testClient = axios.create({ timeout: 30000, validateStatus: () => true })
@@ -742,15 +871,6 @@ function copyResponseText() {
   if (!testResponse.value) return
   const text = testResponse.value.error || testResponse.value.data
   copyTextElement(text)
-}
-
-function filterList() {
-  const t = searchText.value.toLowerCase()
-  if (!t) { list.value = [...rawList.value]; return }
-  list.value = rawList.value.filter(item =>
-    (item.name && item.name.toLowerCase().includes(t)) ||
-    (item.desc && item.desc.toLowerCase().includes(t))
-  )
 }
 
 function openTest(item: ApiDefinition) {
@@ -811,8 +931,7 @@ async function sendTestRequest() {
 onMounted(async () => {
   try {
     const res = await publicClient.get("/api/list") as unknown as ApiDefinition[]
-    rawList.value = res
-    list.value = [...rawList.value]
+    rawList.value = Array.isArray(res) ? res : []
   } catch { ElMessage.error('加载API列表失败') }
   finally { isLoading.value = false }
 })
