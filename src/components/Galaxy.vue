@@ -15,7 +15,7 @@
     <!-- 4. 引力透镜层：悬停时把黑洞周围的星点重绘成被拉弯的弧 -->
     <canvas ref="lensCanvasRef" class="galaxy__lens"></canvas>
 
-    <!-- 5. 动态星场：呼吸星与流星，逐帧清空重画 -->
+    <!-- 5. 动态星场：近光速星流、呼吸星与流星，逐帧清空重画 -->
     <canvas ref="fxCanvasRef" class="galaxy__fx"></canvas>
 
     <!-- 6. 黑洞：鼠标悬浮处的事件视界 + 光子环 + 吸积盘 -->
@@ -45,7 +45,7 @@ import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
  *  3) stars   —— 静态层：散星、银河带星、带十字星芒的亮星，按 seed 一次性烘焙到 canvas；
  *                窗口尺寸 / 主题 / 种子变化时才重画；
  *  4) lens    —— 引力透镜层：悬停时把黑洞周围 140px 内的星点按薄透镜映射错位重排；
- *  5) fx      —— 动态层：呼吸星与流星，逐帧清空重画（数量少，开销可控）；
+ *  5) fx      —— 动态层：近光速星流、呼吸星与流星，逐帧清空重画（数量少，开销可控）；
  *  6) hole    —— 鼠标悬浮处的黑洞：事件视界、光子环、吸积盘，纯 CSS；
  *  7) vignette—— 暗角。
  *
@@ -58,7 +58,7 @@ import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
  *
  * 性能：
  *  - 静态星场只烘焙一次；悬停时只重绘黑洞周围被 mask 挖掉的几百颗星；
- *  - 逐帧层只画 64 颗呼吸星与最多 1~2 颗流星；
+ *  - 逐帧层画 80~210 颗星流、64 颗呼吸星与最多 1~2 颗流星；
  *  - 页面不可见时停帧；prefers-reduced-motion 下只保留静态一帧；
  *  - 各层 canvas 的像素总量设上限：星场 DPR 最多 2，透镜与 fx 最多 1.5，
  *    4K 屏上也不会为了背景吃掉过多显存；
@@ -89,6 +89,14 @@ const FIELD_MAX = 1700
 const BAND_MIN = 560
 const BAND_MAX = 2600
 const TWINKLE_COUNT = 64
+const WARP_DENSITY = 9000 // 每多少平方像素一颗星流
+const WARP_MIN = 80
+const WARP_MAX = 210
+const WARP_CX = 0.5 // 星流的消失点：飞行的前方
+const WARP_CY = 0.43
+const WARP_BASE_SPEED = 30 // 消失点附近的径向速度（px/s）
+const WARP_ACCEL = 1.7 // 越靠外速度越快，形成景深
+const WARP_HERO_RATE = 0.16 // 少数"近距离掠过"的亮星，尾迹更长
 const LENS_EINSTEIN_R = 52 // 黑洞的爱因斯坦半径（px）
 const LENS_MASK_R = 140 // 星场被透镜接管的半径（与 CSS mask 的尺寸保持一致）
 const LENS_SRC_R = 140 // 参与重绘的源星范围
@@ -106,6 +114,17 @@ interface Palette {
     starAlpha: number
     meteor: RGB
     meteorAlpha: number
+    warpAlpha: number
+}
+
+interface WarpStar {
+    angle: number
+    radius: number
+    speed: number
+    color: RGB
+    alpha: number
+    width: number
+    hero: boolean
 }
 
 interface TwinkleStar {
@@ -153,6 +172,7 @@ let palette: Palette = {
     starAlpha: 0.95,
     meteor: [238, 246, 255],
     meteorAlpha: 0.9,
+    warpAlpha: 1,
 }
 let paletteSignature = ''
 
@@ -162,6 +182,8 @@ let dpr = 1
 let twinkles: TwinkleStar[] = []
 let meteors: Meteor[] = []
 let stars: StarPoint[] = []
+let warpStars: WarpStar[] = []
+let warpMaxR = 1
 
 let rafId = 0
 let lastTick = 0
@@ -237,13 +259,14 @@ function readPalette(): Palette {
         starAlpha: parseNumber(cs.getPropertyValue('--gx-star-a'), 0.95),
         meteor: parseRGB(cs.getPropertyValue('--gx-meteor'), [238, 246, 255]),
         meteorAlpha: parseNumber(cs.getPropertyValue('--gx-meteor-a'), 0.9),
+        warpAlpha: parseNumber(cs.getPropertyValue('--gx-warp-a'), 1),
     }
 }
 
 function signatureOf(p: Palette) {
     return [
         p.star.join(','), p.cool.join(','), p.warm.join(','), p.starAlpha,
-        p.meteor.join(','), p.meteorAlpha,
+        p.meteor.join(','), p.meteorAlpha, p.warpAlpha,
     ].join('|')
 }
 
@@ -252,6 +275,33 @@ function pickColor(rand: () => number): RGB {
     if (p < 0.07) return palette.warm
     if (p < 0.27) return palette.cool
     return palette.star
+}
+
+/* ---------- 近光速星流 ---------- */
+
+function spawnWarpStar(rand: () => number, anywhere: boolean): WarpStar {
+    const hero = rand() < WARP_HERO_RATE
+    return {
+        angle: rand() * TAU,
+        // 首次随机铺满行程；重生时回到消失点附近，像从远处迎面而来
+        radius: anywhere ? 24 + rand() * warpMaxR : 6 + rand() * 72,
+        speed: hero ? 1.05 + rand() * 0.45 : 0.7 + rand() * 0.7,
+        color: pickColor(rand),
+        alpha: hero ? 0.85 + rand() * 0.3 : 0.4 + rand() * 0.6,
+        width: hero ? 1.1 + rand() * 0.9 : 0.55 + rand() * 0.6,
+        hero,
+    }
+}
+
+function rebuildWarpStars() {
+    const rand = mulberry32((props.seed ^ 0x5bd1e995) >>> 0)
+    warpMaxR = Math.hypot(
+        Math.max(vw * WARP_CX, vw * (1 - WARP_CX)),
+        Math.max(vh * WARP_CY, vh * (1 - WARP_CY)),
+    ) * 1.08
+    const count = Math.round(clamp((vw * vh) / WARP_DENSITY, WARP_MIN, WARP_MAX))
+    warpStars = []
+    for (let i = 0; i < count; i++) warpStars.push(spawnWarpStar(rand, true))
 }
 
 /* ---------- 尺寸 ---------- */
@@ -466,6 +516,8 @@ function bake() {
         })
     }
 
+    rebuildWarpStars()
+
     emit('stats', {stars: fieldCount + bandCount + brightCount + TWINKLE_COUNT, seed: props.seed})
 
     // 减少动态时也要有一帧可看的呼吸星
@@ -644,10 +696,71 @@ function updateLens() {
     }
 }
 
+function drawWarp(ctx: CanvasRenderingContext2D, dt: number) {
+    if (reduced || dt <= 0) return
+    const intensity = palette.warpAlpha
+    if (intensity <= 0.01) return
+
+    const cx = vw * WARP_CX
+    const cy = vh * WARP_CY
+    ctx.lineCap = 'round'
+
+    for (const star of warpStars) {
+        const prev = star.radius
+        star.radius += (WARP_BASE_SPEED + star.radius * WARP_ACCEL) * star.speed * dt
+        if (star.radius > warpMaxR) {
+            Object.assign(star, spawnWarpStar(Math.random, false))
+            continue
+        }
+
+        const t = star.radius / warpMaxR
+        // 远离消失点才逐渐提亮，中心保持安静
+        const alpha = palette.starAlpha * star.alpha * (0.12 + (star.hero ? 0.72 : 0.55) * t * t) * intensity
+        if (alpha < 0.012) continue
+
+        const cos = Math.cos(star.angle)
+        const sin = Math.sin(star.angle)
+        const x1 = cx + cos * star.radius
+        const y1 = cy + sin * star.radius
+        const step = star.radius - prev
+        // 近处的亮星把一帧的位移拉成更长的光迹
+        const tail = star.hero ? Math.max(0, prev - step * 2.2) : prev
+        const tx = cx + cos * tail
+        const ty = cy + sin * tail
+        const width = star.width * (0.55 + t * 0.95)
+
+        // 先铺一道更宽更淡的外晕，让光迹在星空里显出来
+        if (t > 0.32) {
+            ctx.strokeStyle = rgba(star.color, alpha * 0.2)
+            ctx.lineWidth = width * 3.4
+            ctx.beginPath()
+            ctx.moveTo(tx, ty)
+            ctx.lineTo(x1, y1)
+            ctx.stroke()
+        }
+
+        ctx.strokeStyle = rgba(star.color, alpha)
+        ctx.lineWidth = width
+        ctx.beginPath()
+        ctx.moveTo(tx, ty)
+        ctx.lineTo(x1, y1)
+        ctx.stroke()
+
+        if (t > 0.24) {
+            ctx.fillStyle = rgba(star.color, Math.min(1, alpha * 1.2))
+            ctx.beginPath()
+            ctx.arc(x1, y1, width * (0.45 + t * 0.75), 0, TAU)
+            ctx.fill()
+        }
+    }
+}
+
 function drawFx(dt: number) {
     const ctx = fxCtx
     if (!ctx) return
     ctx.clearRect(0, 0, vw, vh)
+
+    drawWarp(ctx, dt)
 
     for (const star of twinkles) {
         const wave = 0.5 + 0.5 * Math.sin(timeSec * star.speed + star.phase)
@@ -683,8 +796,12 @@ function stepParallax(dt: number) {
     const nx = vw ? targetX / vw - 0.5 : 0
     const ny = vh ? targetY / vh - 0.5 : 0
 
-    starX += (-nx * 9 - starX) * ease
-    starY += (-ny * 6 - starY) * ease
+    // 指针之外再叠一层缓慢漂移：静态星场、银河带与星流都跟着"向前滑"
+    const driftX = Math.sin(timeSec * 0.16) * 14
+    const driftY = Math.cos(timeSec * 0.11) * 9
+
+    starX += (driftX - nx * 9 - starX) * ease
+    starY += (driftY - ny * 6 - starY) * ease
 
     const el = rootRef.value
     if (!el) return

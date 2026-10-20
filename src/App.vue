@@ -577,6 +577,24 @@
   background: var(--paper-2);
 }
 
+/* ---------------- 背景室：隐藏界面 ---------------- */
+
+/* 背景室点「隐藏界面」后，顶栏、页脚与歌单一起淡出，
+   只留背景和该页右下角那枚半透明的「显示界面」按钮 */
+.site-header,
+.site-footer,
+#player {
+  transition: opacity 300ms var(--ease), visibility 300ms;
+}
+
+body.fx-immersive .site-header,
+body.fx-immersive .site-footer,
+body.fx-immersive #player {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* ---------------- 移动端 ---------------- */
 
 .nav-mobile-backdrop,

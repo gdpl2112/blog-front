@@ -53,6 +53,8 @@
   --gx-hole-glow: 255, 152, 82;
   --gx-vignette: 0, 0, 0;
   --gx-vignette-a: 0.5;
+  /* 近光速星流强度（Galaxy.vue）：背景室全速，全站那份另行压暗 */
+  --gx-warp-a: 1;
 
   /* ---- Refractive abyss: light 3D geometry ---- */
   --td-sky-1: #c8dfe4;
@@ -162,8 +164,24 @@
   --ct-shadow: 30, 42, 54;
   --ct-vignette: 38, 52, 70;
   --ct-vignette-a: 0.18;
-  --ct-pointer-a: 0.16;
-  --ct-pointer-line-a: 0.05;
+  --ct-mid-1: #7d92a4;
+  --ct-mid-2: #5a7186;
+  --ct-mid-a: 0.55;
+  --ct-window-cool: #e4f4fb;
+  --ct-cloud: 255, 249, 240;
+  --ct-cloud-a: 0.34;
+  --ct-dome-a: 0.14;
+  --ct-neon-cyan: 74, 166, 190;
+  --ct-neon-violet: 140, 124, 196;
+  --ct-neon-a: 0.3;
+  --ct-traffic-warm: 255, 214, 150;
+  --ct-traffic-cool: 116, 200, 224;
+  --ct-traffic-magenta: 214, 130, 178;
+  --ct-traffic-a: 0.32;
+  --ct-grid: 74, 156, 180;
+  --ct-grid-a: 0.09;
+  --ct-scan: 44, 74, 92;
+  --ct-scan-a: 0.02;
 
   /* ---- 引力场（Gravity.vue 专用） ----
      亮色「晨雾」：纸白底、靛蓝与天蓝浮尘，普通混合、透明度 0.15~0.35；
@@ -294,7 +312,12 @@
 /* 银河被「应用到全站」的那一份（App.vue 加 .galaxy--site）在亮色主题下换成
    「纸底墨星」：亮色的正文是深色字，压在深空上读不清，所以天幕取纸色、星点取墨色；
    恒星的暖光留着，只把星芒换成暖色，纸上仍看得见它。
-   背景室里那份不带这个类，保持深空原样。 */
+   背景室里那份不带这个类，保持深空原样。
+   星流也一样：展品要看得出飞行，正文背后只留一点动势。 */
+.galaxy--site {
+  --gx-warp-a: 0.55;
+}
+
 [data-theme="light"] .galaxy--site {
   --gx-base-1: #eef4fc;
   --gx-base-2: #dae5f5;
@@ -313,6 +336,7 @@
   --gx-hole-glow: 226, 118, 62;
   --gx-vignette: 38, 50, 72;
   --gx-vignette-a: 0.14;
+  --gx-warp-a: 0.42;
 }
 
 [data-theme="dark"] {
@@ -462,8 +486,24 @@
   --ct-shadow: 0, 0, 0;
   --ct-vignette: 0, 0, 0;
   --ct-vignette-a: 0.38;
-  --ct-pointer-a: 0.26;
-  --ct-pointer-line-a: 0.08;
+  --ct-mid-1: #1a3350;
+  --ct-mid-2: #071321;
+  --ct-mid-a: 0.9;
+  --ct-window-cool: #c8ecff;
+  --ct-cloud: 120, 160, 214;
+  --ct-cloud-a: 0.13;
+  --ct-dome-a: 0.26;
+  --ct-neon-cyan: 102, 232, 255;
+  --ct-neon-violet: 178, 140, 255;
+  --ct-neon-a: 0.82;
+  --ct-traffic-warm: 255, 204, 130;
+  --ct-traffic-cool: 108, 234, 255;
+  --ct-traffic-magenta: 255, 112, 202;
+  --ct-traffic-a: 0.85;
+  --ct-grid: 92, 220, 255;
+  --ct-grid-a: 0.14;
+  --ct-scan: 150, 220, 255;
+  --ct-scan-a: 0.045;
 
   /* ---- 引力场：深空 ---- */
   --gv-base: #05060a;

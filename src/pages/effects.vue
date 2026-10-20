@@ -1,5 +1,5 @@
 <template>
-  <div ref="pageRef" class="fx-page">
+  <div ref="pageRef" class="fx-page" :class="{'is-immersive': immersive}">
     <!-- 背景舞台：当前效果以 fixed 图层铺满视口 -->
     <Galaxy v-if="activeId === 'galaxy'" :seed="seed" @stats="onGalaxyStats" />
     <City v-else-if="activeId === 'city'" />
@@ -61,6 +61,7 @@
           <button v-if="canFullscreen" type="button" class="btn" @click="toggleFullscreen">
             {{ isFullscreen ? '退出全屏' : '全屏观看' }}
           </button>
+          <button type="button" class="btn" @click="enterImmersive">隐藏界面</button>
           <button type="button" class="btn btn--ghost" @click="copyLink">复制链接</button>
         </div>
 
@@ -69,6 +70,20 @@
         </p>
       </section>
     </div>
+
+    <!-- 隐藏界面后唯一留下的一枚半透明按钮，点它或按 Esc 恢复界面 -->
+    <Transition name="fx-peek">
+      <button
+        v-if="immersive"
+        type="button"
+        class="fx-peek"
+        title="显示界面（Esc）"
+        @click="exitImmersive"
+      >
+        <i class="bi bi-eye" aria-hidden="true"></i>
+        <span>显示界面</span>
+      </button>
+    </Transition>
   </div>
 </template>
 
@@ -188,6 +203,7 @@ const gravityStats = ref<{particles: number} | null>(null)
 const gravityCount = computed(() => (gravityStats.value ? gravityStats.value.particles.toLocaleString('zh-CN') : ''))
 const canFullscreen = Boolean(document.fullscreenEnabled)
 const isFullscreen = ref(Boolean(document.fullscreenElement))
+const immersive = ref(false)
 
 /** 把当前效果与种子写回 URL；其他查询参数保持原样 */
 function syncQuery() {
@@ -282,6 +298,21 @@ function onFullscreenChange() {
     isFullscreen.value = Boolean(document.fullscreenElement)
 }
 
+/** 隐藏界面：给 body 挂类，App.vue 据此让顶栏、页脚与歌单一起退场 */
+function enterImmersive() {
+    immersive.value = true
+    document.body.classList.add('fx-immersive')
+}
+
+function exitImmersive() {
+    immersive.value = false
+    document.body.classList.remove('fx-immersive')
+}
+
+function onImmersiveKey(event: KeyboardEvent) {
+    if (event.key === 'Escape' && immersive.value) exitImmersive()
+}
+
 async function copyLink() {
     const query: Record<string, string> = {fx: activeId.value}
     if (activeId.value === 'galaxy') query.seed = String(seed.value)
@@ -299,11 +330,14 @@ onMounted(() => {
     // 首次进入时把默认效果与种子补进 URL，保证地址栏里的链接可复现
     syncQuery()
     document.addEventListener('fullscreenchange', onFullscreenChange)
+    document.addEventListener('keydown', onImmersiveKey)
     isFullscreen.value = Boolean(document.fullscreenElement)
 })
 
 onBeforeUnmount(() => {
     document.removeEventListener('fullscreenchange', onFullscreenChange)
+    document.removeEventListener('keydown', onImmersiveKey)
+    document.body.classList.remove('fx-immersive')
     // 离开页面时手动退出全屏，避免浏览器停留在已卸载的节点上
     if (document.fullscreenElement === pageRef.value) {
         document.exitFullscreen().catch(() => {
@@ -342,6 +376,7 @@ onBeforeUnmount(() => {
   box-shadow: var(--glass-shadow), var(--glass-inner);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  transition: opacity 300ms var(--ease), transform 300ms var(--ease), visibility 300ms;
 }
 
 .fx-title {
@@ -512,6 +547,63 @@ onBeforeUnmount(() => {
   background: #05070d;
 }
 
+/* ---------- 隐藏界面：只留背景和一枚半透明的恢复按钮 ---------- */
+
+.fx-page.is-immersive .fx-deck {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+.fx-page.is-immersive .fx-layout {
+  pointer-events: none;
+}
+
+/* 深浅背景上都要读得清，所以不做跟随主题的玻璃，直接用暗色半透明药丸 */
+.fx-peek {
+  position: fixed;
+  right: var(--gap-4);
+  bottom: var(--gap-4);
+  z-index: 960;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--r-full);
+  background: rgba(12, 16, 23, 0.42);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  opacity: 0.55;
+  box-shadow: 0 10px 30px -16px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  transition: opacity var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.fx-peek:hover,
+.fx-peek:focus-visible {
+  opacity: 1;
+  background: rgba(12, 16, 23, 0.62);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.fx-peek-enter-active,
+.fx-peek-leave-active {
+  transition: opacity 260ms var(--ease), transform 260ms var(--ease);
+}
+
+.fx-peek-enter-from,
+.fx-peek-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
 /* ---------- 移动端 ---------- */
 
 @media (max-width: 720px) {
@@ -535,6 +627,11 @@ onBeforeUnmount(() => {
   .fx-swatch {
     width: 38px;
     height: 38px;
+  }
+
+  .fx-peek {
+    right: var(--gap-3);
+    bottom: var(--gap-3);
   }
 }
 </style>
