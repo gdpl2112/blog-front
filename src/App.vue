@@ -1169,7 +1169,7 @@ onMounted(async () => {
   ap = new APlayer({
     container: document.getElementById('player'),
     autoplay: false,
-    listMaxHeight: 280,
+    listMaxHeight: '280px',
     audio: [],
     preload: "none",
     // 播放器主题色跟随站点的朱印色，避免默认浅蓝与整体纸墨观感冲突
