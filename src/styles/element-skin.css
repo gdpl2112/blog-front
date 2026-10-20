@@ -448,9 +448,68 @@
 }
 
 /* ---- Markdown 预览 ---- */
+/* md-editor 的根节点自带 #fff 底板与一套独立的亮色变量，只把内层预览透明
+   会让正文在暗色主题下变成一张白纸（AI 气泡、文章正文都会中招）。
+   这里把它的主题变量接到站点令牌上，根节点不再画底板。 */
+html .md-editor {
+  --md-color: var(--ink);
+  --md-hover-color: var(--ink);
+  --md-bk-color: transparent;
+  --md-bk-color-outstand: var(--glass-thin);
+  --md-bk-hover-color: var(--glass-thin);
+  --md-border-color: var(--rule);
+  --md-border-hover-color: var(--rule-2);
+  --md-border-active-color: var(--seal);
+  --md-scrollbar-bg-color: transparent;
+  --md-scrollbar-thumb-color: var(--rule-2);
+  --md-scrollbar-thumb-hover-color: var(--ink-3);
+  --md-scrollbar-thumb-active-color: var(--ink-3);
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--ink);
+}
+
+html .md-editor .md-editor-preview {
+  --md-theme-color: var(--ink);
+  --md-theme-color-reverse: var(--on-ink);
+  --md-theme-color-hover: var(--ink);
+  --md-theme-color-hover-inset: var(--ink-2);
+  --md-theme-link-color: var(--seal);
+  --md-theme-link-hover-color: var(--seal-ink);
+  --md-theme-border-color: var(--rule);
+  --md-theme-border-color-reverse: var(--rule-2);
+  --md-theme-border-color-inset: var(--rule);
+  --md-theme-bg-color: transparent;
+  --md-theme-bg-color-inset: var(--glass-thin);
+  --md-theme-bg-color-scrollbar-track: transparent;
+  --md-theme-bg-color-scrollbar-thumb: var(--rule-2);
+  --md-theme-bg-color-scrollbar-thumb-hover: var(--ink-3);
+  --md-theme-bg-color-scrollbar-thumb-active: var(--ink-3);
+  --md-theme-heading-color: var(--ink);
+  --md-theme-strong-color: var(--ink);
+  --md-theme-quote-color: var(--ink-2);
+  --md-theme-quote-bg-color: var(--seal-wash);
+  --md-theme-code-inline-color: var(--seal-ink);
+  --md-theme-code-inline-bg-color: var(--seal-wash);
+  --md-theme-code-block-color: var(--block-ink);
+  --md-theme-code-block-bg-color: var(--block);
+  --md-theme-code-before-bg-color: var(--block);
+  --md-theme-code-copy-tips-color: var(--block-ink);
+  --md-theme-code-copy-tips-bg-color: var(--block);
+  --md-theme-code-active-color: var(--seal);
+  --md-theme-table-color: var(--ink);
+  --md-theme-table-border-color: var(--rule);
+  --md-theme-table-stripe-color: var(--glass-thin);
+}
+
 .md-editor-preview-wrapper,
 .md-editor-preview {
   background: transparent !important;
+}
+
+/* 编辑器的分栏预览仍保留内边距；只有纯预览（AI 气泡、文章正文）贴着容器 */
+.md-editor-previewOnly .md-editor-preview-wrapper {
+  padding: 0 !important;
 }
 
 .md-editor-preview {

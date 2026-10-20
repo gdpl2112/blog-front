@@ -146,8 +146,8 @@ const CASES: FxCase[] = [
     {
         id: 'city',
         name: '城市',
-        note: '现代天际线，窗灯错峰明灭',
-        detail: '一组现代高楼沿地平线展开，玻璃楼与石材楼交叠成立体天际线。亮色主题是清晨蓝调，少量窗户开始亮灯；暗色主题转入夜晚，暖光窗户成组亮起、熄灭，楼顶信标间歇闪烁。',
+        note: '霓虹天际线，窗灯错峰明灭',
+        detail: '一组现代高楼沿地平线展开，玻璃楼与石材楼交叠成立体天际线，冷色霓虹只描边，不照亮整座城。亮色主题是清晨蓝调，少量窗户开始亮灯；暗色主题转入夜晚，暖光窗户成组亮起、熄灭，楼顶信标间歇闪烁。鼠标扫过天际线时会带起一道扫描带，扫过的楼体显出一层青色结构线与楼板。',
         swatch: 'radial-gradient(2px 2px at 22% 50%, #ffd18a 0 80%, transparent 90%), radial-gradient(2px 2px at 44% 68%, #ffd18a 0 80%, transparent 90%), radial-gradient(2px 2px at 72% 42%, #ffd18a 0 80%, transparent 90%), linear-gradient(90deg, transparent 0 8%, #31495f 8% 15%, transparent 15% 20%, #22384d 20% 28%, transparent 28% 33%, #2b4357 33% 46%, transparent 46% 51%, #1c3142 51% 68%, transparent 68% 72%, #31495f 72% 90%, transparent 90%), linear-gradient(180deg, #a9c2d5 0%, #ecd2ae 66%, #101a24 66% 100%)',
         isNew: true,
     },

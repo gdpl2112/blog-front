@@ -401,7 +401,7 @@ const rootRef = ref<HTMLElement | null>(null)
 const scanBandRef = ref<SVGRectElement | null>(null)
 const GROUND_Y = 752
 const SCAN_BAND_WIDTH = 300
-const SCAN_IDLE_MS = 2600
+const SCAN_IDLE_MS = 4200
 const reflectionPath = [
     'M96 766V844',
     'M176 766V818',
