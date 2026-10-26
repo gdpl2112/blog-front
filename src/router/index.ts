@@ -20,11 +20,15 @@ import info from '@/pages/v0/info.vue'
 import articles from '@/pages/v0/articles.vue'
 import aox from '@/pages/v0/aox.vue'
 import app from '@/pages/v0/app.vue'
-import pnote from '@/pages/v0/pnote.vue'
 import adminv0 from '@/pages/v0/adminv0.vue'
 import adminv1 from '@/pages/v0/adminv1.vue'
-import adminv2 from '@/pages/v0/adminv2.vue'
 import adminai from '@/pages/v0/adminai.vue'
+
+// 工作台模块：外壳 + 概览 + 内置工具
+import workbench from '@/pages/v0/workbench/index.vue'
+import workbenchOverview from '@/pages/v0/workbench/overview.vue'
+import pnote from '@/pages/v0/workbench/tools/pnote.vue'
+import cardkey from '@/pages/v0/workbench/tools/cardkey.vue'
 
 
 const routes = [{
@@ -84,12 +88,38 @@ const routes = [{
     path: '/v0',
     component: v0,
     meta: {
-        title: 'kweb用户信息'
+        title: '个人中心'
     },
     children: [{
         path: '',
-        component: info
-    },{
+        redirect: '/v0/workbench'
+    }, {
+        // 工作台：个人中心首页，工具作为其子模块
+        path: 'workbench',
+        component: workbench,
+        children: [{
+            path: '',
+            component: workbenchOverview,
+            meta: {
+                title: '工作台',
+                sub: '把内容、接口、应用与工具收在一处。'
+            }
+        }, {
+            path: 'pnote',
+            component: pnote,
+            meta: {
+                title: '密码本',
+                sub: '账号密码的一页账本：鼠标移入行内即可编辑，移出自动保存。'
+            }
+        }, {
+            path: 'cardkey',
+            component: cardkey,
+            meta: {
+                title: '卡密维护',
+                sub: '卡号卡密的生成、检索与兑换状态，仅管理员可见。'
+            }
+        }]
+    }, {
         path: 'info',
         component: info
     }, {
@@ -102,17 +132,11 @@ const routes = [{
         path: 'app',
         component: app
     },{
-        path: 'pnote',
-        component: pnote
-    },{
         path: 'adminv0',
         component: adminv0
     },{
         path: 'adminv1',
         component: adminv1
-    },{
-        path: 'adminv2',
-        component: adminv2
     },{
         path: 'adminai',
         component: adminai,
@@ -120,6 +144,13 @@ const routes = [{
             title: 'AI配置',
             requiresAdmin: true
         }
+    },{
+        // 旧地址兼容：工具已迁入工作台
+        path: 'pnote',
+        redirect: '/v0/workbench/pnote'
+    },{
+        path: 'adminv2',
+        redirect: '/v0/workbench/cardkey'
     }
     ]
 },{

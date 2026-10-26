@@ -903,7 +903,7 @@ body.fx-immersive #player {
                 <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
                 GitHub 组织
               </a>
-              <div class="nav-dropdown-version">front-vue3 · 26.10.21</div>
+              <div class="nav-dropdown-version">front-vue3 · 26.10.26</div>
             </div>
           </li>
           <li class="nav-link-item">
@@ -925,7 +925,7 @@ body.fx-immersive #player {
           <span class="nav-divider"></span>
 
           <template v-if="login_state">
-            <RouterLink to="/v0" class="nav-login-btn">控制台</RouterLink>
+            <RouterLink to="/v0" class="nav-login-btn">个人中心</RouterLink>
             <div class="nav-user-badge" @click="goToProfile">
               <img :src="userInfo.icon" alt="" class="nav-avatar" />
               <span class="nav-username">{{ userInfo.nickname }}</span>
@@ -1007,7 +1007,7 @@ body.fx-immersive #player {
               <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
               GitHub 组织
             </a>
-            <div class="nav-dropdown-version">front-vue3 · 26.10.18</div>
+            <div class="nav-dropdown-version">front-vue3 · 26.10.26</div>
           </div>
         </div>
         <div class="nav-link-item">
@@ -1031,7 +1031,7 @@ body.fx-immersive #player {
         </div>
 
         <template v-if="login_state">
-          <RouterLink to="/v0" class="nav-login-btn" @click="mobileOpen = false">控制台</RouterLink>
+          <RouterLink to="/v0" class="nav-login-btn" @click="mobileOpen = false">个人中心</RouterLink>
           <div class="nav-user-badge" @click="goToProfile(); mobileOpen = false">
             <img :src="userInfo.icon" alt="" class="nav-avatar" />
             <span class="nav-username">{{ userInfo.nickname }}</span>
