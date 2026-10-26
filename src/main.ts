@@ -24,6 +24,14 @@ app.use(ElementPlus)
 
 app.use(router)
 
-app.mount('#app')
+// 等首次导航解析完成后再挂载。
+// 直接访问 /v0/workbench 这类嵌套路由时，perm.ts 的守卫是异步的；
+// 若先 mount 后解析，RouterView 会先以 START_LOCATION 渲染出一片空白，
+// 守卫重定向时还会白闪一次。isReady 失败也要挂载，避免守卫异常导致整页不出内容。
+router.isReady()
+    .catch((err) => {
+        console.error('[router] 首次导航未完成', err)
+    })
+    .then(() => app.mount('#app'))
 
 export default app

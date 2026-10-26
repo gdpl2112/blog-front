@@ -12,7 +12,11 @@ let baseUrl = 'http://127.0.0.1:81/'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: './',
+    // 必须用根路径：路由是 createWebHistory() 的 History 模式。
+    // 若用 './'，构建产物中的资源会变成相对路径 ./assets/xxx.js，
+    // 直接刷新 /v0/workbench 时浏览器按文档地址解析成 /v0/assets/xxx.js，
+    // 该地址被后端 SPA 回退成 index.html（text/html），模块脚本无法执行 → 白屏。
+    base: '/',
     plugins: [
         vue(),
         WindiCSS()
