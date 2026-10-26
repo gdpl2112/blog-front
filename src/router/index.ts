@@ -30,6 +30,7 @@ import workbenchOverview from '@/pages/v0/workbench/overview.vue'
 import pnote from '@/pages/v0/workbench/tools/pnote.vue'
 import cardkey from '@/pages/v0/workbench/tools/cardkey.vue'
 import task from '@/pages/v0/workbench/tools/task.vue'
+import todo from '@/pages/v0/workbench/tools/todo.vue'
 
 
 const routes = [{
@@ -118,6 +119,13 @@ const routes = [{
             meta: {
                 title: '定时任务',
                 sub: '按计划执行 JS 脚本：定点、每月或每日，时刻可固定也可在区间内随机；每次执行都留日志。'
+            }
+        }, {
+            path: 'todo',
+            component: todo,
+            meta: {
+                title: '待办',
+                sub: '把要做的事放进时间轴：临近时按邮箱或 QQ 群提醒三次，完成或过期即停。'
             }
         }, {
             path: 'cardkey',
