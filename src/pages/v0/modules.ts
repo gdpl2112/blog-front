@@ -9,7 +9,7 @@
 export type ConsoleGroupId = 'overview' | 'account' | 'content' | 'ability' | 'tool' | 'admin'
 
 /** 工作台指标项，与 overview.vue 中的统计请求一一对应 */
-export type StatKey = 'articles' | 'favorites' | 'privates' | 'apis' | 'apps' | 'pnotes' | 'cards'
+export type StatKey = 'articles' | 'favorites' | 'privates' | 'apis' | 'apps' | 'pnotes' | 'cards' | 'tasks'
 
 export interface ConsoleGroup {
   id: ConsoleGroupId
@@ -119,8 +119,19 @@ export const consoleModules: ConsoleModule[] = [
     stat: 'pnotes'
   },
   {
-    id: 'cardkey',
+    id: 'task',
     index: '07',
+    name: '定时任务',
+    desc: '按计划执行 JS 脚本，可配代理并留存日志',
+    path: '/v0/workbench/task',
+    group: 'tool',
+    icon: 'bi-clock-history',
+    keywords: ['定时', '任务', '脚本', 'js', 'cron', '代理', 'task', 'schedule'],
+    stat: 'tasks'
+  },
+  {
+    id: 'cardkey',
+    index: '08',
     name: '卡密维护',
     desc: '卡号卡密的生成、检索与兑换状态',
     path: '/v0/workbench/cardkey',
@@ -132,7 +143,7 @@ export const consoleModules: ConsoleModule[] = [
   },
   {
     id: 'adminv0',
-    index: '08',
+    index: '09',
     name: '帖子维护',
     desc: '全站帖子的排序、状态与删除',
     path: '/v0/adminv0',
@@ -144,7 +155,7 @@ export const consoleModules: ConsoleModule[] = [
   },
   {
     id: 'adminv1',
-    index: '09',
+    index: '10',
     name: '一言维护',
     desc: '每日一言的增删与随机生成',
     path: '/v0/adminv1',
@@ -156,7 +167,7 @@ export const consoleModules: ConsoleModule[] = [
   },
   {
     id: 'adminai',
-    index: '10',
+    index: '11',
     name: 'AI 配置',
     desc: '对话模型与密钥的后台设置',
     path: '/v0/adminai',

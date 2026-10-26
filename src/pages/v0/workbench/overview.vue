@@ -530,11 +530,11 @@ const dateText = new Intl.DateTimeFormat('zh-CN', {
 
 /** 未取到数据前保持 null，界面显示占位符而不是 0，避免误导 */
 const stats = reactive<Record<StatKey, number | null>>({
-  articles: null, favorites: null, privates: null, apis: null, apps: null, pnotes: null, cards: null
+  articles: null, favorites: null, privates: null, apis: null, apps: null, pnotes: null, cards: null, tasks: null
 })
 
 const UNITS: Record<StatKey, string> = {
-  articles: '篇', favorites: '篇', privates: '篇', apis: '个', apps: '个', pnotes: '条', cards: '张'
+  articles: '篇', favorites: '篇', privates: '篇', apis: '个', apps: '个', pnotes: '条', cards: '张', tasks: '个'
 }
 
 /** 列表型接口直接按数组长度计数 */
@@ -564,6 +564,7 @@ const metrics = computed(() => {
     {key: 'apis', name: '接口', icon: 'bi-hdd-network', to: '/v0/aox', value: stats.apis, hint: '对外公开'},
     {key: 'apps', name: '应用', icon: 'bi-box-seam', to: '/v0/app', value: stats.apps, hint: '第三方授权'},
     {key: 'pnotes', name: '密码本', icon: 'bi-key', to: '/v0/workbench/pnote', value: stats.pnotes, hint: '工具 · 悬停即改'},
+    {key: 'tasks', name: '定时任务', icon: 'bi-clock-history', to: '/v0/workbench/task', value: stats.tasks, hint: '工具 · 脚本调度'},
   ]
   if (admin.value) {
     list.push({key: 'cards', name: '卡密', icon: 'bi-shield-lock', to: '/v0/workbench/cardkey', value: stats.cards, hint: '工具 · 兑换管理'})
@@ -656,6 +657,7 @@ onMounted(async () => {
     loadCount('/api/ls', 'apis'),
     loadCount('/auth/app/info', 'apps'),
     loadCount('/api/pwdnote', 'pnotes'),
+    loadCount('/api/task/list', 'tasks'),
   ]
 
   // 任一指标失败不影响其余指标渲染

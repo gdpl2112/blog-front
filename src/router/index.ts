@@ -29,6 +29,7 @@ import workbench from '@/pages/v0/workbench/index.vue'
 import workbenchOverview from '@/pages/v0/workbench/overview.vue'
 import pnote from '@/pages/v0/workbench/tools/pnote.vue'
 import cardkey from '@/pages/v0/workbench/tools/cardkey.vue'
+import task from '@/pages/v0/workbench/tools/task.vue'
 
 
 const routes = [{
@@ -110,6 +111,13 @@ const routes = [{
             meta: {
                 title: '密码本',
                 sub: '账号密码的一页账本：鼠标移入行内即可编辑，移出自动保存。'
+            }
+        }, {
+            path: 'task',
+            component: task,
+            meta: {
+                title: '定时任务',
+                sub: '按计划执行 JS 脚本：定点、每月或每日，时刻可固定也可在区间内随机；每次执行都留日志。'
             }
         }, {
             path: 'cardkey',

@@ -123,6 +123,7 @@
       <nav class="wb-tabs" aria-label="工作台模块">
         <RouterLink to="/v0/workbench" class="wb-tab" exact-active-class="active">概览</RouterLink>
         <RouterLink to="/v0/workbench/pnote" class="wb-tab" active-class="active">密码本</RouterLink>
+        <RouterLink to="/v0/workbench/task" class="wb-tab" active-class="active">定时任务</RouterLink>
         <RouterLink v-if="admin" to="/v0/workbench/cardkey" class="wb-tab" active-class="active">卡密维护</RouterLink>
       </nav>
     </header>
