@@ -408,6 +408,19 @@
   max-width: 1320px;
 }
 
+/* 工作台单独放宽到视口 90%，靠 margin: auto 保持左右居中 */
+.main-content-wide {
+  width: 90%;
+  max-width: none;
+}
+
+/* 窄屏下 90% 反而会挤压内容，退回整宽 */
+@media (max-width: 1100px) {
+  .main-content-wide {
+    width: 100%;
+  }
+}
+
 /* ---------------- 版权页 ---------------- */
 
 .site-footer {
@@ -1050,7 +1063,13 @@ body.fx-immersive #player {
     </div>
 
     <!-- 正文 -->
-    <main class="main-content" :class="{'main-content-console': route.path.startsWith('/v0')}">
+    <main
+      class="main-content"
+      :class="{
+        'main-content-console': route.path.startsWith('/v0'),
+        'main-content-wide': route.path.startsWith('/v0/workbench')
+      }"
+    >
       <RouterView />
     </main>
 
