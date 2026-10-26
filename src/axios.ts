@@ -121,10 +121,22 @@ export function userLogout() {
     })
 }
 
+/**
+ * 判定登录端类型，与后端 ClientType 的 pc / mobile 取值对齐。
+ * 后端据此保证「电脑端 + 手机端可同时在线，同一端只保留最近一次登录」。
+ */
+function detectClientType(): 'pc' | 'mobile' {
+    if (typeof navigator === 'undefined') return 'pc'
+    return /android|iphone|ipod|ipad|mobile|windows phone|harmonyos/i.test(navigator.userAgent)
+        ? 'mobile'
+        : 'pc'
+}
+
 export function userLogin(username: string, password: string) {
     return service.post("/auth/login", {
         username,
-        password
+        password,
+        clientType: detectClientType()
     })
 }
 
