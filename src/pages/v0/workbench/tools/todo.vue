@@ -368,6 +368,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-wrap: wrap;
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid var(--rule);
@@ -811,7 +812,8 @@
     <div class="tool-bar">
       <p class="tool-hint">
         一条待办就是时间轴上的一个点。临近时按你勾选的渠道提醒三次：24 小时前、2 小时前、30 分钟前；
-        完成或过期后提醒自动停止。绑定 QQ 机器人后，也可在群里发「待办 交房租 24」快速创建，默认 12 小时后。
+        完成或过期后提醒自动停止。每日重复与 24 小时暂停只在本页设置；绑定 QQ 机器人后，
+        也可在群里发「待办 交房租 24」快速创建单次待办，默认 12 小时后。
       </p>
       <div class="tool-actions">
         <span class="tool-count">{{ counts.pending }} 项进行中</span>
@@ -930,11 +932,21 @@
             <span v-if="todo.notifyBot === 1" class="chip"><i class="bi bi-robot"></i>QQ 群</span>
             <span v-if="todo.notifyEmail !== 1 && todo.notifyBot !== 1" class="chip">仅站内记录</span>
             <span v-if="todo.notifyEmail === 1 || todo.notifyBot === 1" class="chip">提醒 24h · 2h · 30m</span>
+            <span v-if="todo.repeatDaily === 1" class="chip"><i class="bi bi-arrow-repeat"></i>每日重复</span>
+            <span v-if="isSnoozed(todo)" class="chip">
+              <i class="bi bi-bell-slash"></i>暂停至 {{ fmtFull(todo.snoozeUntil) }}
+            </span>
           </div>
 
           <footer class="item-actions">
             <button class="link" type="button" @click="openLogs(todo)">提醒记录</button>
             <button class="link" type="button" @click="openEdit(todo)">编辑</button>
+            <button
+              v-if="todo.finished !== 1"
+              class="link"
+              type="button"
+              @click="toggleSnooze(todo)"
+            >{{ isSnoozed(todo) ? '恢复提醒' : '24 小时不再提醒' }}</button>
             <span class="spacer"></span>
             <button class="link link--danger" type="button" @click="remove(todo)">删除</button>
           </footer>
@@ -980,7 +992,11 @@
           :disabled-date="disabledDate"
           style="width: 100%"
         />
-        <p class="hint">按这个时间点倒推三次提醒；时间一过，待办会自动标记为已过期。</p>
+        <p class="hint">
+          {{ form.repeatDaily === 1
+            ? '按这个时间点倒推三次提醒；每次到期或提前完成后，顺延到次日同一时刻。'
+            : '按这个时间点倒推三次提醒；时间一过，待办会自动标记为已过期。' }}
+        </p>
       </section>
 
       <section class="field">
@@ -1025,6 +1041,38 @@
             </span>
           </button>
         </div>
+      </section>
+
+      <section class="field">
+        <label>重复方式</label>
+        <div class="ways ways--compact">
+          <button
+            class="way"
+            :class="{on: form.repeatDaily === 0}"
+            type="button"
+            @click="form.repeatDaily = 0"
+          >
+            <span class="way-mark"><i class="bi bi-check-lg"></i></span>
+            <span class="way-text">
+              <span class="way-name">仅一次</span>
+              <span class="way-note">到期后进入已过期</span>
+            </span>
+          </button>
+
+          <button
+            class="way"
+            :class="{on: form.repeatDaily === 1}"
+            type="button"
+            @click="form.repeatDaily = 1"
+          >
+            <span class="way-mark"><i class="bi bi-check-lg"></i></span>
+            <span class="way-text">
+              <span class="way-name">每日重复</span>
+              <span class="way-note">每次重复：到期或完成后顺延一天</span>
+            </span>
+          </button>
+        </div>
+        <p class="hint">仅在本页设置；QQ 群快捷命令创建的待办仍为单次。</p>
       </section>
 
       <section class="field">
@@ -1087,7 +1135,9 @@
         <p class="hint">
           {{ form.finished === 1
             ? '当前为已完成状态，保存后不会发送任何提醒，仅保留记录。'
-            : '共三次，发给上方勾选的每个渠道；创建或修改时间后按新时间重新计算。' }}
+            : (form.repeatDaily === 1
+              ? '每轮提醒三次，发给上方勾选的每个渠道；顺延后重新计算下一轮。'
+              : '共三次，发给上方勾选的每个渠道；创建或修改时间后按新时间重新计算。') }}
         </p>
       </section>
 
@@ -1130,7 +1180,7 @@
           <li>打开 QQ，进入机器人已加入的群；</li>
           <li>直接发送这 6 位数字，不需要 @ 机器人；</li>
           <li>看到机器人在群里回复「绑定成功」即可；</li>
-          <li>之后可在群里发「待办 交房租 24」创建待办，不写小时数默认 12 小时。</li>
+          <li>之后可在群里发「待办 交房租 24」创建单次待办，不写小时数默认 12 小时。</li>
         </ol>
 
         <div class="code-card">
@@ -1193,6 +1243,8 @@ interface Todo {
   finished: number
   notifyEmail: number
   notifyBot: number
+  repeatDaily: number
+  snoozeUntil: number
   createTime?: number
 }
 
@@ -1227,6 +1279,8 @@ interface TodoForm {
   finished: number
   notifyEmail: number
   notifyBot: number
+  /** 0 仅一次 1 每日重复；只在待办页面设置 */
+  repeatDaily: number
 }
 
 const tabs = [
@@ -1288,14 +1342,20 @@ function spanText(ms: number) {
 
 function remainText(todo: Todo) {
   if (todo.finished === 1) return '已完成'
+  if (isSnoozed(todo)) return `提醒暂停至 ${fmtFull(todo.snoozeUntil)}`
   if (todo.expired === 1) {
     return `已过期 ${spanText(now.value - todo.eventTime)}`
   }
   return `还有 ${spanText(todo.eventTime - now.value)}`
 }
 
+function isSnoozed(todo: Todo) {
+  return Number(todo.snoozeUntil || 0) > now.value
+}
+
 function isSoon(todo: Todo) {
-  return todo.finished !== 1 && todo.expired !== 1 && todo.eventTime - now.value <= 30 * 60 * 1000
+  return !isSnoozed(todo) && todo.finished !== 1 && todo.expired !== 1
+    && todo.eventTime - now.value <= 30 * 60 * 1000
 }
 
 function remainClass(todo: Todo) {
@@ -1542,7 +1602,7 @@ const form = reactive<TodoForm>(blankForm())
 
 const formSummary = computed(() => {
   const at = form.eventTime ? fmtFull(form.eventTime) : '未选时间'
-  return `${at} · 提醒 3 次`
+  return `${at} · ${form.repeatDaily === 1 ? '每日重复' : '单次'} · 提醒 3 次`
 })
 
 function roundToFive(ms: number) {
@@ -1563,6 +1623,7 @@ function blankForm(): TodoForm {
     finished: 0,
     notifyEmail: bind.emailBound ? 1 : 0,
     notifyBot: bind.emailBound ? 0 : (bind.qbotBound ? 1 : 0),
+    repeatDaily: 0,
   }
 }
 
@@ -1587,6 +1648,7 @@ function openEdit(todo: Todo) {
     finished: todo.finished === 1 ? 1 : 0,
     notifyEmail: todo.notifyEmail === 1 ? 1 : 0,
     notifyBot: todo.notifyBot === 1 ? 1 : 0,
+    repeatDaily: todo.repeatDaily === 1 ? 1 : 0,
   })
   editingId.value = todo.id
   originalTime.value = todo.eventTime
@@ -1637,6 +1699,7 @@ async function save() {
       finished: form.finished,
       notifyEmail: form.notifyEmail,
       notifyBot: form.notifyBot,
+      repeatDaily: form.repeatDaily,
     }
     const res: any = editingId.value
       ? await service.put(`/api/todo/${editingId.value}`, payload)
@@ -1664,6 +1727,21 @@ async function toggleFinished(todo: Todo) {
     if (res?.code === 200) {
       toast(finished === 1 ? '已标记完成，后续提醒已停止' : '已恢复为未完成', 'success')
       await Promise.all([load(true), loadSummary()])
+    } else {
+      toast(res?.msg || '操作失败')
+    }
+  } catch (e: any) {
+    toast(e?.msg || '操作失败')
+  }
+}
+
+async function toggleSnooze(todo: Todo) {
+  const hours = isSnoozed(todo) ? 0 : 24
+  try {
+    const res: any = await service.post(`/api/todo/${todo.id}/snooze?hours=${hours}`)
+    if (res?.code === 200) {
+      toast(hours === 0 ? '已恢复提醒' : '24 小时内不再提醒', 'success')
+      await load(true)
     } else {
       toast(res?.msg || '操作失败')
     }
