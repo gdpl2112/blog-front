@@ -156,6 +156,10 @@ import service from "@/axios";
 import {toast} from "@/utils/utils";
 
 interface RuleForm { name: string; state: string; method: string; address: string; desc: string }
+
+/** 接口清单行：在表单字段基础上补充后端生成的主键 id。 */
+interface ApiRow extends RuleForm { id?: number }
+
 const ruleFormRef = ref<FormInstance>()
 const ruleForm = reactive<RuleForm>({name:'',state:'',method:'',address:'',desc:''})
 const rules = reactive<FormRules<RuleForm>>({
@@ -181,7 +185,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 }
 const resetForm = (formEl: FormInstance | undefined) => { if (formEl) formEl.resetFields() }
 
-const tableData = ref([{name:'api名',state:'success',method:'GET',address:'http://kloping.top',desc:'dd'}])
+const tableData = ref<ApiRow[]>([{name:'api名',state:'success',method:'GET',address:'http://kloping.top',desc:'dd'}])
 service.get("/api/ls").then((res: any) => { tableData.value = res })
 
 const deleteRow = (index: number) => {

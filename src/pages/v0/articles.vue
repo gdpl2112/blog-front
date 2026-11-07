@@ -178,9 +178,16 @@ const open1 = ref(true)
 const open2 = ref(true)
 const open3 = ref(true)
 
-let datas = ref([])
-let dataw = ref([])
-let datap = ref([])
+/** 文章清单条目，字段与后端 /notice 系列接口返回的简要信息对齐。 */
+interface ArticleBrief {
+  id: number
+  title: string
+  time: string
+}
+
+let datas = ref<ArticleBrief[]>([])
+let dataw = ref<ArticleBrief[]>([])
+let datap = ref<ArticleBrief[]>([])
 
 service.get("/notice/myall").then((res: any) => { datas.value = res })
 service.get("/notice/favorites").then((res: any) => { dataw.value = res })

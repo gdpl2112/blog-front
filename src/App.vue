@@ -1020,7 +1020,7 @@ body.fx-immersive #player {
               <img alt="github" loading="lazy" src="https://avatars.githubusercontent.com/u/96173877?s=200&v=4" />
               GitHub 组织
             </a>
-            <div class="nav-dropdown-version">front-vue3 · 26.11.07</div>
+            <div class="nav-dropdown-version">frontV3 · 26.11.07</div>
           </div>
         </div>
         <div class="nav-link-item">

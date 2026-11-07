@@ -306,7 +306,11 @@ import {reactive, ref} from "vue";
 import type {FormInstance, FormRules, UploadProps} from "element-plus";
 import {Lock} from '@element-plus/icons-vue'
 
-const gotoQqb = () => { window.qc.Login.showPopup({appId:"102801348",redirectURI:"https://kloping.top/login?t=qqb"}); }
+const gotoQqb = () => {
+  // qc_jssdk.js 可能被浏览器拦截或加载失败，此处显式兜底，避免点击后抛 TypeError。
+  if (!window.qc) { toast("QQ 登录组件未加载，请刷新页面后重试"); return }
+  window.qc.Login.showPopup({appId: "102801348", redirectURI: "https://kloping.top/login?t=qqb"});
+}
 const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {}
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') toast('仅支持jpg或png');

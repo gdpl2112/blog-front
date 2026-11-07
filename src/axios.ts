@@ -1,10 +1,28 @@
-import axios from "axios";
+import axios, {type AxiosRequestConfig} from "axios";
 import Cookie from "js-cookie";
 import router from "@/router";
 import {toast} from "@/utils/utils";
 import {ref} from "vue";
 
-export const service = axios.create({
+/**
+ * 解包后的 HTTP 客户端契约。
+ *
+ * 响应拦截器已把 AxiosResponse 解包成后端返回的 JSON，但 axios 的类型仍声明为
+ * `Promise<AxiosResponse>`，导致业务代码访问 `res.code` / `res.data` 时类型报错。
+ * 这里显式声明解包后的返回类型；泛型默认为 any，以兼容项目既有的调用风格，
+ * 新代码可传入具体类型获得类型提示，例如 `service.get<StateInfo>("/auth/state_info")`。
+ */
+export interface ApiClient {
+    get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>
+
+    post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>
+
+    put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>
+
+    delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>
+}
+
+const instance = axios.create({
     baseURL: '/',
     timeout: 30000,
     // 当前 API 与前端共用 kloping.top；显式携带 Cookie 也兼容后续跨域部署。
@@ -39,7 +57,7 @@ export function clearAuthCookies() {
 }
 
 // 添加请求拦截器
-service.interceptors.request.use(function (config) {
+instance.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
     // 保留调用方显式传入的管理端凭证（例如 /adm/ai 使用的 Bearer token）。
     // 普通请求仍沿用登录态 Cookie。
@@ -59,7 +77,7 @@ service.interceptors.request.use(function (config) {
 });
 
 // 添加响应拦截器
-service.interceptors.response.use(function (response) {
+instance.interceptors.response.use(function (response) {
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
     return (response.data as any);
@@ -91,7 +109,7 @@ export const login_state = ref(false)
 
 export async function loadUser() {
     try {
-        const res = await service.get("/auth/state_info");
+        const res = await instance.get("/auth/state_info");
         let data = res as unknown as StateInfo;
         if (data.code !== 200) {
             login_state.value = false;
@@ -110,7 +128,7 @@ export async function loadUser() {
 }
 
 export function userLogout() {
-    service.post("/auth/logout").then(r0 => {
+    instance.post("/auth/logout").then(r0 => {
         let r = r0 as unknown as StateInfo;
         if (r.code == 200) {
             toast("退出登录成功", "success")
@@ -133,11 +151,17 @@ function detectClientType(): 'pc' | 'mobile' {
 }
 
 export function userLogin(username: string, password: string) {
-    return service.post("/auth/login", {
+    return instance.post("/auth/login", {
         username,
         password,
         clientType: detectClientType()
     })
 }
+
+/**
+ * 对外的统一请求实例。
+ * 通过 ApiClient 契约对外暴露，使其返回类型与响应拦截器的实际行为一致。
+ */
+export const service = instance as unknown as ApiClient
 
 export default service

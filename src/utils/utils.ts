@@ -1,6 +1,18 @@
 import {ElNotification} from "element-plus";
 
-export function toast(msg: string, type = 'error', duration = 2000) {
+/**
+ * 通知类型，取值与 Element Plus Notification 的 type 保持一致。
+ * 注意：Element Plus 的通知没有 "danger"，危险提示请用 "error"。
+ */
+export type ToastType = 'primary' | 'success' | 'info' | 'warning' | 'error'
+
+/**
+ * 全局轻提示。
+ * @param msg 提示文案
+ * @param type 提示类型，默认 error
+ * @param duration 自动关闭时长（毫秒），默认 2000
+ */
+export function toast(msg: string, type: ToastType = 'error', duration = 2000) {
     ElNotification({
         message: msg,
         type: type,
@@ -49,14 +61,26 @@ export function getTimeMs(t: number) {
     return "0" + min + ":" + (t < 10 ? "0" + t : t)
 }
 
-export function copyTextElement(eid: string) {
+/**
+ * 选中指定元素的内容并复制到剪贴板。
+ * @param selector CSS 选择器（如 "#dayyan_div"）
+ * @returns 是否复制成功；选择器未命中或浏览器拒绝选区时返回 false
+ */
+export function copyTextElement(selector: string) {
+    const target = document.querySelector(selector);
+    if (!target) {
+        alert('未找到要复制的元素');
+        return false;
+    }
     const range = document.createRange();
-    range.selectNode(document.querySelector(eid));
+    range.selectNode(target);
     const selection: Selection | null = window.getSelection();
     if (selection != null) {
         if (selection.rangeCount > 0) selection.removeAllRanges();
         selection.addRange(range);
         document.execCommand('Copy');
         alert('文本已成功复制到剪贴板');
+        return true;
     }
+    return false;
 }

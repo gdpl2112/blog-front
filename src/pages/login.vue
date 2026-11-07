@@ -265,19 +265,19 @@ import {Lock, User} from '@element-plus/icons-vue'
 import {useRouter} from "vue-router";
 import {toast} from "@/utils/utils";
 import service, {loadUser, setAuthToken, userLogin} from "@/axios";
-import {ElLoading} from "element-plus";
+import {ElLoading, type FormInstance} from "element-plus";
 
 const form = reactive({username: '', password: ''})
 const rules = {
   username: [{required: true, message: '请输入用户名', trigger: 'blur'},{min: 3, max: 30, message: '长度在3到30个字符', trigger: 'blur'}],
   password: [{required: true, message: '请输入密码', trigger: 'blur'},{min: 6, max: 24, message: '长度在6到20个字符', trigger: 'blur'}]
 }
-const formRef = ref(null)
+const formRef = ref<FormInstance>()
 const router = useRouter()
 const loading = ref(false)
 
 const submitForm = () => {
-  formRef.value.validate((valid) => {
+  formRef.value?.validate((valid) => {
     if (valid) {
       loading.value = true
       userLogin(form.username, form.password).then((res: any) => {
@@ -301,16 +301,18 @@ const resetEid = () => {
     let res = r0 as any;
     if (res.code === 200) { toast("请检查你的邮箱/切勿重复操作", "success") }
     else toast(res.msg)
-  }).catch((err: any) => { toast(err, "danger") }).finally(() => { loadingf.close() });
+  }).catch((err: any) => { toast(err, "error") }).finally(() => { loadingf.close() });
 }
 
 const gotoGithub = () => {
   service.get("/auth/github/login?now=false").then((res: any) => {
     document.location = res.url
-  }).catch((err: any) => { toast("获得授权登录链接失败" + err, "danger") });
+  }).catch((err: any) => { toast("获得授权登录链接失败" + err, "error") });
 }
 
 const gotoQq = () => {
+  // qc_jssdk.js 可能被浏览器拦截或加载失败，此处显式兜底，避免点击后抛 TypeError。
+  if (!window.qc) { toast("QQ 登录组件未加载，请刷新页面后重试"); return }
   window.qc.Login.showPopup({appId: "102801348", redirectURI: "https://kloping.top/login?t=qq"});
 }
 
