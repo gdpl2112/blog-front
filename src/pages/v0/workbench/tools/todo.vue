@@ -621,9 +621,41 @@
   color: var(--ink-2);
 }
 
+.plan-input {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.plan-input .el-input-number {
+  width: 64px;
+}
+
+.plan-input .el-input-number .el-input__inner {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
+.plan-unit {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
 .plan-note {
   display: block;
   margin-top: 2px;
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+}
+
+.plan-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
   font-size: var(--text-2xs);
   color: var(--ink-3);
 }
@@ -811,7 +843,7 @@
   <div class="tool">
     <div class="tool-bar">
       <p class="tool-hint">
-        一条待办就是时间轴上的一个点。临近时按你勾选的渠道提醒三次：24 小时前、2 小时前、30 分钟前；
+        一条待办就是时间轴上的一个点。临近时按你设置的时间点和勾选的渠道提醒；
         完成或过期后提醒自动停止。每日重复与 24 小时暂停只在本页设置；绑定 QQ 机器人后，
         也可在群里发「待办 交房租 24」快速创建单次待办，默认 12 小时后。
       </p>
@@ -931,7 +963,7 @@
             <span v-if="todo.notifyEmail === 1" class="chip"><i class="bi bi-envelope"></i>邮箱</span>
             <span v-if="todo.notifyBot === 1" class="chip"><i class="bi bi-robot"></i>QQ 群</span>
             <span v-if="todo.notifyEmail !== 1 && todo.notifyBot !== 1" class="chip">仅站内记录</span>
-            <span v-if="todo.notifyEmail === 1 || todo.notifyBot === 1" class="chip">提醒 24h · 2h · 30m</span>
+            <span v-if="todo.notifyEmail === 1 || todo.notifyBot === 1" class="chip">提醒 {{ offsetsOf(todo) }}</span>
             <span v-if="todo.repeatDaily === 1" class="chip"><i class="bi bi-arrow-repeat"></i>每日重复</span>
             <span v-if="isSnoozed(todo)" class="chip">
               <i class="bi bi-bell-slash"></i>暂停至 {{ fmtFull(todo.snoozeUntil) }}
@@ -994,8 +1026,8 @@
         />
         <p class="hint">
           {{ form.repeatDaily === 1
-            ? '按这个时间点倒推三次提醒；每次到期或提前完成后，顺延到次日同一时刻。'
-            : '按这个时间点倒推三次提醒；时间一过，待办会自动标记为已过期。' }}
+            ? '按设置的时间点提前提醒；每次到期或提前完成后，顺延到次日同一时刻。'
+            : '按设置的时间点提前提醒；时间一过，待办会自动标记为已过期。' }}
         </p>
       </section>
 
@@ -1116,28 +1148,40 @@
       <section class="field" style="margin-bottom: 0">
         <label>提醒计划</label>
         <div class="plan">
-          <div class="plan-node">
-            <span class="plan-dot"></span>
-            <span class="plan-time">24 小时前</span>
-            <span class="plan-note">第一次</span>
-          </div>
-          <div class="plan-node">
-            <span class="plan-dot"></span>
-            <span class="plan-time">2 小时前</span>
-            <span class="plan-note">第二次</span>
-          </div>
-          <div class="plan-node">
-            <span class="plan-dot"></span>
-            <span class="plan-time">30 分钟前</span>
-            <span class="plan-note">第三次</span>
+          <div v-for="(slot, i) in form.plan" :key="i" class="plan-node">
+            <span class="plan-dot" :class="{off: !offsetValue(slot)}"></span>
+            <span class="plan-time">
+              <span v-if="offsetValue(slot)" class="plan-input">
+                <el-input-number
+                  v-model="slot.value"
+                  :min="slot.unit === 'm' ? 1 : 1"
+                  :max="slot.unit === 'd' ? 7 : (slot.unit === 'h' ? 168 : 10080)"
+                  :controls="false"
+                  size="small"
+                  @change="sortPlan"
+                />
+                <el-select v-model="slot.unit" class="plan-unit" size="small" style="width: 84px" @change="sortPlan">
+                  <el-option label="分钟前" value="m" />
+                  <el-option label="小时前" value="h" />
+                  <el-option label="天前" value="d" />
+                </el-select>
+              </span>
+              <button v-else class="link" type="button" @click="enableSlot(slot)">添加时间点</button>
+            </span>
+            <span class="plan-note">
+              <span v-if="offsetValue(slot)" class="plan-preview">{{ offsetText(slot) }}</span>
+              <button v-if="offsetValue(slot) && hasMoreThanOne()" class="link" type="button"
+                      @click="clearSlot(slot)">移除</button>
+              <span v-else>第 {{ i + 1 }} 次</span>
+            </span>
           </div>
         </div>
         <p class="hint">
           {{ form.finished === 1
             ? '当前为已完成状态，保存后不会发送任何提醒，仅保留记录。'
             : (form.repeatDaily === 1
-              ? '每轮提醒三次，发给上方勾选的每个渠道；顺延后重新计算下一轮。'
-              : '共三次，发给上方勾选的每个渠道；创建或修改时间后按新时间重新计算。') }}
+              ? '每轮按上面的时间点提醒，发给上方勾选的每个渠道；顺延后重新计算下一轮。'
+              : '按上面的时间点提前提醒，发给上方勾选的每个渠道；创建或修改时间后按新时间重新计算。') }}
         </p>
       </section>
 
@@ -1209,13 +1253,13 @@
 
       <div v-if="logs.length === 0" class="empty-box">
         <strong>还没有发送记录</strong>
-        <span>进入 24 小时窗口并触发第一次提醒后，这里会出现结果。</span>
+        <span>到达提醒时间点并发出提醒后，这里会出现结果。</span>
       </div>
 
       <template v-else>
         <div v-for="log in logs" :key="log.id">
           <div class="log-row">
-            <span>{{ stageLabel(log.stage) }}</span>
+            <span>{{ stageLabel(logTodo, log.stage) }}</span>
             <span>{{ channelLabel(log.channel) }}</span>
             <span :class="log.state === 1 ? 'ok' : 'bad'">{{ log.state === 1 ? '成功' : '失败' }}</span>
             <span>{{ fmtFull(log.sendTime) }}</span>
@@ -1243,6 +1287,7 @@ interface Todo {
   finished: number
   notifyEmail: number
   notifyBot: number
+  notifyOffsets?: string | null
   repeatDaily: number
   snoozeUntil: number
   createTime?: number
@@ -1279,8 +1324,17 @@ interface TodoForm {
   finished: number
   notifyEmail: number
   notifyBot: number
+  /** 提醒计划：最多三个槽位，空槽位表示不启用 */
+  plan: PlanSlot[]
   /** 0 仅一次 1 每日重复；只在待办页面设置 */
   repeatDaily: number
+}
+
+type PlanUnit = 'm' | 'h' | 'd'
+
+interface PlanSlot {
+  value?: number
+  unit: PlanUnit
 }
 
 const tabs = [
@@ -1372,10 +1426,11 @@ function slotClass(todo: Todo) {
   }
 }
 
-function stageLabel(stage: number) {
-  if (stage === 3) return '30 分钟前'
-  if (stage === 2) return '2 小时前'
-  return '24 小时前'
+function stageLabel(todo: Todo | null, stage: number) {
+  const minutes = parseOffsets(todo?.notifyOffsets)
+  if (!minutes.length) return `第 ${stage} 次`
+  const index = Math.min(Math.max(stage, 1), minutes.length) - 1
+  return `${minutesText(minutes[index])}前`
 }
 
 function channelLabel(channel: string) {
@@ -1598,11 +1653,98 @@ const editingId = ref<number | null>(null)
 const originalTime = ref<number | null>(null)
 const saving = ref(false)
 
+/** 缺省提醒：24 小时前、2 小时前、30 分钟前，与后端 TodoItem.DEFAULT_NOTIFY_OFFSETS 一致 */
+const DEFAULT_OFFSETS = [1440, 120, 30]
+const MAX_OFFSET_MINUTES = 7 * 24 * 60
+
+function toSlot(minutes: number): PlanSlot {
+  if (minutes % 1440 === 0) return {value: minutes / 1440, unit: 'd'}
+  if (minutes % 60 === 0) return {value: minutes / 60, unit: 'h'}
+  return {value: minutes, unit: 'm'}
+}
+
+function parseOffsets(raw?: string | null): number[] {
+  if (!raw) return []
+  return raw.split(',')
+    .map((part) => Number(part.trim()))
+    .filter((minutes) => Number.isInteger(minutes) && minutes >= 1 && minutes <= MAX_OFFSET_MINUTES)
+    .sort((a, b) => b - a)
+}
+
+function planFromOffsets(raw?: string | null): PlanSlot[] {
+  const minutes = parseOffsets(raw)
+  return (minutes.length ? minutes : DEFAULT_OFFSETS).slice(0, 3).map(toSlot)
+}
+
+/** 槽位代表的提前分钟数；未启用返回 0 */
+function slotMinutes(slot: PlanSlot) {
+  if (!slot.value) return 0
+  const factor = slot.unit === 'd' ? 1440 : (slot.unit === 'h' ? 60 : 1)
+  return Math.round(slot.value * factor)
+}
+
+function offsetValue(slot: PlanSlot) {
+  return slotMinutes(slot)
+}
+
+function minutesText(minutes: number) {
+  if (minutes >= 1440 && minutes % 1440 === 0) return `${minutes / 1440} 天`
+  if (minutes >= 60 && minutes % 60 === 0) return `${minutes / 60} 小时`
+  return `${minutes} 分钟`
+}
+
+function offsetText(slot: PlanSlot) {
+  return `${minutesText(slotMinutes(slot))}前`
+}
+
+function enabledSlots() {
+  return form.plan.filter((slot) => slotMinutes(slot) > 0)
+}
+
+function hasMoreThanOne() {
+  return enabledSlots().length > 1
+}
+
+function enableSlot(slot: PlanSlot) {
+  const index = Math.min(form.plan.indexOf(slot), DEFAULT_OFFSETS.length - 1)
+  Object.assign(slot, toSlot(DEFAULT_OFFSETS[index]))
+  sortPlan()
+}
+
+function clearSlot(slot: PlanSlot) {
+  if (!hasMoreThanOne()) return
+  slot.value = undefined
+  sortPlan()
+}
+
+/** 提前量从大到小排列，空槽位自然落在末尾 */
+function sortPlan() {
+  form.plan.sort((a, b) => slotMinutes(b) - slotMinutes(a))
+}
+
+function planMinutes() {
+  return enabledSlots().map(slotMinutes).sort((a, b) => b - a)
+}
+
+function planPayload() {
+  return planMinutes().join(',')
+}
+
+function planSummary() {
+  const minutes = planMinutes()
+  return minutes.length ? minutes.map(minutesText).join(' · ') : '未设置'
+}
+
+function offsetsOf(todo: Todo) {
+  const minutes = parseOffsets(todo.notifyOffsets)
+  return (minutes.length ? minutes : DEFAULT_OFFSETS).map(minutesText).join(' · ')
+}
+
 const form = reactive<TodoForm>(blankForm())
 
 const formSummary = computed(() => {
   const at = form.eventTime ? fmtFull(form.eventTime) : '未选时间'
-  return `${at} · ${form.repeatDaily === 1 ? '每日重复' : '单次'} · 提醒 3 次`
+  return `${at} · ${form.repeatDaily === 1 ? '每日重复' : '单次'} · 提醒 ${planSummary()}`
 })
 
 function roundToFive(ms: number) {
@@ -1623,6 +1765,7 @@ function blankForm(): TodoForm {
     finished: 0,
     notifyEmail: bind.emailBound ? 1 : 0,
     notifyBot: bind.emailBound ? 0 : (bind.qbotBound ? 1 : 0),
+    plan: planFromOffsets(null),
     repeatDaily: 0,
   }
 }
@@ -1648,6 +1791,7 @@ function openEdit(todo: Todo) {
     finished: todo.finished === 1 ? 1 : 0,
     notifyEmail: todo.notifyEmail === 1 ? 1 : 0,
     notifyBot: todo.notifyBot === 1 ? 1 : 0,
+    plan: planFromOffsets(todo.notifyOffsets),
     repeatDaily: todo.repeatDaily === 1 ? 1 : 0,
   })
   editingId.value = todo.id
@@ -1681,6 +1825,8 @@ function validate(): string | null {
   if (!time || Number.isNaN(time)) return '请选择事件时间点'
   // 未改时间时允许保留过去时间，只改状态或描述不必被迫改期
   if (time <= Date.now() && time !== originalTime.value) return '事件时间点需要晚于当前时间'
+  if (enabledSlots().length === 0) return '请至少保留一个提醒时间点'
+  if (planMinutes().some((minutes) => minutes > MAX_OFFSET_MINUTES)) return '单个提醒时间点最多提前 7 天'
   return null
 }
 
@@ -1699,6 +1845,7 @@ async function save() {
       finished: form.finished,
       notifyEmail: form.notifyEmail,
       notifyBot: form.notifyBot,
+      notifyOffsets: planPayload(),
       repeatDaily: form.repeatDaily,
     }
     const res: any = editingId.value
